@@ -1,0 +1,84 @@
+# USI++ Makefile
+#
+
+LIBS=@LIBS@
+LDFLAGS=@LDFLAGS@
+CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c
+CXX=@CXX@
+CC=@CC@
+INSTALL=@INSTALL@
+RANLIB=@RANLIB@
+
+all: usi++
+
+clear:
+	rm -f *.o
+
+usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o ip6.o\
+	 TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o object.o
+	ar cr libusi++.a *.o
+	$(CC) *.o -shared -o libusi++.so
+	$(RANLIB) libusi++.a
+#	rm -f *.o
+
+object.o: object.cc
+	$(CXX) $(CXXFLAGS) object.cc
+
+TX_dnet_eth.o: TX_dnet_eth.cc
+	$(CXX) $(CXXFLAGS) TX_dnet_eth.cc
+
+TX_dnet_ip.o: TX_dnet_ip.cc
+	$(CXX) $(CXXFLAGS) TX_dnet_ip.cc
+
+icmp6.o: icmp6.cc
+	$(CXX) $(CXXFLAGS) icmp6.cc
+
+TX_IP6.o: TX_IP6.cc
+	$(CXX) $(CXXFLAGS) TX_IP6.cc
+
+ip6.o: ip6.cc
+	$(CXX) $(CXXFLAGS) ip6.cc
+
+arp.o: arp.cc
+	$(CXX) $(CXXFLAGS) arp.cc
+
+datalink.o: datalink.cc
+	$(CXX) $(CXXFLAGS) datalink.cc
+
+icmp.o: icmp.cc
+	$(CXX) $(CXXFLAGS) icmp.cc
+
+ip.o: ip.cc
+	$(CXX) $(CXXFLAGS) ip.cc
+
+misc.o: misc.cc
+	$(CXX) $(CXXFLAGS) misc.cc
+
+udp.o: udp.cc
+	$(CXX) $(CXXFLAGS) udp.cc
+
+tcp.o: tcp.cc
+	$(CXX) $(CXXFLAGS) tcp.cc
+
+Layer2.o: Layer2.cc
+	$(CXX) $(CXXFLAGS) Layer2.cc
+
+TX_IP.o: TX_IP.cc
+	$(CXX) $(CXXFLAGS) TX_IP.cc
+
+install:
+	$(INSTALL) -g bin -o root -m 0755 libusi++.* /usr/lib
+	mkdir -m 0755 /usr/include/usi++||true
+	cp -R ../usi++/* /usr/include/usi++
+	chown -R root /usr/include/usi++
+	ldconfig||true
+	@echo To build programs using libusi++, you have to do \'c++ foo.cc -lusi++ $(LIBS) $(LDFLAGS)\'
+
+uninstall:
+	rm -f /usr/lib/libusi++.a
+	rm -f /usr/lib/libusi++.so
+	rm -rf /usr/include/usi++
+
+clean:
+	rm -f *.o *.a
+
