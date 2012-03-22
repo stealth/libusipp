@@ -447,11 +447,6 @@ int IP::sendpack(const void *payload, size_t paylen)
 	if (get_totlen() == 0)
 		set_totlen(paylen + (iph.ihl<<2));		// how long ?
 
-	memcpy(s, &iph, iph.ihl<<2 > (int)sizeof(iph) ? sizeof(iph) : iph.ihl<<2);
-
-	// copy options if any
-	if (iph.ihl<<2 > (int)sizeof(iph))
-		memcpy(s + sizeof(iph), ipOptions, (iph.ihl<<2)  - sizeof(iph));
 
 	// If dnet is used oN BSD, also convert the otherwise host byte orderd
 	// attributes
@@ -461,6 +456,13 @@ int IP::sendpack(const void *payload, size_t paylen)
 		iph.frag_off = htons(iph.frag_off);
 	}
 #endif
+
+	memcpy(s, &iph, iph.ihl<<2 > (int)sizeof(iph) ? sizeof(iph) : iph.ihl<<2);
+
+	// copy options if any
+	if (iph.ihl<<2 > (int)sizeof(iph))
+		memcpy(s + sizeof(iph), ipOptions, (iph.ihl<<2)  - sizeof(iph));
+
 
 	if (raw_tx()->tag() != TX_TAG_IP)
 		calc_csum = 1;
