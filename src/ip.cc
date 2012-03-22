@@ -385,7 +385,7 @@ int IP::set_src(const string &host)
    	struct hostent *he;
 
 	if ((he = gethostbyname(host.c_str())) == NULL)
-		return die("IP::set_src::gethostbyname:", RETURN, -h_errno);
+		return die("IP::set_src::gethostbyname:", RETURN, h_errno);
 	memcpy(&iph.saddr, he->h_addr, he->h_length);
 	return 0;
 }
@@ -406,7 +406,7 @@ int IP::set_dst(const string &host)
    	struct hostent *he;
 
 	if ((he = gethostbyname(host.c_str())) == NULL)
-		return die("IP::set_dst::gethostbyname:", RETURN, -h_errno);
+		return die("IP::set_dst::gethostbyname:", RETURN, h_errno);
 	memcpy(&iph.daddr, he->h_addr, he->h_length);
 	return 0;
 }
@@ -482,7 +482,7 @@ int IP::sendpack(const void *payload, size_t paylen)
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = iph.daddr;
 
-	r = Layer2::sendpack(s, paylen + sizeof(iph), (struct sockaddr *)&saddr);
+	r = Layer2::sendpack(s, paylen + (iph.ihl<<2), (struct sockaddr *)&saddr);
 
 	delete [] s;
 	return r;
