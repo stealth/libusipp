@@ -42,6 +42,12 @@ public:
 	 */
 	virtual int sendpack(const void *, size_t, struct sockaddr * = 0) = 0;
 
+	/*! return some TX-unique tag, e.g. TX_IP etc, see usi-structs.h enum.
+	 *  This is for the upper layers to check which transport layer has been
+	*   registered, since some require IP checksum compuatation, and some dont.
+	 */
+	virtual int tag() = 0;
+
 	/*! Must have capability to send broadcast packets. May be
 	 * just a dummy.
 	 */

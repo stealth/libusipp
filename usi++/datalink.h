@@ -113,7 +113,8 @@ public:
 
 
 	/*! Return the actual framlen of the object.
-	 *  (framelen depends on datalink)
+	 *  (framelen depends on datalink) Not the len of the whole frame,
+	*   only that of the header.
 	 */
 	int get_framelen();
 
@@ -150,6 +151,9 @@ public:
 
 	/*! Returns true when recv() timed out */
 	virtual bool timeout();
+
+	/*! See RX::tag() */
+	virtual int tag() { return RX_TAG_PCAP; }
 
 }; // class Datalink {}
 

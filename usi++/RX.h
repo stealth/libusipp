@@ -59,6 +59,11 @@ public:
 	/*! Get Layer2 destination address */
 	virtual std::string &get_l2dst(std::string &) = 0;
 
+	/*! return some RX-unique tag, e.g. RX_PCAP etc, see usi-structs.h enum.
+	 *  This is for the upper layers to check which capture layer has been
+	 *  registered.
+	 */
+	virtual int tag() = 0;
 };
 
 } // namespace usipp

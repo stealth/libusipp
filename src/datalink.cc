@@ -67,7 +67,6 @@ pcap::~pcap()
 		pcap_close(d_pd);
 }
 
-
 pcap::pcap(const pcap &rhs)
 {
 	if (this == &rhs)
@@ -88,6 +87,7 @@ pcap::pcap(const pcap &rhs)
 
 	return;
 }
+
 
 pcap &pcap::operator=(const pcap &rhs)
 {
@@ -113,12 +113,14 @@ pcap &pcap::operator=(const pcap &rhs)
 	return *this;
 }
 
+
 /*  Return the actual d_datalink of the object.
  */
 int pcap::get_datalink()
 {
    	return d_datalink;
 }
+
 
 /*  Return the actual framlen of the object.
  *  (d_framelen depends on d_datalink)
@@ -144,6 +146,7 @@ string &pcap::get_l2src(string &hwaddr)
 	return hwaddr;
 }
 
+
 /*  Fill buffer with dst-hardware-adress of actuall packet,
  *  use 'd_datalink' to determine what HW the device is.
  *  Now only ethernet s supportet.
@@ -159,6 +162,7 @@ string &pcap::get_l2dst(string &hwaddr)
 	return hwaddr;
 }
 
+
 /*  Get protocol-type of ethernet-frame
  *  Maybe moves to ethernet-class in future?
  */
@@ -166,6 +170,7 @@ uint16_t pcap::get_etype()
 {
    	return ntohs(d_ether.ether_type);
 }
+
 
 /*  Initialize a device ("eth0" for example) for packet-
  *  capturing. It MUST be called before sniffpack() is launched.
@@ -188,14 +193,14 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	int v = 1;
 	if (ioctl(pcap_fileno(d_pd), BIOCIMMEDIATE, &v) < 0) {
 		snprintf(ebuf, sizeof(ebuf),
-			 "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1) %s",
-			 strerror(errno));
+		        "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1) %s",
+		        strerror(errno));
 		return die(ebuf, STDERR, -1);
 	}
 #endif
 	if (pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf) < 0) {
 		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_lookupnet: %s",
-				 pcap_geterr(d_pd));
+		         pcap_geterr(d_pd));
 		return die(ebuf, STDERR, -1);
 	}
 
@@ -205,23 +210,23 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	 */
 	if (pcap_compile(d_pd, &d_filter, d_filter_string, 1, d_netmask) < 0) {
 		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_compile: %s",
-				 pcap_geterr(d_pd));
+		         pcap_geterr(d_pd));
 		return die(ebuf, STDERR, -1);
 	}
 
 	if (pcap_setfilter(d_pd, &d_filter) < 0) {
 		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_setfilter: %s",
-				 pcap_geterr(d_pd));
+		         pcap_geterr(d_pd));
 		return die(ebuf, STDERR, -1);
 	}
 
 	if ((d_datalink = pcap_datalink(d_pd)) < 0) {
 		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_d_datalink: %s",
-				 pcap_geterr(d_pd));
+		         pcap_geterr(d_pd));
 		return die(ebuf, STDERR, -1);
 	}
 
-		// turn d_datalink into d_framelen
+	// turn d_datalink into d_framelen
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		d_framelen = sizeof(d_ether);
@@ -246,8 +251,7 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 		d_framelen = 16;
 		break;
 	default:
-		printf("%d %d\n", d_datalink, DLT_RAW);
-		return die("pcap::init_device: Unknown d_datalink.", STDERR, -1);
+		return die("pcap::init_device: Unknown datalink type.", STDERR, -1);
 	}
 
 	strncpy(d_dev, dev.c_str(), sizeof(d_dev));

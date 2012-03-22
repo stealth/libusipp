@@ -12,10 +12,10 @@
 
 #include "TX.h"
 #include "config.h"
+#include "usi-structs.h"
 #include <sys/socket.h>
 
 #ifdef HAVE_LIBDNET
-#include "usi-structs.h"
 #include <dnet.h>
 #include <string>
 #endif
@@ -34,7 +34,7 @@ private:
 
 	eth_t *deth;
 
-	ether_header ehdr;
+	usipp::ether_header ehdr;
 
 public:
 
@@ -42,7 +42,14 @@ public:
 	TX_dnet_eth(const std::string &);
 
 	/*! destructor */
-	virtual ~TX_dnet_eth() { eth_close(deth); };
+	virtual ~TX_dnet_eth()
+	{
+		if (deth)
+			eth_close(deth);
+	}
+
+	/*! See TX::tag() */
+	virtual int tag() { return TX_TAG_DNET_ETH; }
 
 	/*! send a packet with payload via libdnet (eth), hardware frame included */
 	virtual int sendpack(const void *, size_t, struct sockaddr * = 0);
@@ -71,6 +78,8 @@ class TX_dnet_eth : public TX {
 public:
 
 	TX_dnet_eth(const std::string &) {}
+
+	virtual int tag() { return TX_TAG_NONE; }
 
 	virtual int sendpack(const void *vp, size_t, struct sockaddr * = 0) { return -1; }
 

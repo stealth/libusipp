@@ -453,6 +453,20 @@ int IP::sendpack(const void *payload, size_t paylen)
 	if (iph.ihl<<2 > (int)sizeof(iph))
 		memcpy(s + sizeof(iph), ipOptions, (iph.ihl<<2)  - sizeof(iph));
 
+	// If dnet is used oN BSD, also convert the otherwise host byte orderd
+	// attributes
+#ifdef BROKEN_BSD
+	if (raw_tx()->tag() != TX_TAG_IP) {
+		iph.tot_len = htons(iph.tot_len);
+		iph.frag_off = htons(iph.frag_off);
+	}
+#endif
+
+	if (raw_tx()->tag() != TX_TAG_IP)
+		calc_csum = 1;
+	else
+		calc_csum = 0;
+
 	if (calc_csum) {
 		iphdr *iph_ptr = (iphdr *)s;
 		iph_ptr->check = 0;

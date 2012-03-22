@@ -17,6 +17,11 @@ int Object::die(const string &message, errorFuncs what, int error)
 	d_error_string = message;
 	d_errno = error;
 
+	int r = error;
+
+	if (r > 0)
+		r = -r;
+
 	if (d_use_exceptions) {
 		throw usifault(message);
 	}
@@ -41,14 +46,16 @@ int Object::die(const string &message, errorFuncs what, int error)
 		if (d_print_message)
 			fprintf(stderr, "%s\n", pcap_strerror(error));
 		else
-			d_error_string += pcap_strerror(error);	
+			d_error_string += pcap_strerror(error);
 		break;
 	case RETURN:
-		return d_errno;
+		break;
+
 	default:
 		break;
 	}
-	return -1;
+
+	return r;
 }
 
 }

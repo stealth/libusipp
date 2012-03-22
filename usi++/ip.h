@@ -28,7 +28,7 @@ namespace usipp {
  */
 class IP : public Layer2 {
 protected:
-	struct iphdr iph;
+	usipp::iphdr iph;
 	char ipOptions[40];
 	bool calc_csum;
 
@@ -204,6 +204,7 @@ public:
 	 *  _Default value_ is off (but _default argument_ when called is 'on'),
 	 *  but its needed if a Layer2 TX object is used (TX_dnet_eth).
 	 *  The _default argument_ is on.
+	 *  If usi++ detects other TX layers than TX_IP, it is automatically enabled.
 	 */
 	virtual void checksum(bool cs = 1);
 

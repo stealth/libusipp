@@ -56,6 +56,7 @@ public:
 
 extern unsigned short in_cksum(unsigned short *ptr, int len, bool may_pad);
 
+
 } // namespace usipp
 
 

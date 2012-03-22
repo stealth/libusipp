@@ -544,6 +544,19 @@ struct ip6_opt {
 };
 
 
+enum {
+	TX_TAG_NONE = 0,
+	RX_TAG_NONE = 0,
+
+	TX_TAG_IP = 0x1000,
+	TX_TAG_IP6,
+	TX_TAG_DNET_IP,
+	TX_TAG_DNET_ETH,
+
+	RX_TAG_PCAP = 0x2000
+};
+
+
 } // namespace usipp
 
 

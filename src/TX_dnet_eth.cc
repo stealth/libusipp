@@ -28,7 +28,7 @@ TX_dnet_eth::TX_dnet_eth(const string &dev)
 	memset(&ehdr, 0, sizeof(ehdr));
 	deth = eth_open(dev.c_str());
 	if (!deth)
-		die("TX_dnet_eth", PERROR, -errno);
+		die("TX_dnet_eth", PERROR, errno);
 }
 
 
@@ -43,7 +43,7 @@ int TX_dnet_eth::set_l2src(const string &src)
 
 	if (sscanf(src.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != ETH_ALEN)
-		die("TX_dnet_eth::set_l2src::sscanf: invalid ethernet address", RETURN, -1);
+		return die("TX_dnet_eth::set_l2src::sscanf: invalid ethernet address", RETURN, -1);
 
 	memcpy(ehdr.ether_shost, mac, sizeof(ehdr.ether_shost));
 	return 0;
@@ -83,10 +83,13 @@ int TX_dnet_eth::sendpack(const string &payload)
 int TX_dnet_eth::sendpack(const void *buf, size_t len, struct sockaddr *s)
 {
 
+	if (!deth)
+		return die("TX_dnet_eth::sendpack: No eth interface opened!", STDERR, -1);
+
 	char *tbuf = new (nothrow) char[len + sizeof(ehdr)];
 
 	if (!tbuf)
-		return -1;
+		return die("X_dnet_eth::sendpack::new: Out of Memory!", RETURN, -1);
 
 	memcpy(tbuf, &ehdr, sizeof(ehdr));
 	memcpy(tbuf + sizeof(ehdr), buf, len);
@@ -96,7 +99,7 @@ int TX_dnet_eth::sendpack(const void *buf, size_t len, struct sockaddr *s)
 	delete [] tbuf;
 
 	if (r < 0)
-		return die("TX_dnet_eth::sendpack::eth_send", PERROR, -errno);
+		return die("TX_dnet_eth::sendpack::eth_send:", PERROR, errno);
 	return r;
 }
 

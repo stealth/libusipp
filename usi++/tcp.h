@@ -30,7 +30,7 @@ namespace usipp {
 template<typename T>
 class TCP : public T {
 private:
-	struct tcphdr tcph;
+	usipp::tcphdr tcph;
 	char tcpOptions[40];
 public:
 

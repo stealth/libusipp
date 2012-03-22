@@ -22,7 +22,7 @@ TX_dnet_ip::TX_dnet_ip()
 {
 	dip = ip_open();
 	if (!dip)
-		die("TX_dnet_ip::ip_open:", PERROR, -errno);
+		die("TX_dnet_ip::ip_open:", PERROR, errno);
 }
 
 
@@ -31,11 +31,15 @@ int TX_dnet_ip::sendpack(const std::string &payload)
 	return sendpack(payload.c_str(), payload.size());
 }
 
+
 int TX_dnet_ip::sendpack(const void *buf, size_t len, struct sockaddr *s)
 {
+	if (!dip)
+		die("TX_dnet_ip::sendpack: No IP interface opened!", STDERR, -1);
+
 	ssize_t r = (int)ip_send(dip, buf, len);
 	if (r < 0)
-		return die("TX_dnet_ip::sendpack::ip_send:", PERROR, -errno);
+		return die("TX_dnet_ip::sendpack::ip_send:", PERROR, errno);
 	return r;
 }
 

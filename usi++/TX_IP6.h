@@ -11,6 +11,7 @@
 #define _TX_IP6_H_
 
 #include "config.h"
+#include "usi-structs.h"
 #include "TX.h"
 #include <stdio.h>
 #include <unistd.h>
@@ -34,6 +35,9 @@ public:
 
 	/*! Destructor */
 	virtual ~TX_IP6() { close(rawfd); }
+
+	/*! See TX::tag() */
+	virtual int tag() { return TX_TAG_IP6; }
 
 	/*! Send a packet on raw socket (starting with IP-hdr) */
 	virtual int sendpack(const void *, size_t, struct sockaddr* = 0);

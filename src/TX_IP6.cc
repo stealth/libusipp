@@ -27,7 +27,7 @@ int TX_IP6::sendpack(const void *buf, size_t len, struct sockaddr *s)
    	if (rawfd < 0) {
 		// open a socket
 		if ((rawfd = socket(PF_INET6, SOCK_RAW, IPPROTO_RAW)) < 0)
-			return die("TX_IP6::sendpack::socket", PERROR, -errno);
+			return die("TX_IP6::sendpack::socket", PERROR, errno);
 
 		//int one = 1;
 
@@ -38,7 +38,7 @@ int TX_IP6::sendpack(const void *buf, size_t len, struct sockaddr *s)
 
 	int r;
 	if ((r = sendto(rawfd, buf, len, 0, s, sizeof(sockaddr_in6))) < 0)
-		return die("TX_IP6::sendpack::sendto", PERROR, -errno);
+		return die("TX_IP6::sendpack::sendto", PERROR, errno);
 
 	return r;
 }
@@ -56,15 +56,15 @@ int TX_IP6::broadcast()
 	if (rawfd < 0) {
 		// open a socket
 		if ((rawfd = socket(PF_INET6, SOCK_RAW, IPPROTO_RAW)) < 0)
-			return die("TX_IP6::sendpack::socket", PERROR, -errno);
+			return die("TX_IP6::sendpack::socket", PERROR, errno);
 
 		// let us write IP-headers
 		if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
-			return die("TX_IP6::sendpack::setsockopt", PERROR, -errno);
+			return die("TX_IP6::sendpack::setsockopt", PERROR, errno);
 	}
 
 	if (setsockopt(rawfd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one)) < 0)
-		return die("TX_IP6::broadcast::setsockopt", PERROR, -errno);
+		return die("TX_IP6::broadcast::setsockopt", PERROR, errno);
 	return 0;
 }
 

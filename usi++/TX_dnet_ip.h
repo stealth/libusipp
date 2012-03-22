@@ -12,6 +12,7 @@
 
 #include "TX.h"
 #include "config.h"
+#include "usi-structs.h"
 #include <string>
 #include <sys/socket.h>
 
@@ -34,9 +35,19 @@ private:
 	ip_t *dip;
 
 public:
+
+	/*! Constructor */
 	TX_dnet_ip();
 
-	virtual ~TX_dnet_ip() { ip_close(dip); };
+	/*! Destructor */
+	virtual ~TX_dnet_ip()
+	{
+		if (dip)
+			ip_close(dip);
+	}
+
+	/*! See TX::tag() */
+	virtual int tag() { return TX_TAG_DNET_IP; }
 
 	/*! send a packet via libdnet (ip) */
 	virtual int sendpack(const void *, size_t, struct sockaddr * = 0);
@@ -62,6 +73,9 @@ public:
 
 	/*!*/
 	TX_dnet_ip(const std::string &) {}
+
+	/*!*/
+	virtual int tag() { return TX_TAG_NONE; }
 
 	/*!*/
 	virtual int sendpack(const void *vp, size_t, struct sockaddr * = 0) { return -1; }

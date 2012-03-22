@@ -30,7 +30,7 @@ namespace usipp {
 template<typename T>
 class UDP : public T {
 private:
-	struct udphdr d_udph;
+	usipp::udphdr d_udph;
 public:
 
 	/*! Construct an UDP object, destinated to a host (FQDN or IP string).
