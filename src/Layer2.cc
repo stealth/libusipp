@@ -60,6 +60,8 @@ Layer2::Layer2(const Layer2 &rhs)
 int Layer2::sendpack(const void *buf, size_t len, struct sockaddr *s)
 {
 	int r = d_tx->sendpack(buf, len, s);
+	if (r < 0)
+		return die(d_rx->why(), STDERR, d_rx->error());
 	return r;
 }
 

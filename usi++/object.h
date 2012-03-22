@@ -34,12 +34,13 @@ public:
 
 	Object() : d_error_string(""), d_errno(0), d_use_exceptions(0), d_print_message(0) {}
 
+	/*! Destructor */
 	virtual ~Object() {}
 
 	/*! Return the error string */
 	const char *why() { return d_error_string.c_str(); }
 
-	/*! Return errno */
+	/*! Return saved error code */
 	int error() { return d_errno; }
 
 	/*! en/disable throwing of exceptions, rather than returning -1 on error */
@@ -49,6 +50,7 @@ public:
 	void print_errors(bool b) { d_print_message = b; }
 
 protected:
+
 	/*! only used internally by derived classes */
 	int die(const std::string &, errorFuncs, int);
 

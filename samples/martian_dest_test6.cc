@@ -29,7 +29,8 @@ int main(int argc, char **argv)
 	icmp.register_tx(eth);
 	icmp.set_type(ICMP6_ECHO_REQUEST);
 
-       	icmp.sendpack(ping);
+	if (icmp.sendpack(ping) < 0)
+		cerr<<icmp.why()<<endl;
         return 0;
 }
 
