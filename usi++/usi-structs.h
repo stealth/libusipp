@@ -297,12 +297,15 @@ struct pseudohdr {
 
 
 enum {
-	TH_FIN	= 0x01,
-	TH_SYN	= 0x02,
-	TH_RST	= 0x04,
-	TH_PUSH	= 0x08,
-	TH_ACK	= 0x10,
-	TH_URG	= 0x20
+	TH_FIN	= 0x001,
+	TH_SYN	= 0x002,
+	TH_RST	= 0x004,
+	TH_PUSH	= 0x008,
+	TH_ACK	= 0x010,
+	TH_URG	= 0x020,
+	TH_ECE  = 0x040,
+	TH_CWR  = 0x080,
+	TH_NS   = 0x100
 };
 
 

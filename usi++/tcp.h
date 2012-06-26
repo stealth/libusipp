@@ -81,7 +81,7 @@ public:
 	 * or any combination of these (althought common combinations are SYN|ACK or
 	 * similar)
 	 */
-	uint8_t get_flags();
+	uint16_t get_flags();
 
 	/*! Get TCP window size. */
 	uint16_t get_win();
@@ -113,7 +113,7 @@ public:
 	uint8_t set_off(uint8_t);
 
 	/*! Set TCP flags*/
-	uint8_t set_flags(uint8_t);
+	uint16_t set_flags(uint16_t);
 
 	/*! Set TCP window */
 	uint16_t set_win(uint16_t);

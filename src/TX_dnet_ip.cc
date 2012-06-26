@@ -35,7 +35,7 @@ int TX_dnet_ip::sendpack(const std::string &payload)
 int TX_dnet_ip::sendpack(const void *buf, size_t len, struct sockaddr *s)
 {
 	if (!dip)
-		die("TX_dnet_ip::sendpack: No IP interface opened!", STDERR, -1);
+		return die("TX_dnet_ip::sendpack: No IP interface opened!", STDERR, -1);
 
 	ssize_t r = (int)ip_send(dip, buf, len);
 	if (r < 0)

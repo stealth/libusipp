@@ -117,9 +117,9 @@ uint8_t TCP<T>::get_off()
 /*! set TCP-flags
  */
 template<typename T>
-uint8_t TCP<T>::get_flags()
+uint16_t TCP<T>::get_flags()
 {
-	return tcph.th_flags;
+	return tcph.th_flags|tcph.th_x2<<8;
 }
 
 
@@ -200,11 +200,14 @@ uint8_t TCP<T>::set_off(uint8_t o)
 /*! set TCP-flags
  */
 template<typename T>
-uint8_t TCP<T>::set_flags(uint8_t f)
+uint16_t TCP<T>::set_flags(uint16_t f)
 {
-	return tcph.th_flags = f;
-}
+	// flags only have 8 bits, if more, it sets the unused bits in the header
+	tcph.th_flags = f & 0xff;
+	tcph.th_x2 = f>>8;
 
+	return f;
+}
 
 /*! set TCP window */
 template<typename T>
