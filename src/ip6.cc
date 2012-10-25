@@ -179,7 +179,10 @@ int IP6::sendpack(const void *payload, size_t paylen)
 		return -1;
 
 	size_t len = sizeof(iph) + e_hdrs_len + paylen;
-	char *s = new char[len];
+	char *s = new (nothrow) char[len];
+
+	if (!s)
+		return -1;
 
 	iph.payload_len = htons(e_hdrs_len + paylen);
 
@@ -263,6 +266,10 @@ int IP6::sniffpack(void *buf, size_t blen)
 	int xlen = 66000;
 
 	char *tmp = new (nothrow) char[xlen];
+
+	if (!tmp)
+		return -1;
+
 	memset(tmp, 0, xlen);
 
    	if ((r = Layer2::sniffpack(tmp, xlen)) == 0 &&
@@ -281,7 +288,7 @@ int IP6::sniffpack(void *buf, size_t blen)
 	if (r < 0) {
 		delete [] tmp;
 		return -1;
-	} else if (r == 0 || r < totlen) {//TODO: handle fragments
+	} else if (r == 0 || r < totlen || totlen < 0) {//TODO: handle fragments
 		delete [] tmp;
 		return 0;
 	}
@@ -309,6 +316,11 @@ int IP6::sniffpack(void *buf, size_t blen)
 
 	e_hdrs_len = offset;
 	r -= offset;
+
+	if (r < 0) {
+		delete [] tmp;
+		return -1;
+	}
 
 	if (buf)
 		memcpy(buf, tmp + sizeof(iph) + offset, r < (int)blen ? r : blen);
