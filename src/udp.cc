@@ -161,6 +161,8 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 	char *tmp = new char[len+1];	// for padding, if needed
 	memset(tmp, 0, len + 1);
 
+	udphdr orig_udph = d_udph;
+
    	// build a pseudoheader for IPvX-checksum
 	T::d_pseudo.saddr = T::get_src();	// sourceaddress
 	T::d_pseudo.daddr = T::get_dst();	// destinationaddress
@@ -169,14 +171,14 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 	memcpy(&this->d_pseudo.zero, &zero, sizeof(this->d_pseudo.zero));
 	T::d_pseudo.proto = IPPROTO_UDP;
 
-	if (sizeof(T::d_pseudo.len) == sizeof(uint16_t))
-		T::d_pseudo.len = htons(sizeof(d_udph) + paylen);
-	else
-		T::d_pseudo.len = htonl(sizeof(d_udph) + paylen);
-
-
 	if (d_udph.len == 0)
 		d_udph.len = htons(paylen + sizeof(d_udph));
+
+	if (sizeof(T::d_pseudo.len) == sizeof(uint16_t))
+		T::d_pseudo.len = d_udph.len;
+	else
+		T::d_pseudo.len = htonl(ntohs(d_udph.len));
+
 
 
 	// copy pseudohdr+header+data to buffer
@@ -191,6 +193,8 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 		u->check = in_cksum((unsigned short*)tmp, len, 1);
 
 	r = T::sendpack(tmp + sizeof(T::d_pseudo), len - sizeof(T::d_pseudo));
+
+	d_udph = orig_udph;
 
 	delete [] tmp;
 	return r;

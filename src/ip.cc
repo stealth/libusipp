@@ -23,7 +23,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-
 #ifdef USI_DEBUG
 #include <iostream>
 #endif
@@ -314,6 +313,7 @@ uint16_t IP::get_sum()
  */
 uint16_t IP::set_sum(uint16_t sum)
 {
+	calc_csum = 0;
    	return iph.check = sum;
 }
 
@@ -442,6 +442,8 @@ int IP::sendpack(const void *payload, size_t paylen)
 
 	memset(s, 0, paylen + (iph.ihl<<2) + 1);
 
+	iphdr orig_iph = iph;
+
 	// We give user the chance to set wrong length's
 	// if he really want's to ...
 	if (get_totlen() == 0)
@@ -466,8 +468,6 @@ int IP::sendpack(const void *payload, size_t paylen)
 
 	if (raw_tx()->tag() != TX_TAG_IP)
 		calc_csum = 1;
-	else
-		calc_csum = 0;
 
 	if (calc_csum) {
 		iphdr *iph_ptr = (iphdr *)s;
@@ -483,6 +483,10 @@ int IP::sendpack(const void *payload, size_t paylen)
 	saddr.sin_addr.s_addr = iph.daddr;
 
 	r = Layer2::sendpack(s, paylen + (iph.ihl<<2), (struct sockaddr *)&saddr);
+
+
+	// restore original totlen etc
+	iph = orig_iph;
 
 	delete [] s;
 	return r;
