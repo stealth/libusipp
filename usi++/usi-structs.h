@@ -333,7 +333,7 @@ enum {
 	IP_RF = 0x8000,
 	IP_DF = 0x4000,
 	IP_MF = 0x2000,
-	IP_OFFMASK = 0x1ffff
+	IP_OFFMASK = 0x1fff
 };
 
 
