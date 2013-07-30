@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 		cout<<"["<<l2mac(icmp.rx()->get_l2src(smac))<<"->"<<l2mac(icmp.rx()->get_l2dst(dmac))<<"]:";
 #endif
 		cout<<"type:"<<(int)icmp.get_type()<<" ["<<icmp.get_src(src)<<" -> "
-		    <<icmp.get_dst(dst, 1)<<"] "<<"seq: "<<icmp.get_seq()
+		    <<icmp.get_dst(dst)<<"] "<<"seq: "<<icmp.get_seq()
 		    <<" ttl: "<<(int)icmp.get_ttl()<<" id: "<<icmp.get_icmpId()<<endl;
 		    //<<buf<<endl;
 

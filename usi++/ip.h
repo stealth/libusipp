@@ -116,17 +116,13 @@ public:
 	 */
 	IP(const IP&);
 
-	/*! Get source address in human readable form.
-	 *  Resolve to an hostname, if resolv is true.
-	 *  Returns the passed string ref.
+	/*! Get source address in dotted IP form.
 	 */
-	std::string &get_src(std::string &, bool resolv = 0);
+	std::string &get_src(std::string &);
 
-	/*! Get destination address in human readable form.
-	 *  Resolve to an hostname, if resolv is true.
-	 *  Returns the passed string ref.
+	/*! Get destination address in dotted IP form.
 	 */
-	std::string &get_dst(std::string &, bool resolv = 0);
+	std::string &get_dst( std::string &);
 
 	/*! Set header-len in number of 32 bit words. 5 (5*4 = 20) in normal case.
 	 *  Contructor does this for you, so you should not use this.

@@ -54,17 +54,12 @@ IP::IP(const string &dst, uint8_t proto)
 	iph.protocol = proto;
 	iph.tot_len = 0;
 
-	calc_csum = 0;
+	if (raw_tx()->tag() != TX_TAG_IP)
+		calc_csum = 1;
+	else
+		calc_csum = 0;
 
-	char host[MAXHOSTLEN];
-
-	memset(host, 0, sizeof(host));
-	// ask for local hostname
-	if (gethostname(host, sizeof(host) - 1) < 0) {
-		set_src(INADDR_ANY);
-	} else
-		set_src(host);
-
+	set_src(INADDR_ANY);
 	set_dst(dst);
 }
 
@@ -86,17 +81,12 @@ IP::IP(uint32_t dst, uint8_t proto)
 	iph.id = 0;
 	iph.protocol = proto;
 
-	calc_csum = 0;
+	if (raw_tx()->tag() != TX_TAG_IP)
+		calc_csum = 1;
+	else
+		calc_csum = 0;
 
-	char host[MAXHOSTLEN];
-	memset(host, 0, sizeof(host));
-
-	// ask for local hostname
-	if (gethostname(host, sizeof(host)-1) < 0) {
-		set_src(INADDR_ANY);
-	} else
-		set_src(host);
-
+	set_src(INADDR_ANY);
 	set_dst(dst);
 }
 
@@ -326,22 +316,18 @@ uint32_t IP::get_dst()
 }
 
 
-/*! get the destination-adress in human-readable form.
- *  If resolv == 1, then resolve to a hostname if possible,
- *  otherwise give back IP (resolv == 0).
+/*! get the dst address in dotted form
  */
-string &IP::get_dst(string &s, bool resolv)
+string &IP::get_dst(string &s)
 {
-   	 struct in_addr in;
-	 struct hostent *he;
+	s = "";
+	struct in_addr in;
 
-	 in.s_addr = iph.daddr;
-	 if (!resolv || (he = gethostbyaddr((char*)&in, sizeof(in), AF_INET)) == NULL)
-		s = inet_ntoa(in);
-	 else
-		s = he->h_name;
-	 return s;
+	in.s_addr = iph.saddr;
+	s = inet_ntoa(in);
+	return s;
 }
+
 
 
 /*! return the source-adress of actuall IP-packet
@@ -353,20 +339,16 @@ uint32_t IP::get_src()
 }
 
 
-/*! get the source address in human-readable form
- * If 'resolv' == 1, return hostname, if 0 only IP-adress.
+/*! get the source address in dotted form
  */
-string &IP::get_src(string &s, bool resolv)
+string &IP::get_src(string &s)
 {
-   	 struct in_addr in;
-	 struct hostent *he;
+	s = "";
+	struct in_addr in;
 
-	 in.s_addr = iph.saddr;
-	 if (!resolv || (he = gethostbyaddr((char*)&in, sizeof(in), AF_INET)) == NULL)
-		s = inet_ntoa(in);
-	 else
-		s = he->h_name;
-	 return s;
+	in.s_addr = iph.saddr;
+	s = inet_ntoa(in);
+	return s;
 }
 
 
@@ -450,7 +432,7 @@ int IP::sendpack(const void *payload, size_t paylen)
 		set_totlen(paylen + (iph.ihl<<2));		// how long ?
 
 
-	// If dnet is used oN BSD, also convert the otherwise host byte orderd
+	// If dnet is used on BSD, also convert the otherwise host byte orderd
 	// attributes
 #ifdef BROKEN_BSD
 	if (raw_tx()->tag() != TX_TAG_IP) {
@@ -465,9 +447,6 @@ int IP::sendpack(const void *payload, size_t paylen)
 	if (iph.ihl<<2 > (int)sizeof(iph))
 		memcpy(s + sizeof(iph), ipOptions, (iph.ihl<<2)  - sizeof(iph));
 
-
-	if (raw_tx()->tag() != TX_TAG_IP)
-		calc_csum = 1;
 
 	if (calc_csum) {
 		iphdr *iph_ptr = (iphdr *)s;
