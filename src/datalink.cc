@@ -367,7 +367,7 @@ void *pcap::get_frame(void *hwframe, size_t len)
 }
 
 
-int pcap::timeout(struct timeval tv)
+int pcap::timeout(const struct timeval &tv)
 {
 	d_tv = tv;
 	d_timeout = false;

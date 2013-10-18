@@ -86,17 +86,15 @@ public:
 
 
 	/*! Fill buffer with src-hardware-adress of actuall packet,
-	 *  use 'datalink' to determine what HW the device is.
-	 *  Now only ethernet s supportet, but it's extensinable.
-	 *  This is just for convenience, as rx()->get_l2src() could be used.
+	 *  use get_datalink() to determine what HW the device is.
+	 *  Only ethernet is supportet yet, but it's extensible.
 	 */
 	virtual std::string &get_l2src(std::string &);
 
 
 	/*! Fill buffer with dst-hardware-adress of actuall packet,
- 	 *  use 'datalink' to determine what HW the device is.
-	 *  Now only ethernet s supportet, but it's extensinable.
-	 *  This is just for convenience, as rx()->get_l2src() could be used.
+ 	 *  use get_datalink() to determine what HW the device is.
+	 *  Only ethernet is supportet yet, but it's extensible.
 	 */
 	virtual std::string &get_l2dst(std::string &);
 
@@ -146,7 +144,7 @@ public:
 
 
 	/*! Set a timeout. Implements RX::timeout() = 0. */
-	virtual int timeout(struct timeval);
+	virtual int timeout(const struct timeval &);
 
 
 	/*! Returns true when recv() timed out */
@@ -155,7 +153,7 @@ public:
 	/*! See RX::tag() */
 	virtual int tag() { return RX_TAG_PCAP; }
 
-}; // class Datalink {}
+}; // class pcap {}
 
 
 } // namespace usipp
