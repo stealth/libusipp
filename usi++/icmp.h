@@ -52,9 +52,12 @@ public:
 	 */
 	virtual int sendpack(const std::string &);
 
-	/*! handle packets, that are NOT actually for the
-	 *  local adress!
-	 */
+	/*! Capture an packet from the NIC.
+	*/
+	virtual std::string &sniffpack(std::string &);
+
+	/*! Capture an packet from the NIC.
+	*/
 	virtual int sniffpack(void *, size_t);
 
 	/*! Initialize a device ("eth0" for example) for packet-

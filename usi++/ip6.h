@@ -106,6 +106,9 @@ public:
 	virtual int init_device(const std::string &, int, size_t);
 
 	/*! Sniff a IP6 packet and set up internal fields. */
+	virtual std::string &sniffpack(std::string &);
+
+	/*! Sniff a IP6 packet and set up internal fields. */
 	virtual int sniffpack(void *, size_t);
 
 private:

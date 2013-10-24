@@ -22,7 +22,6 @@
 #include <net/bpf.h>
 #endif
 
-
 #ifdef USI_DEBUG
 #include <iostream>
 #endif
@@ -31,15 +30,17 @@ namespace usipp {
 
 using namespace std;
 
+
 pcap::pcap()
 	: RX()
 {
 	// Initialize
-	memset(d_filter_string, 0, sizeof(d_filter_string));
+	d_localnet = d_netmask = 0;
+	d_filter_string = "";
+	d_cooked = "";
+	d_dev = "";
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
-
-	memset(d_dev, 0, sizeof(d_dev));
 	d_timeout = false;
 
 }
@@ -47,17 +48,20 @@ pcap::pcap()
 
 /* This constructor should be used to
  *  initialize raw-d_datalink-objects, means not IP/TCP/ICMP etc.
- *  We need this b/c unlike in derived classes, d_datalink::init_device()
+ *  We need this b/c unlike in derived classes, pcap::init_device()
  *  cannot set a filter!
  */
 pcap::pcap(const string &filterStr)
+	: RX()
 {
 	// Initialize
-	memset(d_filter_string, 0, sizeof(d_filter_string));
-	strncpy(d_filter_string, filterStr.c_str(), sizeof(d_filter_string));
+	d_localnet = d_netmask = 0;
+	d_filter_string = filterStr;
+	d_cooked = "";
+	d_dev = "";
 	d_pd = NULL;
-
-	memset(d_dev, 0, sizeof(d_dev));
+	memset(&d_tv, 0, sizeof(d_tv));
+	d_timeout = false;
 }
 
 
@@ -77,10 +81,16 @@ pcap::pcap(const pcap &rhs)
 	d_phdr = rhs.d_phdr;
 
 	d_ether = rhs.d_ether;
-	strncpy(d_filter_string, rhs.d_filter_string, sizeof(d_filter_string));
-	strncpy(d_dev, rhs.d_dev, sizeof(d_dev));
+	d_80211 = rhs.d_80211;
+	d_cooked = rhs.d_cooked;
+
+	d_filter_string = rhs.d_filter_string;
+	d_dev = rhs.d_dev;
 	d_has_promisc = rhs.d_has_promisc;
 	d_snaplen = rhs.d_snaplen;
+
+	d_localnet = rhs.d_localnet;
+	d_netmask = rhs.d_netmask;
 
 	if (rhs.d_pd)
 		init_device(d_dev, d_has_promisc, d_snaplen);
@@ -99,10 +109,16 @@ pcap &pcap::operator=(const pcap &rhs)
 	d_phdr = rhs.d_phdr;
 
 	d_ether = rhs.d_ether;
-	strncpy(d_filter_string, rhs.d_filter_string, sizeof(d_filter_string));
-	strncpy(d_dev, rhs.d_dev, sizeof(d_dev));
+	d_80211 = rhs.d_80211;
+	d_cooked = rhs.d_cooked;
+
+	d_filter_string = rhs.d_filter_string;
+	d_dev = rhs.d_dev;
 	d_has_promisc = rhs.d_has_promisc;
 	d_snaplen = rhs.d_snaplen;
+
+	d_localnet = rhs.d_localnet;
+	d_netmask = rhs.d_netmask;
 
 	if (rhs.d_pd) {
 		if (d_pd)
@@ -128,6 +144,15 @@ int pcap::get_datalink()
 int pcap::get_framelen()
 {
 	return d_framelen;
+}
+
+
+/* Get the cooked header, if any (RADIOTAP)
+ */
+string &pcap::get_cooked(string &hdr)
+{
+	hdr = d_cooked;
+	return hdr;
 }
 
 
@@ -182,8 +207,12 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	char ebuf[PCAP_ERRBUF_SIZE];
 	memset(ebuf, 0, PCAP_ERRBUF_SIZE);
 
+	string e = "";
+
 	if ((d_pd = pcap_open_live(dev.c_str(), d_snaplen, promisc, 500, ebuf)) == NULL) {
-		return die(ebuf, STDERR, -1);
+		e = "pcap::init_device::pcap_open_live:";
+		e += ebuf;
+		return die(e, STDERR, -1);
 	}
 
 // Ehem, BSD workarounnd. BSD won't timeout on select()
@@ -192,38 +221,44 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 #ifdef IMMEDIATE
 	int v = 1;
 	if (ioctl(pcap_fileno(d_pd), BIOCIMMEDIATE, &v) < 0) {
-		snprintf(ebuf, sizeof(ebuf),
-		        "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1) %s",
-		        strerror(errno));
-		return die(ebuf, STDERR, -1);
+		e = "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1):";
+		e += strerror(errno);
+		return die(e, STDERR, -1);
 	}
 #endif
-	if (pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_lookupnet: %s",
-		         pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
+
+	// Only for devices with assigned IP address
+	if (d_filter_string.find("ip") != string::npos) {
+		if (pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf) < 0) {
+			e = "pcap::init_device::pcap_lookupnet:";
+			e += ebuf;
+			return die(e, STDERR, -1);
+		}
 	}
 
-	/* The d_filter_string must be filled by derived classes, such
-	 * as IP, where the virtual init_device() simply sets d_filter_string
-	 * to "ip" and then calls pcap::init_device().
-	 */
-	if (pcap_compile(d_pd, &d_filter, d_filter_string, 1, d_netmask) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_compile: %s",
-		         pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
+	if (d_filter_string.size() > 0) {
+		/* The d_filter_string must be filled by derived classes, such
+		 * as IP, where the virtual init_device() simply sets d_filter_string
+		 * to "ip" and then calls pcap::init_device().
+		 */
+		if (pcap_compile(d_pd, &d_filter, d_filter_string.c_str(), 1, d_netmask) < 0) {
+			e = "pcap::init_device::pcap_compile:";
+			e += pcap_geterr(d_pd);
+			return die(e, STDERR, -1);
+		}
+
+		if (pcap_setfilter(d_pd, &d_filter) < 0) {
+			e = "pcap::init_device::pcap_setfilter:";
+			e += pcap_geterr(d_pd);
+			return die(e, STDERR, -1);
+		}
 	}
 
-	if (pcap_setfilter(d_pd, &d_filter) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_setfilter: %s",
-		         pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
-	}
 
 	if ((d_datalink = pcap_datalink(d_pd)) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::init_device::pcap_d_datalink: %s",
-		         pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
+		e = "pcap::init_device::pcap_datalink:";
+		e += pcap_geterr(d_pd);
+		return die(e, STDERR, -1);
 	}
 
 	// turn d_datalink into d_framelen
@@ -231,6 +266,11 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	case DLT_EN10MB:
 		d_framelen = sizeof(d_ether);
 		break;
+#ifdef RADIOTAP
+	case DLT_IEEE802_11_RADIO:
+		d_framelen = sizeof(d_80211);
+		break;
+#endif
 	case DLT_PPP:
 		d_framelen = 4;
 		break;
@@ -254,7 +294,7 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 		return die("pcap::init_device: Unknown datalink type.", STDERR, -1);
 	}
 
-	strncpy(d_dev, dev.c_str(), sizeof(d_dev));
+	d_dev = dev;
 	d_has_promisc = promisc;
 	d_snaplen = d_snaplen;
 	return 0;
@@ -268,22 +308,36 @@ int pcap::setfilter(const string &s)
 	char ebuf[PCAP_ERRBUF_SIZE];
 	memset(ebuf, 0, PCAP_ERRBUF_SIZE);
 
+	string e = "";
+
 	if (!d_pd)
 		return die("pcap::setfilter: Device not initialized.", STDERR, -1);
 
-	memset(d_filter_string, 0, sizeof(d_filter_string));
-	snprintf(d_filter_string, sizeof(d_filter_string), "%s", s.c_str());
+	d_filter_string = s;
 
-	if (pcap_compile(d_pd, &d_filter, d_filter_string, 1, d_netmask) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::setfilter::pcap_compile: %s", pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
+	if (pcap_compile(d_pd, &d_filter, d_filter_string.c_str(), 1, d_netmask) < 0) {
+		e = "pcap::setfilter::pcap_compile:";
+		e += pcap_geterr(d_pd);
+		return die(e, STDERR, -1);
 	}
 
 	if (pcap_setfilter(d_pd, &d_filter) < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap::setfilter::pcap_setfilter: %s", pcap_geterr(d_pd));
-		return die(ebuf, STDERR, -1);
+		e = "pcap::setfilter::pcap_setfilter:";
+		e += pcap_geterr(d_pd);
+		return die(e, STDERR, -1);
 	}
 	return 0;
+}
+
+
+string &pcap::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
 }
 
 
@@ -322,10 +376,19 @@ int pcap::sniffpack(void *s, size_t len)
 
 	while ((tmp = (char*)pcap_next(d_pd, &d_phdr)) == NULL);
 
+	uint16_t cooked_hdr = 0;
+
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		memcpy(&d_ether, tmp, d_framelen);
 		break;
+#ifdef RADIOTAP
+	case DLT_IEEE802_11_RADIO:
+		cooked_hdr = ((ieee80211_radiotap_header *)tmp)->len;
+		d_cooked = string(tmp, cooked_hdr);
+		memcpy(&d_80211, tmp + cooked_hdr, d_framelen);
+		break;
+#endif
 	case DLT_PPP:
 		break;
 	case DLT_PPP_BSDOS:
@@ -346,9 +409,9 @@ int pcap::sniffpack(void *s, size_t len)
 #endif
 
 	// d_framelen was already calculated by init_device
-	memcpy(s, (tmp + d_framelen),
-	       d_phdr.len - d_framelen < len ? d_phdr.len - d_framelen : len);
-	return d_phdr.len - d_framelen < len ? d_phdr.len - d_framelen : len;
+	memcpy(s, tmp + cooked_hdr + d_framelen,
+	       d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len);
+	return d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len;
 }
 
 
@@ -360,10 +423,39 @@ void *pcap::get_frame(void *hwframe, size_t len)
    	case DLT_EN10MB:
 		memcpy(hwframe, &d_ether, (len<sizeof(d_ether)?len:sizeof(d_ether)));
 		break;
+#ifdef RADIOTAP
+	case DLT_IEEE802_11_RADIO:
+		memcpy(hwframe, &d_80211, (len<sizeof(d_80211)?len:sizeof(d_80211)));
+		break;
+#endif
 	default:
 	   	return NULL;
 	}
 	return hwframe;
+}
+
+string &pcap::get_frame(string &frame)
+{
+	frame = "";
+
+	char buf[1024];
+
+	switch (d_datalink) {
+	case DLT_EN10MB:
+		memcpy(buf, &d_ether, sizeof(d_ether));
+		frame = string(buf, sizeof(d_ether));
+		break;
+#ifdef RADIOTAP
+	case DLT_IEEE802_11_RADIO:
+		memcpy(buf, &d_80211, sizeof(d_80211));
+		frame = string(buf, sizeof(d_80211));
+		break;
+#endif
+	default:
+		;
+	}
+
+	return frame;
 }
 
 

@@ -38,7 +38,7 @@ int ip_trace(const string &dst, const string &src, const string &dev, int type)
 		ip.sendpack("");
 		sn.sniffpack(NULL, 0);
 
-		cout<<"  "<<i<<"  "<<sn.get_src(h1, 1)<<" ("<<sn.get_src(h2)<<")\n";
+		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3 || sn.get_type() == 0)
 			break;
 	}
@@ -62,7 +62,7 @@ int icmp_trace(const string &dst, const string &src, const string &dev, int type
 		icmp.sendpack("");
 		sn.sniffpack(NULL, 0);
 
-		cout<<"  "<<i<<"  "<<sn.get_src(h1, 1)<<" ("<<sn.get_src(h2)<<")\n";
+		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3 || sn.get_type() == 0)
 			break;
 	}
@@ -89,7 +89,7 @@ int udp_trace(const string &dst, const string &src, const string &dev, int port)
 		udp.sendpack("");
 		sn.sniffpack(NULL, 0);
 
-		cout<<"  "<<i<<"  "<<sn.get_src(h1, 1)<<" ("<<sn.get_src(h2, 0)<<")\n";
+		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3)
 			break;
 	}
@@ -120,7 +120,7 @@ int tcp_trace(const string &dst, const string &src, const string &dev, int port)
 		tcp.set_ttl(i);
 		tcp.sendpack("");
 		sn.sniffpack(NULL, 0);
-		cout<<"  "<<i<<"  "<<sn.get_src(h1, 1)<<" ("<<sn.get_src(h2, 0)<<")\n";
+		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_proto() == IPPROTO_TCP)
 			break;
 	}

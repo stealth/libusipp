@@ -301,6 +301,18 @@ int TCP<T>::sendpack(const string &s)
 	return sendpack(s.c_str(), s.length());
 }
 
+/*! sniff a TCP packet */
+template<typename T>
+string &TCP<T>::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
+}
+
 
 /*! sniff a TCP-packet.
  */

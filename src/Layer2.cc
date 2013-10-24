@@ -72,6 +72,11 @@ int Layer2::sendpack(const string &payload)
 }
 
 
+string &Layer2::sniffpack(string &s)
+{
+	return d_rx->sniffpack(s);
+}
+
 // delegate sniff request to the receiver
 int Layer2::sniffpack(void *buf, size_t len)
 {
@@ -115,7 +120,7 @@ int Layer2::init_device(const string &dev, int p, size_t snaplen)
 }
 
 
-int Layer2::timeout(struct timeval tv)
+int Layer2::timeout(const struct timeval &tv)
 {
 	return d_rx->timeout(tv);
 }

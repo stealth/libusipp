@@ -35,7 +35,7 @@ int main()
 	// test assignment operators
 	req2 = *req;
 	delete req;
-        req2.sendpack(&blob, sizeof(blob));
+	req2.sendpack(&blob, sizeof(blob));
 
 	rep->set_l2src("77:88:99:aa:bb:cc");
 

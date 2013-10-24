@@ -25,7 +25,10 @@ int main()
 	usipp::ether_arp ea;
    	ARP *a = new ARP("eth0");
 
-	a->init_device("eth0", 1, 100);
+	if (a->init_device("eth0", 1, 100) < 0) {
+		cerr<<a->why()<<endl;
+		return 1;
+	}
 
 	char sip[100], dip[100];
 

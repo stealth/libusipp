@@ -30,12 +30,16 @@ int main(int argc, char **argv)
 
 	if (argc < 2) {
 		cout<<argv[0]<<" [intf]\n";
-		exit(1);
+		return 1;
 	}
-	icmp.init_device(argv[1], 1, 500);
+
+	if (icmp.init_device(argv[1], 1, 500) < 0) {
+		cerr<<icmp.why()<<endl;
+		return 1;
+	}
 
 	string smac, dmac;
-	while(1){
+	while (1) {
 		memset(buf,0,1000);
     		// blocks
 	   	cout<<icmp.sniffpack(buf, 1000)<<endl;

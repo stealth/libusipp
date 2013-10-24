@@ -20,6 +20,13 @@ extern "C" {
 #include <pcap.h>
 }
 
+#ifdef HAVE_DLT_IEEE802_11_RADIO
+#define RADIOTAP
+#endif
+
+#ifdef RADIOTAP
+#include "radiotap.h"
+#endif
 
 //#include "config.h"
 
@@ -49,7 +56,7 @@ private:
 	struct pcap_pkthdr d_phdr;
 
 	// filled by init_device()
-	char d_dev[10];
+	std::string d_dev;
 	int d_has_promisc;
 
 	// true when timed out
@@ -57,7 +64,11 @@ private:
 
 protected:
 	struct ether_header d_ether;
-	char d_filter_string[1000];
+#ifdef RADIOTAP
+	struct wifi_hdr d_80211;
+#endif
+	std::string d_cooked;
+	std::string d_filter_string;
 
 public:
 
@@ -109,6 +120,9 @@ public:
 	 */
 	int get_datalink();
 
+	/*! Return the cooked header if any, e.g. RADIOTAP header */
+	std::string &get_cooked(std::string &);
+
 
 	/*! Return the actual framlen of the object.
 	 *  (framelen depends on datalink) Not the len of the whole frame,
@@ -130,6 +144,9 @@ public:
 	virtual int setfilter(const std::string &filter);
 
 
+	/*! sniff a packet */
+	virtual std::string &sniffpack(std::string &);
+
 	/*! sniff a packet
 	*/
 	virtual int sniffpack(void *, size_t);
@@ -137,6 +154,9 @@ public:
 
 	/*! Return HW-frame (ethernet header) */
 	void *get_frame(void *, size_t);
+
+	/*! get the HW-frame as string */
+	std::string &get_frame(std::string &);
 
 
 	/*! Get pcap_t struct to obtain fileno etc for select. */

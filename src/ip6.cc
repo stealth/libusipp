@@ -260,6 +260,18 @@ int IP6::next_header(const string &s)
 }
 
 
+/*! sniff a IP6 packet */
+string &IP6::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
+}
+
+
 int IP6::sniffpack(void *buf, size_t blen)
 {
 	int r = 0;

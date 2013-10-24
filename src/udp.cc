@@ -208,6 +208,19 @@ int UDP<T>::sendpack(const string &s)
 }
 
 
+/*! sniff a UDP packet */
+template <typename T>
+string &UDP<T>::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
+}
+
+
 /* Capture packets that are not for our host.
  */
 template <typename T>

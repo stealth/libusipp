@@ -136,6 +136,11 @@ public:
 	 * We need them too for TCP {}, and TCP{} calls IP::function() then.
 	 */
 
+
+	/*! Capture an packet from the NIC.
+	*/
+	virtual std::string &sniffpack(std::string &);
+
 	/*! Capture a packet from the NIC.
 	 */
 	virtual int sniffpack(void *buf, size_t buflen);

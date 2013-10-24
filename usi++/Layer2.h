@@ -58,6 +58,9 @@ public:
 	Layer2 &operator=(const Layer2 &);
 
 	/*! Actually, capture a packet */
+	virtual std::string &sniffpack(std::string &);
+
+	/*! Actually, capture a packet */
 	virtual int sniffpack(void *, size_t);
 
 	/*! Send a packet */
@@ -73,7 +76,7 @@ public:
 	int setfilter(const std::string &f);
 
 	/*! Set a timeout */
-	int timeout(struct timeval);
+	int timeout(const struct timeval &);
 
 	/*! return was timeout? */
 	bool timeout();

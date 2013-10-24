@@ -197,6 +197,18 @@ int ICMP::sendpack(const string &payload)
 }
 
 
+/*! sniff a ICMP packet */
+string &ICMP::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
+}
+
+
 /* handle packets, that are NOT actually for the
  *  local adress!
  */

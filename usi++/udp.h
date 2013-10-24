@@ -95,8 +95,14 @@ public:
 	/*! Send a packet conating a string of payload. */
 	virtual int sendpack(const std::string &);
 
-	/*! Capture packets that are not for our host.
-	 */
+
+	/*! Capture an packet from the NIC.
+	*/
+	virtual std::string &sniffpack(std::string &);
+
+
+	/*! Capture an packet from the NIC.
+	*/
 	virtual int sniffpack(void*, size_t);
 
 	/*! Initialize a device ("eth0" for example) for packet-

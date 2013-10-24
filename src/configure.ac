@@ -2,13 +2,14 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.62])
-AC_INIT(libusi++, 1.99, [BUG-REPORT-ADDRESS])
+AC_INIT(libusi++, 2.00, [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([arp.cc])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
@@ -49,12 +50,24 @@ AC_CHECK_LIB(nsl, inet_ntoa)
 # Checks for header files.
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h sys/ioctl.h unistd.h])
 
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyaddr gethostbyname gethostname inet_ntoa memset select socket strerror])
+
+r=`grep DLT_IEEE802_11_RADIO /usr/include/pcap/bpf.h 2>/dev/null`
+r+=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/bpf.h 2>/dev/null`
+case "$r" in
+	*DLT_IEEE802_11_RADIO*)
+		CXXFLAGS="$CXXFLAGS -DRADIOTAP"
+		echo "Enabling 80211 radiotap"
+		;;
+	*)
+esac
+
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

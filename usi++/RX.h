@@ -37,6 +37,9 @@ public:
 	/*! Destrcutor */
 	virtual ~RX() {}
 
+	/*! Capture a packet from the net, string version */
+	virtual std::string &sniffpack(std::string &) = 0;
+
 	/*! Capture a packet from the network.
 	 *  At most a given len. */
 	virtual int sniffpack(void *, size_t) = 0;
@@ -48,7 +51,7 @@ public:
 	virtual int setfilter(const std::string &) = 0;
 
 	/*! set a timeout */
-	virtual int timeout(struct timeval) = 0;
+	virtual int timeout(const struct timeval &) = 0;
 
 	/*! RX derived class must also tell user when timeout occurs */
 	virtual bool timeout() = 0;

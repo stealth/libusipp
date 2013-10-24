@@ -211,6 +211,12 @@ public:
 	/*! Send a packet containg a payload of string.*/
 	virtual int sendpack(const std::string &);
 
+
+	/*! Capture an packet from the NIC.
+	*/
+	virtual std::string &sniffpack(std::string &);
+
+
 	/*! Capture an packet from the NIC.
 	*/
 	virtual int sniffpack(void *buf, size_t len);
