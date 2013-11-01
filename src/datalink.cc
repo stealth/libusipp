@@ -21,7 +21,7 @@
 #ifdef IMMEDIATE
 #include <net/bpf.h>
 #endif
-#define USI_DEBUG
+
 #ifdef USI_DEBUG
 #include <iostream>
 #endif
