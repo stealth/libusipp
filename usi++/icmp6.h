@@ -15,6 +15,7 @@ namespace usipp {
 /*! \class ICMP6
  *  \brief ICMP6 class
  *  \example martian_dest_test6.cc
+ *  \example icmp6_sniff.cc
  */
 class ICMP6 : public IP6 {
 private:
@@ -42,12 +43,16 @@ public:
 	/*! Get ICMPv6 type */
 	uint8_t get_type();
 
+	/*! Get ICMPv6 ID if applicable */
 	uint16_t get_icmpId();
 
+	/*! Set ICMPv6 ID field */
 	uint16_t set_icmpId(uint16_t);
 
+	/*! Get ICMPv6 sequence number if applicable */
 	uint16_t get_seq();
 
+	/*! Set ICMPv6 sequence number */
 	uint16_t set_seq(uint16_t);
 
 	/*! Get ICMpv6 data */

@@ -206,7 +206,7 @@ int IP6::sendpack(const void *payload, size_t paylen)
 	char *s = new (nothrow) char[len];
 
 	if (!s)
-		return -1;
+		return die("IP6::sendpack: OOM", STDERR, -1);
 
 	iph.payload_len = htons(e_hdrs_len + paylen);
 

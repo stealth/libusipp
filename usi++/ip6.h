@@ -15,6 +15,7 @@ namespace usipp {
 
 /*! \class IP6
  *  \brief IP6 class
+ *  \example icmp6_sniff.cc
  */
 class IP6 : public Layer2 {
 
