@@ -21,7 +21,7 @@
 #ifdef IMMEDIATE
 #include <net/bpf.h>
 #endif
-
+#define USI_DEBUG
 #ifdef USI_DEBUG
 #include <iostream>
 #endif
@@ -42,7 +42,7 @@ pcap::pcap()
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
-
+	memset(&d_ether, 0, sizeof(d_ether));
 }
 
 
@@ -62,6 +62,7 @@ pcap::pcap(const string &filterStr)
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
+	memset(&d_ether, 0, sizeof(d_ether));
 }
 
 
@@ -70,6 +71,7 @@ pcap::~pcap()
 	if (d_pd != NULL)
 		pcap_close(d_pd);
 }
+
 
 pcap::pcap(const pcap &rhs)
 {
@@ -147,7 +149,7 @@ int pcap::get_framelen()
 }
 
 
-/* Get the cooked header, if any (RADIOTAP)
+/* Get the cooked header, if any (HAVE_RADIOTAP)
  */
 string &pcap::get_cooked(string &hdr)
 {
@@ -227,14 +229,8 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	}
 #endif
 
-	// Only for devices with assigned IP address
-	if (d_filter_string.find("ip") != string::npos) {
-		if (pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf) < 0) {
-			e = "pcap::init_device::pcap_lookupnet:";
-			e += ebuf;
-			return die(e, STDERR, -1);
-		}
-	}
+	// ignore error, as device might be down or not IP-based
+	pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf);
 
 	if (d_filter_string.size() > 0) {
 		/* The d_filter_string must be filled by derived classes, such
@@ -266,7 +262,7 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 	case DLT_EN10MB:
 		d_framelen = sizeof(d_ether);
 		break;
-#ifdef RADIOTAP
+#ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		d_framelen = sizeof(d_80211);
 		break;
@@ -382,7 +378,7 @@ int pcap::sniffpack(void *s, size_t len)
 	case DLT_EN10MB:
 		memcpy(&d_ether, tmp, d_framelen);
 		break;
-#ifdef RADIOTAP
+#ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		cooked_hdr = ((ieee80211_radiotap_header *)tmp)->len;
 		d_cooked = string(tmp, cooked_hdr);
@@ -423,7 +419,7 @@ void *pcap::get_frame(void *hwframe, size_t len)
    	case DLT_EN10MB:
 		memcpy(hwframe, &d_ether, (len<sizeof(d_ether)?len:sizeof(d_ether)));
 		break;
-#ifdef RADIOTAP
+#ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		memcpy(hwframe, &d_80211, (len<sizeof(d_80211)?len:sizeof(d_80211)));
 		break;
@@ -445,7 +441,7 @@ string &pcap::get_frame(string &frame)
 		memcpy(buf, &d_ether, sizeof(d_ether));
 		frame = string(buf, sizeof(d_ether));
 		break;
-#ifdef RADIOTAP
+#ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		memcpy(buf, &d_80211, sizeof(d_80211));
 		frame = string(buf, sizeof(d_80211));

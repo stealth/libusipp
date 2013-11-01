@@ -20,11 +20,9 @@ extern "C" {
 #include <pcap.h>
 }
 
-#ifdef HAVE_DLT_IEEE802_11_RADIO
-#define RADIOTAP
-#endif
+#include "config.h"
 
-#ifdef RADIOTAP
+#ifdef HAVE_RADIOTAP
 #include "radiotap.h"
 #endif
 
@@ -62,11 +60,15 @@ private:
 	// true when timed out
 	bool d_timeout;
 
+
 protected:
+
 	struct ether_header d_ether;
-#ifdef RADIOTAP
+
+#ifdef HAVE_RADIOTAP
 	struct wifi_hdr d_80211;
 #endif
+
 	std::string d_cooked;
 	std::string d_filter_string;
 
@@ -102,34 +104,11 @@ public:
 	 */
 	virtual std::string &get_l2src(std::string &);
 
-
 	/*! Fill buffer with dst-hardware-adress of actuall packet,
  	 *  use get_datalink() to determine what HW the device is.
 	 *  Only ethernet is supportet yet, but it's extensible.
 	 */
 	virtual std::string &get_l2dst(std::string &);
-
-
-	/*! Get protocol-type of ethernet-frame
-	 *  Maybe moves to ethernet-class in future?
-	 */
-	uint16_t get_etype();
-
-
-	/*! Return the actual datalink of the object.
-	 */
-	int get_datalink();
-
-	/*! Return the cooked header if any, e.g. RADIOTAP header */
-	std::string &get_cooked(std::string &);
-
-
-	/*! Return the actual framlen of the object.
-	 *  (framelen depends on datalink) Not the len of the whole frame,
-	*   only that of the header.
-	 */
-	int get_framelen();
-
 
 	/*! Initialize a device ("eth0" for example) for packet-
 	 *  capturing. It MUST be called before sniffpack() is launched.
@@ -138,11 +117,9 @@ public:
 	 */
 	virtual int init_device(const std::string &dev, int promisc, size_t snaplen);
 
-
 	/*! set a new filter for capturing
 	 */
 	virtual int setfilter(const std::string &filter);
-
 
 	/*! sniff a packet */
 	virtual std::string &sniffpack(std::string &);
@@ -150,6 +127,15 @@ public:
 	/*! sniff a packet
 	*/
 	virtual int sniffpack(void *, size_t);
+
+	/*! Set a timeout. Implements RX::timeout() = 0. */
+	virtual int timeout(const struct timeval &);
+
+	/*! Returns true when recv() timed out */
+	virtual bool timeout();
+
+	/*! See RX::tag() */
+	virtual int tag() { return RX_TAG_PCAP; }
 
 
 	/*! Return HW-frame (ethernet header) */
@@ -162,16 +148,24 @@ public:
 	/*! Get pcap_t struct to obtain fileno etc for select. */
 	pcap_t *handle() { return d_pd; }
 
+	/*! Get protocol-type of ethernet-frame
+	 *  Maybe moves to ethernet-class in future?
+	 */
+	uint16_t get_etype();
 
-	/*! Set a timeout. Implements RX::timeout() = 0. */
-	virtual int timeout(const struct timeval &);
+	/*! Return the actual datalink of the object.
+	 */
+	int get_datalink();
 
+	/*! Return the cooked header if any, e.g. RADIOTAP header */
+	std::string &get_cooked(std::string &);
 
-	/*! Returns true when recv() timed out */
-	virtual bool timeout();
+	/*! Return the actual framlen of the object.
+	 *  (framelen depends on datalink) Not the len of the whole frame,
+	 *  only that of the header.
+	 */
+	int get_framelen();
 
-	/*! See RX::tag() */
-	virtual int tag() { return RX_TAG_PCAP; }
 
 }; // class pcap {}
 

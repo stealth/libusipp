@@ -62,7 +62,7 @@ r=`grep DLT_IEEE802_11_RADIO /usr/include/pcap/bpf.h 2>/dev/null`
 r+=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/bpf.h 2>/dev/null`
 case "$r" in
 	*DLT_IEEE802_11_RADIO*)
-		CXXFLAGS="$CXXFLAGS -DRADIOTAP"
+		AC_DEFINE([HAVE_RADIOTAP], [1], [Define if radiotap exists.])
 		echo "Enabling 80211 radiotap"
 		;;
 	*)

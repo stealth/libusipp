@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include "80211.h"
 
+namespace usipp {
+
 struct ieee80211_radiotap_header {
 	uint8_t version;	/* Version 0. Only increases
 				 * for drastic changes,
@@ -15,8 +17,8 @@ struct ieee80211_radiotap_header {
 	uint8_t pad;
 	uint16_t len;		/* length of the whole
 				 * header in bytes, including
-				 * it_version, it_pad,
-				 * it_len, and data fields.
+				 * version, pad,
+				 * len, and data fields.
 				 */
 	uint32_t present;	/* A bitmap telling which
 				 * fields are present. Set bit 31
@@ -162,6 +164,8 @@ struct wifi_hdr {
 		struct ieee80211_data data;
 	} u;
 };
+
+}
 
 #endif
 

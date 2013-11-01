@@ -8,12 +8,15 @@
 #ifndef __80211_h__
 #define __80211_h__
 
+
 #include <stdio.h>
 #include <stdint.h>
 #include <netinet/in.h>
 #include <asm/byteorder.h>
 
 #define __packed __attribute__((packed))
+
+namespace usipp {
 
 /* Note: Fields are encoded in little-endian! */
 struct ieee80211_frm_ctrl {
@@ -774,6 +777,7 @@ struct subelement {
 	uint8_t data[0];
 } __packed;
 
+}
 
 #endif
 

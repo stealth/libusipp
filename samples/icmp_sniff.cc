@@ -24,7 +24,7 @@ string l2mac(string &l2)
 
 int main(int argc, char **argv)
 {
-   	ICMP icmp("127.0.0.1");
+	ICMP *icmp = new ICMP("127.0.0.1");
 	char buf[1000] = {0};
 	string src, dst;
 
@@ -33,8 +33,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (icmp.init_device(argv[1], 1, 500) < 0) {
-		cerr<<icmp.why()<<endl;
+	if (icmp->init_device(argv[1], 1, 500) < 0) {
+		cerr<<icmp->why()<<endl;
 		return 1;
 	}
 
@@ -42,13 +42,13 @@ int main(int argc, char **argv)
 	while (1) {
 		memset(buf,0,1000);
     		// blocks
-	   	cout<<icmp.sniffpack(buf, 1000)<<endl;
+	   	cout<<icmp->sniffpack(buf, 1000)<<endl;
 #ifdef PRINT_MAC
-		cout<<"["<<l2mac(icmp.rx()->get_l2src(smac))<<"->"<<l2mac(icmp.rx()->get_l2dst(dmac))<<"]:";
+		cout<<"["<<l2mac(icmp->rx()->get_l2src(smac))<<"->"<<l2mac(icmp->rx()->get_l2dst(dmac))<<"]:";
 #endif
-		cout<<"type:"<<(int)icmp.get_type()<<" ["<<icmp.get_src(src)<<" -> "
-		    <<icmp.get_dst(dst)<<"] "<<"seq: "<<icmp.get_seq()
-		    <<" ttl: "<<(int)icmp.get_ttl()<<" id: "<<icmp.get_icmpId()<<endl;
+		cout<<"type:"<<(int)icmp->get_type()<<" ["<<icmp->get_src(src)<<" -> "
+		    <<icmp->get_dst(dst)<<"] "<<"seq: "<<icmp->get_seq()
+		    <<" ttl: "<<(int)icmp->get_ttl()<<" id: "<<icmp->get_icmpId()<<endl;
 		    //<<buf<<endl;
 
 	}

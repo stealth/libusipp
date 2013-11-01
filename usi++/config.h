@@ -40,6 +40,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #define HAVE_NETINET_IN_H 1
 
+/* Define if radiotap exists. */
+#define HAVE_RADIOTAP 1
+
 /* Define to 1 if you have the `select' function. */
 #define HAVE_SELECT 1
 
@@ -86,7 +89,7 @@
 #define PACKAGE_NAME "libusi++"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libusi++ 1.99"
+#define PACKAGE_STRING "libusi++ 2.00"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libusi--"
@@ -95,7 +98,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.99"
+#define PACKAGE_VERSION "2.00"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
