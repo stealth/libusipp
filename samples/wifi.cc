@@ -8,7 +8,7 @@ int main()
 {
 	usipp::pcap *wmon = new usipp::pcap;
 
-	if (wmon->init_device("eth0", 1, 1500) < 0) {
+	if (wmon->init_device("mon0", 1, 1500) < 0) {
 		cerr<<wmon->why()<<endl;
 		return 1;
 	}
