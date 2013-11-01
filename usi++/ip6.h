@@ -46,8 +46,14 @@ public:
 	/*! Get IP6 source address */
 	struct in6_addr get_src();
 
+	/*! Get IP6 source address, string version */
+	std::string &get_src(std::string &);
+
 	/*! Get IP6 destination address */
 	struct in6_addr get_dst();
+
+	/*! Get IP6 destination address, string version */
+	std::string &get_dst(std::string &);
 
 	/*! Set IP6 source address */
 	struct in6_addr &set_src(const struct in6_addr &);

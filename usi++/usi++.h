@@ -43,9 +43,10 @@ namespace usipp {
  */
 class usifault {
 	std::string fault;
+
 public:
 	/*! */
-   	usifault(const std::string &s = "undef") : fault(s) {}
+	usifault(const std::string &s = "undef") : fault(s) {}
 
 	/*! */
         ~usifault() {}

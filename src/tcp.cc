@@ -319,19 +319,23 @@ string &TCP<T>::sniffpack(string &s)
 template<typename T>
 int TCP<T>::sniffpack(void *buf, size_t len)
 {
+	if (len > max_buffer_len)
+		return T::die("TCP::sniffpack: Insane large buffer len", STDERR, -1);
+
 	size_t xlen = len + sizeof(tcph) + sizeof(tcpOptions);
 
-	char *tmp = new char[xlen];
 	int r = 0;
+	char *tmp = new (nothrow) char[xlen];
+	if (!tmp)
+		return T::die("TCP::sniffpack: OOM", STDERR, -1);
 
 	memset(tmp, 0, xlen);
-	memset(buf, 0, len);
 	memset(&tcph, 0, sizeof(tcph));
 
 	r = T::sniffpack(tmp, xlen);
 
-	if (r == 0 && Layer2::timeout()) {	// timeout
-		delete[] tmp;
+	if (r == 0 && Layer2::timeout()) {
+		delete [] tmp;
 		return 0;
 	} else if (r < (int)sizeof(tcph)) {
 		delete [] tmp;

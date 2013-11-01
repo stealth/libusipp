@@ -27,6 +27,7 @@ namespace usipp {
 
 
 enum  {
+	max_buffer_len = 0x1000000,
 	MAXHOSTLEN = 1000,
 	ETH_ALEN = 6
 };

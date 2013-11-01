@@ -226,12 +226,20 @@ string &UDP<T>::sniffpack(string &s)
 template <typename T>
 int UDP<T>::sniffpack(void *buf, size_t len)
 {
-	char *tmp = new char[len + sizeof(d_udph)];
+	if (len > max_buffer_len)
+		return T::die("UDP::sniffpack: Insane large buffer len", STDERR, -1);
+
 	int r = 0;
+	char *tmp = new (nothrow) char[len + sizeof(d_udph)];
+	if (!tmp)
+		return T::die("UDP::sniffpack: OOM", STDERR, -1);
+
 	memset(tmp, 0, len + sizeof(d_udph));
+	memset(&d_udph, 0, sizeof(d_udph));
 
 	r = T::sniffpack(tmp, len + sizeof(d_udph));
-	if (r == 0 && Layer2::timeout()) {	// timeout
+
+	if (r == 0 && Layer2::timeout()) {
 		delete [] tmp;
 		return 0;
 	} else if (r < (int)sizeof(d_udph)) {

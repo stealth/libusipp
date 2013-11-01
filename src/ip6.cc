@@ -98,9 +98,33 @@ struct in6_addr IP6::get_src()
 }
 
 
+string &IP6::get_src(string &s)
+{
+	s = "";
+
+	char buf[128];
+	memset(buf, 0, sizeof(buf));
+	if (inet_ntop(AF_INET6, &iph.saddr, buf, sizeof(buf)))
+		s = buf;
+	return s;
+}
+
+
 struct in6_addr IP6::get_dst()
 {
 	return iph.daddr;
+}
+
+
+string &IP6::get_dst(string &s)
+{
+	s = "";
+
+	char buf[128];
+	memset(buf, 0, sizeof(buf));
+	if (inet_ntop(AF_INET6, &iph.daddr, buf, sizeof(buf)))
+		s = buf;
+	return s;
 }
 
 
@@ -280,7 +304,7 @@ int IP6::sniffpack(void *buf, size_t blen)
 	char *tmp = new (nothrow) char[xlen];
 
 	if (!tmp)
-		return -1;
+		return die("IP6::sniffpack: OOM", STDERR, -1);
 
 	memset(tmp, 0, xlen);
 

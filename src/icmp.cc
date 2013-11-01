@@ -166,7 +166,10 @@ int ICMP::sendpack(const void *payload, size_t paylen)
 	struct icmphdr *i;
 
 	// s will be our packet
-	char *s = new char[len];
+	char *s = new (nothrow) char[len];
+	if (!s)
+		return die("ICMP::sendpack: OOM", STDERR, -1);
+
 	memset(s, 0, len);
 
 	// copy ICMP header to packet
@@ -214,15 +217,22 @@ string &ICMP::sniffpack(string &s)
  */
 int ICMP::sniffpack(void *s, size_t len)
 {
+	if (len > max_buffer_len)
+		return die("ICMP::sniffpack: Insane large buffer len", STDERR, -1);
+
 	size_t plen = len + sizeof(struct icmphdr);
-	char *tmp = new (nothrow) char[plen];
 	int r = 0;
+	char *tmp = new (nothrow) char[plen];
+
+	if (!tmp)
+		return die("ICMP::sniffpack: OOM", STDERR, -1);
 
 	memset(tmp, 0, plen);
+	memset(&icmphdr, 0, sizeof(icmphdr));
 
 	r = IP::sniffpack(tmp, plen);
 
-	if (r == 0 && Layer2::timeout()) {	// timeout
+	if (r == 0 && Layer2::timeout()) {
 		delete [] tmp;
 		return 0;
 	} else if (r < (int)sizeof(icmphdr)) {

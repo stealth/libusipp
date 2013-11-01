@@ -42,6 +42,14 @@ public:
 	/*! Get ICMPv6 type */
 	uint8_t get_type();
 
+	uint16_t get_icmpId();
+
+	uint16_t set_icmpId(uint16_t);
+
+	uint16_t get_seq();
+
+	uint16_t set_seq(uint16_t);
+
 	/*! Get ICMpv6 data */
 	uint32_t get_data();
 
@@ -53,6 +61,13 @@ public:
 
 	/*! Send a ICMPv6 packet containg payload */
 	virtual int sendpack(const std::string &);
+
+	/*! Sniff a ICMP6 packet and set up internal fields. */
+	virtual std::string &sniffpack(std::string &);
+
+	/*! Sniff a ICMP6 packet and set up internal fields. */
+	virtual int sniffpack(void *, size_t);
+
 };
 
 }

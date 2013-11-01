@@ -495,13 +495,18 @@ string &IP::sniffpack(string &s)
  */
 int IP::sniffpack(void *buf, size_t len)
 {
+	if (len > max_buffer_len)
+		return die("IP::sniffpack: insane large buffer len", STDERR, -1);
+
 	int r = 0;
 	int xlen = len + sizeof(iph) + sizeof(ipOptions);
 	struct usipp::iphdr *i = NULL;
 
-	char *tmp = new char[xlen];
+	char *tmp = new (nothrow) char[xlen];
+	if (!tmp)
+		return die("IP::snifpack: OOM", STDERR, -1);
+
 	memset(tmp, 0, xlen);
-	memset(buf, 0, len);
 
 	/* until we assembled fragments or we received and unfragemented packet
 	 */

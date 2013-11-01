@@ -63,6 +63,32 @@ uint8_t ICMP6::get_code()
 }
 
 
+uint16_t ICMP6::get_seq()
+{
+	return ntohs(icmp6hdr.icmp6_seq);
+}
+
+
+uint16_t ICMP6::set_seq(uint16_t seq)
+{
+	icmp6hdr.icmp6_seq = htons(seq);
+	return seq;
+}
+
+
+uint16_t ICMP6::get_icmpId()
+{
+	return ntohs(icmp6hdr.icmp6_id);
+}
+
+
+uint16_t ICMP6::set_icmpId(uint16_t id)
+{
+	icmp6hdr.icmp6_id = htons(id);
+	return id;
+}
+
+
 uint32_t ICMP6::get_data()
 {
 	return icmp6hdr.icmp6_dataun.icmp6_un_data32[0];
@@ -79,7 +105,10 @@ uint32_t ICMP6::set_data(uint32_t d)
 int ICMP6::sendpack(const void *payload, size_t paylen)
 {
 	size_t len = sizeof(icmp6hdr) + paylen;
-	char *s = new char[len];
+	char *s = new (nothrow) char[len];
+	if (!s)
+		return die("ICMP6::sendpack: OOM", STDERR, -1);
+
 	memset(s, 0, len);
 
 	memcpy(s, &icmp6hdr, sizeof(icmp6hdr));
@@ -87,7 +116,10 @@ int ICMP6::sendpack(const void *payload, size_t paylen)
 
 	icmp6_hdr *i = (icmp6_hdr*)s;
 	if (i->icmp6_cksum == 0) {
-		unsigned char *c = new unsigned char[2*sizeof(in6_addr)+3*sizeof(uint32_t)+len], *cptr = c;
+		unsigned char *c = new (nothrow) unsigned char[2*sizeof(in6_addr)+3*sizeof(uint32_t)+len], *cptr = c;
+		if (!c)
+			return die("ICMP6::sendpack: OOM", STDERR, -1);
+
 		in6_addr i6 = get_src();
 		memcpy(cptr, &i6, sizeof(i6));
 		cptr += sizeof(i6);
@@ -113,6 +145,53 @@ int ICMP6::sendpack(const string &payload)
 {
 	return sendpack(payload.c_str(), payload.size());
 }
+
+
+int ICMP6::sniffpack(void *buf, size_t blen)
+{
+	if (blen > max_buffer_len)
+		return die("ICMP6::sniffpack: Insane large buffer len", STDERR, -1);
+
+	int r = 0;
+	char *tmp = new (nothrow) char[blen + sizeof(icmp6hdr)];
+	if (!tmp)
+		return die("ICMP6::sniffpack: OOM", STDERR, -1);
+
+	memset(tmp, 0, blen + sizeof(icmp6hdr));
+	memset(&icmp6hdr, 0, sizeof(icmp6hdr));
+
+	r = IP6::sniffpack(tmp, blen + sizeof(icmp6hdr));
+
+	if (r == 0 && Layer2::timeout()) {
+		delete [] tmp;
+		return 0;
+	} else if (r < (int)sizeof(icmp6hdr)) {
+		delete [] tmp;
+		return -1;
+	}
+
+	memcpy(&icmp6hdr, tmp, sizeof(icmp6hdr));
+	r -= sizeof(icmp6hdr);
+
+	if (buf)
+		memcpy(buf, tmp + sizeof(icmp6hdr), r < (int)blen ? r : blen);
+
+	delete [] tmp;
+	return r < (int)blen ? r : blen;
+}
+
+
+string &ICMP6::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+
+	int r = this->sniffpack(buf, sizeof(buf));
+	if (r > 0)
+		s = string(buf, r);
+	return s;
+}
+
 
 }
 
