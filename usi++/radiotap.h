@@ -1,4 +1,4 @@
-/* Mostly taken from Linux kernel-source/examples */
+/* Mostly taken from Linux kernel-source/examples, but enum-ified */
 
 #ifndef __radiotap_h__
 #define __radiotap_h__
@@ -61,63 +61,68 @@ enum ieee80211_radiotap_type {
 
 
 /* Channel flags. */
-#define	IEEE80211_CHAN_TURBO	0x0010	/* Turbo channel */
-#define	IEEE80211_CHAN_CCK	0x0020	/* CCK channel */
-#define	IEEE80211_CHAN_OFDM	0x0040	/* OFDM channel */
-#define	IEEE80211_CHAN_2GHZ	0x0080	/* 2 GHz spectrum channel. */
-#define	IEEE80211_CHAN_5GHZ	0x0100	/* 5 GHz spectrum channel */
-#define	IEEE80211_CHAN_PASSIVE	0x0200	/* Only passive scan allowed */
-#define	IEEE80211_CHAN_DYN	0x0400	/* Dynamic CCK-OFDM channel */
-#define	IEEE80211_CHAN_GFSK	0x0800	/* GFSK channel (FHSS PHY) */
+enum ieee80211_channel_flags {
+	IEEE80211_CHAN_TURBO	= 0x0010,	/* Turbo channel */
+	IEEE80211_CHAN_CCK	= 0x0020,	/* CCK channel */
+	IEEE80211_CHAN_OFDM	= 0x0040,	/* OFDM channel */
+	IEEE80211_CHAN_2GHZ	= 0x0080,	/* 2 GHz spectrum channel. */
+	IEEE80211_CHAN_5GHZ	= 0x0100,	/* 5 GHz spectrum channel */
+	IEEE80211_CHAN_PASSIVE	= 0x0200,	/* Only passive scan allowed */
+	IEEE80211_CHAN_DYN	= 0x0400,	/* Dynamic CCK-OFDM channel */
+	IEEE80211_CHAN_GFSK	= 0x0800	/* GFSK channel (FHSS PHY) */
+};
+
 
 /* For IEEE80211_RADIOTAP_FLAGS */
-#define	IEEE80211_RADIOTAP_F_CFP	0x01	/* sent/received
+enum ieee80211_radiotap_flags {
+
+	IEEE80211_RADIOTAP_F_CFP	= 0x01,	/* sent/received
 						 * during CFP
 						 */
-#define	IEEE80211_RADIOTAP_F_SHORTPRE	0x02	/* sent/received
+	IEEE80211_RADIOTAP_F_SHORTPRE	= 0x02,	/* sent/received
 						 * with short
 						 * preamble
 						 */
-#define	IEEE80211_RADIOTAP_F_WEP	0x04	/* sent/received
+	IEEE80211_RADIOTAP_F_WEP	= 0x04,	/* sent/received
 						 * with WEP encryption
 						 */
-#define	IEEE80211_RADIOTAP_F_FRAG	0x08	/* sent/received
+	IEEE80211_RADIOTAP_F_FRAG	= 0x08,	/* sent/received
 						 * with fragmentation
 						 */
-#define	IEEE80211_RADIOTAP_F_FCS	0x10	/* frame includes FCS */
-#define	IEEE80211_RADIOTAP_F_DATAPAD	0x20	/* frame has padding between
+	IEEE80211_RADIOTAP_F_FCS	= 0x10,	/* frame includes FCS */
+	IEEE80211_RADIOTAP_F_DATAPAD	= 0x20,	/* frame has padding between
 						 * 802.11 header and payload
 						 * (to 32-bit boundary)
 						 */
-#define IEEE80211_RADIOTAP_F_BADFCS	0x40	/* bad FCS */
+	IEEE80211_RADIOTAP_F_BADFCS	= 0x40,	/* bad FCS */
 
-/* For IEEE80211_RADIOTAP_RX_FLAGS */
-#define IEEE80211_RADIOTAP_F_RX_BADPLCP	0x0002	/* frame has bad PLCP */
+	/* For IEEE80211_RADIOTAP_RX_FLAGS */
+	IEEE80211_RADIOTAP_F_RX_BADPLCP	= 0x0002,	/* frame has bad PLCP */
 
-/* For IEEE80211_RADIOTAP_TX_FLAGS */
-#define IEEE80211_RADIOTAP_F_TX_FAIL	0x0001	/* failed due to excessive
-						 * retries */
-#define IEEE80211_RADIOTAP_F_TX_CTS	0x0002	/* used cts 'protection' */
-#define IEEE80211_RADIOTAP_F_TX_RTS	0x0004	/* used rts/cts handshake */
-#define IEEE80211_RADIOTAP_F_TX_NOACK	0x0008	/* don't expect an ack */
+	/* For IEEE80211_RADIOTAP_TX_FLAGS */
+	IEEE80211_RADIOTAP_F_TX_FAIL	= 0x0001,	/* failed due to excessive
+							 * retries */
+	IEEE80211_RADIOTAP_F_TX_CTS	= 0x0002,	/* used cts 'protection' */
+	IEEE80211_RADIOTAP_F_TX_RTS	= 0x0004,	/* used rts/cts handshake */
+	IEEE80211_RADIOTAP_F_TX_NOACK	= 0x0008,	/* don't expect an ack */
 
 
-/* For IEEE80211_RADIOTAP_MCS */
-#define IEEE80211_RADIOTAP_MCS_HAVE_BW		0x01
-#define IEEE80211_RADIOTAP_MCS_HAVE_MCS		0x02
-#define IEEE80211_RADIOTAP_MCS_HAVE_GI		0x04
-#define IEEE80211_RADIOTAP_MCS_HAVE_FMT		0x08
-#define IEEE80211_RADIOTAP_MCS_HAVE_FEC		0x10
+	/* For IEEE80211_RADIOTAP_MCS */
+	IEEE80211_RADIOTAP_MCS_HAVE_BW	= 0x01,
+	IEEE80211_RADIOTAP_MCS_HAVE_MCS	= 0x02,
+	IEEE80211_RADIOTAP_MCS_HAVE_GI	= 0x04,
+	IEEE80211_RADIOTAP_MCS_HAVE_FMT	= 0x08,
+	IEEE80211_RADIOTAP_MCS_HAVE_FEC	= 0x10,
 
-#define IEEE80211_RADIOTAP_MCS_BW_MASK		0x03
-#define	IEEE80211_RADIOTAP_MCS_BW_20		0
-#define	IEEE80211_RADIOTAP_MCS_BW_40		1
-#define	IEEE80211_RADIOTAP_MCS_BW_20L		2
-#define	IEEE80211_RADIOTAP_MCS_BW_20U		3
-#define IEEE80211_RADIOTAP_MCS_SGI		0x04
-#define IEEE80211_RADIOTAP_MCS_FMT_GF		0x08
-#define IEEE80211_RADIOTAP_MCS_FEC_LDPC		0x10
-
+	IEEE80211_RADIOTAP_MCS_BW_MASK	= 0x03,
+	IEEE80211_RADIOTAP_MCS_BW_20	= 0,
+	IEEE80211_RADIOTAP_MCS_BW_40	= 1,
+	IEEE80211_RADIOTAP_MCS_BW_20L	= 2,
+	IEEE80211_RADIOTAP_MCS_BW_20U	= 3,
+	IEEE80211_RADIOTAP_MCS_SGI	= 0x04,
+	IEEE80211_RADIOTAP_MCS_FMT_GF	= 0x08,
+	IEEE80211_RADIOTAP_MCS_FEC_LDPC	= 0x10
+};
 
 
 /* Radiotap header iteration
