@@ -323,7 +323,7 @@ string &IP::get_dst(string &s)
 	s = "";
 	struct in_addr in;
 
-	in.s_addr = iph.saddr;
+	in.s_addr = iph.daddr;
 	s = inet_ntoa(in);
 	return s;
 }
