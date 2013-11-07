@@ -1,7 +1,7 @@
-// c++ martian_dest.cc -lusi++ -lpcap -ldnet
+// c++ martian_dest2.cc -lusi++ -lpcap -ldnet
 //
 // test remote machine to allow 127.0.0.1 destination from
-// ethernet NIC's
+// ethernet NIC's, TX_pcap_eth version.
 #include <iostream>
 #include <string>
 #include <usi++/usi++.h>
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	ICMP icmp("127.0.0.1");
 	icmp.init_device("eth0", 1, 1500);
 
-	// must be a pcap RX
+	// must be a pcap RX, init_device() already called
 	ref_count<RX> rx = icmp.rx();
 
 	cout<<"refcount of RX: "<<rx.use()<<endl;
