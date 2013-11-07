@@ -18,8 +18,8 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __tx_pcap_eth_h__
-#define __tx_pcap_eth_h__
+#ifndef __tx_pcap_h__
+#define __tx_pcap_h__
 
 #include "TX.h"
 #include "datalink.h"
