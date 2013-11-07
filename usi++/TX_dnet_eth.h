@@ -60,10 +60,14 @@ public:
 	/*! enable broadcasting of TX */
 	virtual int broadcast();
 
-	/*! Set ethernet source address */
+	/*! Set ethernet source address. If len of string is ETH_A_LEN (6), use it as binary blob,
+	 *  otherwise expect it to be of the 11:22:33:44:55:66 format.
+	 */
 	virtual int set_l2src(const std::string &);
 
-	/*! Set ethernet destination address */
+	/*! Set ethernet destination address. If len of string is ETH_A_LEN (6), use it as binary blob,
+         *  otherwise expect it to be of the 11:22:33:44:55:66 format.
+	 */
 	virtual int set_l2dst(const std::string &);
 
 	/*! Set ethernet type (ETH_P_IP, ETH_P_ARP etc).*/
