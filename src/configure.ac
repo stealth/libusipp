@@ -18,6 +18,7 @@ CXXFLAGS="$CXXFLAGS -fPIC -I/usr/local/include"
 
 # Checks for libraries.
 AC_CHECK_LIB(pcap, pcap_open_live,,echo Need libpcap installed;exit)
+AC_CHECK_FUNCS_ONCE(pcap_inject)
 AC_CHECK_LIB(dnet, ip_open)
 
 host=`uname`;

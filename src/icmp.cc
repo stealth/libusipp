@@ -1,13 +1,22 @@
-/*** This Programs/Libraries are (C)opyright by Sebastian Krahmer.
- *** You may use it under the terms of the GPL. You should have
- *** already received the file COPYING that shows you your rights. If not,
- *** you can get it at http://www.cs.uni-potsdam.de/homepages/students/linuxer
- *** the logit-package. You will also find some other nice utillities there.
- ***
- *** THERE IS ABSOLUTELY NO WARRANTY. SO YOU USE IT AT YOUR OWN RISK.
- *** IT WAS WRITTEN IN THE HOPE THAT IT WILL BE USEFULL. I AM NOT RESPONSIBLE
- *** FOR ANY DAMAGE YOU MAYBE GET DUE TO USING MY PROGRAMS.
- ***/
+/*
+ * This file is part of the libusi++ packet capturing/sending framework.
+ *
+ * (C) 2000-2013 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
+ *
+ * libusi++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * libusi++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with psc.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "usi++/usi++.h"
 #include "usi++/icmp.h"
@@ -29,9 +38,6 @@ using namespace std;
 
 
 ICMP::ICMP(const string &host)
-#ifndef IPPROTO_ICMP
-#define IPPROTO_ICMP 1
-#endif
       : IP(host, IPPROTO_ICMP)
 {
 	// clear memory

@@ -18,54 +18,50 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __tx_dnet_eth_h__
-#define __tx_dnet_eth_h__
+#ifndef __tx_pcap_eth_h__
+#define __tx_pcap_eth_h__
 
 #include "TX.h"
+#include "datalink.h"
+#include "refcount.h"
 #include "config.h"
 #include "usi-structs.h"
 #include <sys/socket.h>
-
-#ifdef HAVE_LIBDNET
-#include <dnet.h>
 #include <string>
-#endif
 
 
 namespace usipp {
 
-/*!\class TX_dnet_eth
- * \brief libdnet packet socket TX provider
- * \example martian_dest_test.cc
+/*!\class TX_pcap_eth
+ * \brief libpcap packet socket TX provider (via pcap_inject())
+ * \example martian_dest_test2.cc
  */
-#ifdef HAVE_LIBDNET
 
-class TX_dnet_eth : public TX {
+class TX_pcap_eth : public TX {
 private:
 
-	eth_t *deth;
-
-	usipp::ether_header ehdr;
+	usipp::pcap *d_pcap;
+	ether_header ehdr;
 
 public:
 
-	/*! provide a dnet eth (layer 2) sender with NIC-name as argument */
-	TX_dnet_eth(const std::string &);
+	/*! provide a pcap eth (layer 2) sender with a pcap object as argument.
+	 * Does not take ownership of pcap *, so you must destroy it yourself.
+	 */
+	TX_pcap_eth(usipp::pcap *);
 
 	/*! destructor */
-	virtual ~TX_dnet_eth()
+	virtual ~TX_pcap_eth()
 	{
-		if (deth)
-			eth_close(deth);
 	}
 
 	/*! See TX::tag() */
-	virtual int tag() { return TX_TAG_DNET_ETH; }
+	virtual int tag() { return TX_TAG_PCAP_ETH; }
 
-	/*! send a packet with payload via libdnet (eth), hardware frame included */
+	/*! send a packet with payload via libpcap (eth), hardware frame included */
 	virtual int sendpack(const void *, size_t, struct sockaddr * = 0);
 
-	/*! send a packet with payload via libdnet (eth), hardware frame included */
+	/*! send a packet with payload via libpcap (eth), hardware frame included */
 	int sendpack(const std::string &);
 
 	/*! enable broadcasting of TX */
@@ -85,27 +81,6 @@ public:
 	void set_type(uint16_t);
 
 };
-#else
-
-/* dummy wrapper; its strongly recommended to install libdnet */
-class TX_dnet_eth : public TX {
-
-public:
-
-	TX_dnet_eth(const std::string &) {}
-
-	virtual int tag() { return TX_TAG_NONE; }
-
-	virtual int sendpack(const void *vp, size_t, struct sockaddr * = 0) { return -1; }
-
-	virtual int broadcast() { return -1; }
-
-	virtual int set_l2src(const std::string &) { return -1; }
-
-	virtual int set_l2dst(const std::string &) { return -1; }
-};
-
-#endif
 
 } // namespace usipp
 

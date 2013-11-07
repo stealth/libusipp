@@ -15,7 +15,7 @@ clear:
 	rm -f *.o
 
 usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o ip6.o\
-	 TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o object.o
+	 TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o TX_pcap_eth.o TX_pcap.o object.o
 	ar cr libusi++.a *.o
 	$(CC) *.o -shared -o libusi++.so
 	$(RANLIB) libusi++.a
@@ -23,6 +23,12 @@ usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o ip6.o\
 
 object.o: object.cc
 	$(CXX) $(CXXFLAGS) object.cc
+
+TX_pcap.o: TX_pcap.cc
+	$(CXX) $(CXXFLAGS) TX_pcap.cc
+
+TX_pcap_eth.o: TX_pcap_eth.cc
+	$(CXX) $(CXXFLAGS) TX_pcap_eth.cc
 
 TX_dnet_eth.o: TX_dnet_eth.cc
 	$(CXX) $(CXXFLAGS) TX_dnet_eth.cc

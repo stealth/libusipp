@@ -1,11 +1,22 @@
-/*** Some of the definitions (values and comments) are taken from LGPL'ed GNU C library.
- *** I adjusted it to my coding style and made enums from definitions.
- *** Some others are my own.
- ***
- *** THERE IS ABSOLUTELY NO WARRANTY. SO YOU USE IT AT YOUR OWN RISK.
- *** IT WAS WRITTEN IN THE HOPE THAT IT WILL BE USEFULL. I AM NOT RESPONSIBLE
- *** FOR ANY DAMAGE YOU MAYBE GET DUE TO USING MY PROGRAMS.
- ***/
+/*
+ * This file is part of the libusi++ packet capturing/sending framework.
+ *
+ * (C) 2000-2013 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
+ *
+ * libusi++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * libusi++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with psc.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef __usi_structs_h__
@@ -54,45 +65,45 @@ struct ether_header
  *	These are the defined Ethernet Protocol ID's.
  */
 enum {
-	ETH_P_LOOP =	0x0060,		// Ethernet Loopback packet
-	ETH_P_ECHO =	0x0200,		// Ethernet Echo packet
-	ETH_P_PUP  =	0x0400,		// Xerox PUP packet
-	ETH_P_IP   =	0x0800,		// Internet Protocol packet
-	ETH_P_X25  =	0x0805,		// CCITT X.25
-	ETH_P_ARP  =	0x0806,		// Address Resolution packet
-	ETH_P_BPQ  =	0x08FF,		// G8BPQ AX.25 Ethernet Packet	[ NOT AN OFFICIALLY REGISTERED ID ]
-	ETH_P_DEC  =    0x6000,         // DEC Assigned proto
-	ETH_P_DNA_DL =  0x6001,         // DEC DNA Dump/Load
-	ETH_P_DNA_RC =  0x6002,         // DEC DNA Remote Console
-	ETH_P_DNA_RT =  0x6003,         // DEC DNA Routing
-	ETH_P_LAT    =  0x6004,         // DEC LAT
-	ETH_P_DIAG   =  0x6005,         // DEC Diagnostics
-	ETH_P_CUST   =  0x6006,         // DEC Customer use
-	ETH_P_SCA    =  0x6007,         // DEC Systems Comms Arch
-	ETH_P_RARP   =  0x8035,		// Reverse Addr Res packet
-	ETH_P_ATALK  =	0x809B,		// Appletalk DDP
-	ETH_P_AARP   =	0x80F3,		// Appletalk AARP
-	ETH_P_IPX    =	0x8137,		// IPX over DIX
-	ETH_P_IPV6   =	0x86DD,		// IPv6 over bluebook
+	ETH_P_LOOP	= 0x0060,	// Ethernet Loopback packet
+	ETH_P_ECHO	= 0x0200,	// Ethernet Echo packet
+	ETH_P_PUP	= 0x0400,	// Xerox PUP packet
+	ETH_P_IP	= 0x0800,	// Internet Protocol packet
+	ETH_P_X25	= 0x0805,	// CCITT X.25
+	ETH_P_ARP	= 0x0806,	// Address Resolution packet
+	ETH_P_BPQ	= 0x08FF,	// G8BPQ AX.25 Ethernet Packet	[ NOT AN OFFICIALLY REGISTERED ID ]
+	ETH_P_DEC	= 0x6000,	// DEC Assigned proto
+	ETH_P_DNA_DL	= 0x6001,	// DEC DNA Dump/Load
+	ETH_P_DNA_RC	= 0x6002,	// DEC DNA Remote Console
+	ETH_P_DNA_RT	= 0x6003,	// DEC DNA Routing
+	ETH_P_LAT	= 0x6004,	// DEC LAT
+	ETH_P_DIAG	= 0x6005,	// DEC Diagnostics
+	ETH_P_CUST	= 0x6006,	// DEC Customer use
+	ETH_P_SCA	= 0x6007,	// DEC Systems Comms Arch
+	ETH_P_RARP	= 0x8035,	// Reverse Addr Res packet
+	ETH_P_ATALK	= 0x809B,	// Appletalk DDP
+	ETH_P_AARP	= 0x80F3,	// Appletalk AARP
+	ETH_P_IPX	= 0x8137,	// IPX over DIX
+	ETH_P_IPV6	= 0x86DD,	// IPv6 over bluebook
 
 /*
  *	Non DIX types. Won't clash for 1500 types.
  */
 
-	ETH_P_802_3  =	0x0001,		// Dummy type for 802.3 frames
-	ETH_P_AX25   =	0x0002,		// Dummy protocol id for AX.25
-	ETH_P_ALL    =	0x0003,		// Every packet (be careful!!!)
-	ETH_P_802_2  =	0x0004,		// 802.2 frames
-	ETH_P_SNAP   =	0x0005,		// Internal only
-	ETH_P_DDCMP  =   0x0006,        // DEC DDCMP: Internal only
-	ETH_P_WAN_PPP =  0x0007,        // Dummy type for WAN PPP frames
-	ETH_P_PPP_MP  =  0x0008,        // Dummy type for PPP MP frames
+	ETH_P_802_3	= 0x0001,	// Dummy type for 802.3 frames
+	ETH_P_AX25	= 0x0002,	// Dummy protocol id for AX.25
+	ETH_P_ALL	= 0x0003,	// Every packet (be careful!!!)
+	ETH_P_802_2	= 0x0004,	// 802.2 frames
+	ETH_P_SNAP	= 0x0005,	// Internal only
+	ETH_P_DDCMP	= 0x0006,	// DEC DDCMP: Internal only
+	ETH_P_WAN_PPP	= 0x0007,	// Dummy type for WAN PPP frames
+	ETH_P_PPP_MP	= 0x0008,	// Dummy type for PPP MP frames
 	ETH_P_LOCALTALK = 0x0009,	// Localtalk pseudo type
-	ETH_P_PPPTALK =	0x0010,		// Dummy type for Atalk over PPP
-	ETH_P_TR_802_2 = 0x0011,	// 802.2 frames
-	ETH_P_MOBITEX =	0x0015,		// Mobitex (kaz@cafe.net)
-	ETH_P_CONTROL =	0x0016,		// Card specific control frames
-	ETH_P_IRDA   =	0x0017		// Linux/IR
+	ETH_P_PPPTALK	= 0x0010,	// Dummy type for Atalk over PPP
+	ETH_P_TR_802_2	= 0x0011,	// 802.2 frames
+	ETH_P_MOBITEX	= 0x0015,	// Mobitex (kaz@cafe.net)
+	ETH_P_CONTROL	= 0x0016,	// Card specific control frames
+	ETH_P_IRDA	= 0x0017	// Linux/IR
 };
 
 
@@ -534,11 +545,11 @@ struct pseudohdr6 {
 
 
 enum {
-	NEXT_HDR_HBH  =	0,		// hop by hop
-	NEXT_HDR_RH   =	43,		// routing header
-	NEXT_HDR_FH   =	44,		// fragmentation header
-	NEXT_HDR_DOH  =	60,		// destination option
-	NEXT_HDR_MOB  =	135		// mobility header
+	NEXT_HDR_HBH	= 0,		// hop by hop
+	NEXT_HDR_RH	= 43,		// routing header
+	NEXT_HDR_FH	= 44,		// fragmentation header
+	NEXT_HDR_DOH	= 60,		// destination option
+	NEXT_HDR_MOB	= 135		// mobility header
 };
 
 
@@ -549,16 +560,52 @@ struct ip6_opt {
 
 
 enum {
-	TX_TAG_NONE = 0,
-	RX_TAG_NONE = 0,
+	TX_TAG_NONE	= 0,
+	RX_TAG_NONE	= 0,
 
-	TX_TAG_IP = 0x1000,
+	TX_TAG_IP	= 0x1000,
 	TX_TAG_IP6,
 	TX_TAG_DNET_IP,
 	TX_TAG_DNET_ETH,
+	TX_TAG_PCAP,
+	TX_TAG_PCAP_ETH,
 
-	RX_TAG_PCAP = 0x2000
+	RX_TAG_PCAP	= 0x2000
 };
+
+
+enum {
+	IPPROTO_IP		= 0,
+	IPPROTO_HOPOPTS		= 0,		/* IPv6 Hop-by-Hop options.  */
+	IPPROTO_ICMP		= 1,		/* Internet Control Message Protocol.  */
+	IPPROTO_IGMP		= 2,		/* Internet Group Management Protocol. */
+	IPPROTO_IPIP		= 4,		/* IPIP tunnels (older KA9Q tunnels use 94).  */
+	IPPROTO_TCP		= 6,		/* Transmission Control Protocol.  */
+	IPPROTO_EGP		= 8,		/* Exterior Gateway Protocol.  */
+	IPPROTO_PUP		= 12,		/* PUP protocol.  */
+	IPPROTO_UDP		= 17,		/* User Datagram Protocol.  */
+	IPPROTO_IDP		= 22,		/* XNS IDP protocol.  */
+	IPPROTO_TP		= 29,		/* SO Transport Protocol Class 4.  */
+	IPPROTO_DCCP		= 33,		/* Datagram Congestion Control Protocol.  */
+	IPPROTO_IPV6		= 41,		/* IPv6 header.  */
+	IPPROTO_ROUTING		= 43,		/* IPv6 routing header.  */
+	IPPROTO_FRAGMENT	= 44,		/* IPv6 fragmentation header.  */
+	IPPROTO_RSVP		= 46,		/* Reservation Protocol.  */
+	IPPROTO_GRE		= 47,		/* General Routing Encapsulation.  */
+	IPPROTO_ESP		= 50,		/* encapsulating security payload.  */
+	IPPROTO_AH		= 51,		/* authentication header.  */
+	IPPROTO_ICMPV6		= 58,		/* ICMPv6.  */
+	IPPROTO_NONE		= 59,		/* IPv6 no next header.  */
+	IPPROTO_DSTOPTS		= 60,		/* IPv6 destination options.  */
+	IPPROTO_MTP		= 92,		/* Multicast Transport Protocol.  */
+	IPPROTO_ENCAP		= 98,		/* Encapsulation Header.  */
+	IPPROTO_PIM		= 103,		/* Protocol Independent Multicast.  */
+	IPPROTO_COMP		= 108,		/* Compression Header Protocol.  */
+	IPPROTO_SCTP		= 132,		/* Stream Control Transmission Protocol.  */
+	IPPROTO_UDPLITE		= 136,		/* UDP-Lite protocol.  */
+	IPPROTO_RAW		= 255		/* Raw IP packets.  */
+};
+
 
 
 } // namespace usipp

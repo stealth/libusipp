@@ -39,6 +39,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
+/* Define to 1 if you have the `pcap_inject' function. */
+#undef HAVE_PCAP_INJECT
+
 /* Define if radiotap exists. */
 #undef HAVE_RADIOTAP
 

@@ -27,10 +27,8 @@ int main(int argc, char **argv)
 	icmp.set_src(argv[3]);
 
 	// We registered a non-IP layer TX provider which cannot
-	// know about checksums, so we could force IP class calculate it before
-	// passing it to TX. However, not really necessary to explicitely call
-	// this, as IP class detects non-RAW socket TX providers itself.
-	//icmp.checksum();
+	// know about checksums, so let calculate it by IP class
+	icmp.checksum(1);
 	icmp.register_tx(eth);
 
 	icmp.set_type(ICMP_ECHO);
