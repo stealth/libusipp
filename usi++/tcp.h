@@ -26,7 +26,8 @@
 #include "datalink.h"
 #include "ip.h"
 #include "ip6.h"
-
+#include "RX.h"
+#include "TX.h"
 
 #include <string>
 #include <stdint.h>
@@ -46,7 +47,7 @@ public:
 
 	/*! Construct a TCP object destinated to a hostname (FQDN or or IP-address string).
 	 */
-	TCP(const std::string &);
+	TCP(const std::string &, RX *rx = NULL, TX *tx = NULL);
 
 	/*! destructor
 	 */

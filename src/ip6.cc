@@ -41,8 +41,8 @@ namespace usipp {
 
 using namespace std;
 
-IP6::IP6(const struct in6_addr &in6, uint8_t proto)
-	: Layer2(NULL, d_tx = new TX_IP6)
+IP6::IP6(const struct in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
+	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
 {
 	memset(&iph, 0, sizeof(iph));
 	memset(&d_pseudo, 0, sizeof(d_pseudo));
@@ -56,8 +56,8 @@ IP6::IP6(const struct in6_addr &in6, uint8_t proto)
 }
 
 
-IP6::IP6(const string &hostname, uint8_t proto)
-	: Layer2(NULL, new TX_IP6)
+IP6::IP6(const string &hostname, uint8_t proto, RX *rx, TX *tx)
+	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
 {
 	memset(&iph, 0, sizeof(iph));
 	memset(&d_pseudo, 0, sizeof(d_pseudo));

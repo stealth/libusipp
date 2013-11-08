@@ -38,8 +38,8 @@ namespace usipp {
 using namespace std;
 
 
-ICMP6::ICMP6(const string &dst)
-	: IP6(dst, IPPROTO_ICMPV6)
+ICMP6::ICMP6(const string &dst, RX *rx, TX *tx)
+	: IP6(dst, IPPROTO_ICMPV6, rx, tx)
 {
 	memset(&icmp6hdr, 0, sizeof(icmp6hdr));
 }

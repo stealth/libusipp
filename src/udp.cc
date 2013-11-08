@@ -21,6 +21,8 @@
 
 #include "usi++/usi++.h"
 #include "usi++/udp.h"
+#include "usi++/RX.h"
+#include "usi++/TX.h"
 
 #include <cstring>
 #include <string>
@@ -40,8 +42,8 @@ using namespace std;
 
 
 template<typename T>
-UDP<T>::UDP(const string &host)
-      : T(host, IPPROTO_UDP)
+UDP<T>::UDP(const string &host, RX *rx, TX *tx)
+      : T(host, IPPROTO_UDP, rx, tx)
 {
 	memset(&d_udph, 0, sizeof(d_udph));
 }

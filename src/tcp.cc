@@ -21,6 +21,8 @@
 
 #include "usi++/usi++.h"
 #include "usi++/tcp.h"
+#include "usi++/RX.h"
+#include "usi++/TX.h"
 
 #include <cstring>
 #include <string>
@@ -38,8 +40,8 @@ using namespace std;
 
 /*! create a TCP object destined to 'host' */
 template<typename T>
-TCP<T>::TCP(const string &host)
-     : T(host, IPPROTO_TCP)
+TCP<T>::TCP(const string &host, RX *rx, TX *tx)
+     : T(host, IPPROTO_TCP, rx, tx)
 {
 	srand(time(NULL));
 	memset(&tcph, 0, sizeof(tcph));

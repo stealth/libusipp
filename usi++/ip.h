@@ -25,6 +25,8 @@
 #include "datalink.h"
 #include "object.h"
 #include "Layer2.h"
+#include "RX.h"
+#include "TX.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
@@ -57,14 +59,14 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP(const std::string &dst, uint8_t);
+	IP(const std::string &dst, uint8_t, RX *rx = NULL, TX *tx = NULL);
 
 	/*! Construct an IP object. Requires destination address as
 	 *  32bit network ordered integer and a protocol. Tries to set source
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP(uint32_t dst, uint8_t);
+	IP(uint32_t dst, uint8_t, RX *rx = NULL, TX *tx = NULL);
 
 	/*! Destructor
 	 */

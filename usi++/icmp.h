@@ -18,12 +18,15 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ICMP_H_
-#define _ICMP_H_
+#ifndef __icmp_h__
+#define __icmp_h__
 
 #include "usi-structs.h"
 #include "datalink.h"
 #include "ip.h"
+#include "RX.h"
+#include "TX.h"
+
 #include <string>
 #include <stdint.h>
 
@@ -43,7 +46,7 @@ private:
 public:
 	/*! Expects host.
 	 */
-	ICMP(const std::string &);
+	ICMP(const std::string &, RX *rx = NULL, TX *tx = NULL);
 
 	virtual ~ICMP();
 

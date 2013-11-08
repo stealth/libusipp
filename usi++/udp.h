@@ -29,6 +29,9 @@
 #include "datalink.h"
 #include "ip6.h"
 #include "ip.h"
+#include "RX.h"
+#include "TX.h"
+
 
 namespace usipp {
 
@@ -45,7 +48,7 @@ public:
 
 	/*! Construct an UDP object, destinated to a host (FQDN or IP string).
 	 */
-	UDP(const std::string &);
+	UDP(const std::string &, RX *rx = NULL, TX *tx = NULL);
 
 	/*! Destructor
 	 */

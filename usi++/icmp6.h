@@ -25,6 +25,8 @@
 #include "datalink.h"
 #include "Layer2.h"
 #include "ip6.h"
+#include "RX.h"
+#include "TX.h"
 
 #include <string>
 #include <stdint.h>
@@ -43,7 +45,7 @@ private:
 
 public:
 	/*! create a new ICMP6 object to destination dst */
-	ICMP6(const std::string &dst);
+	ICMP6(const std::string &dst, RX *rx = NULL, TX *tx = NULL);
 
 	virtual ~ICMP6();
 

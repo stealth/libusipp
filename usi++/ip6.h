@@ -24,6 +24,8 @@
 #include "usi-structs.h"
 #include "datalink.h"
 #include "Layer2.h"
+#include "RX.h"
+#include "TX.h"
 
 #include <string>
 #include <stdint.h>
@@ -45,7 +47,7 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP6(const struct in6_addr &dst, uint8_t proto);
+	IP6(const struct in6_addr &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
 
 	/*! New IP6 packet with destination address (hostname or IP6 string)
 	 *  and next-header 'proto'.
@@ -53,7 +55,7 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP6(const std::string &dst, uint8_t proto);
+	IP6(const std::string &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
 
 	/*! Copy constructor */
 	IP6(const IP6&);

@@ -49,8 +49,8 @@ using namespace std;
  *  The constructor assigns most of the IP header information
  *  with usable data by itself (IP version, TTL etc).
  */
-IP::IP(const string &dst, uint8_t proto)
-   	: Layer2()
+IP::IP(const string &dst, uint8_t proto, RX *rx, TX *tx)
+   	: Layer2(rx, tx)
 {
 	memset(&iph, 0, sizeof(iph));
 	memset(ipOptions, 0, sizeof(ipOptions));
@@ -77,8 +77,8 @@ IP::IP(const string &dst, uint8_t proto)
 /*  Same as above, but use networkbyte-ordered int32 for destination-adress.
  *  This is usefull in case you do sth. like ip.set_src(ip2.get_src())
  */
-IP::IP(uint32_t dst, uint8_t proto)
-   	: Layer2()
+IP::IP(uint32_t dst, uint8_t proto, RX *rx, TX *tx)
+   	: Layer2(rx, tx)
 {
    	memset(&iph, 0, sizeof(iph));
 	memset(ipOptions, 0, sizeof(ipOptions));

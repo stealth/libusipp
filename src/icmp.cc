@@ -37,8 +37,8 @@ namespace usipp {
 using namespace std;
 
 
-ICMP::ICMP(const string &host)
-      : IP(host, IPPROTO_ICMP)
+ICMP::ICMP(const string &host, RX *rx, TX *tx)
+      : IP(host, IPPROTO_ICMP, rx, tx)
 {
 	// clear memory
 	memset(&icmphdr, 0, sizeof(icmphdr));
