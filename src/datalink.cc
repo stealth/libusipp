@@ -397,6 +397,9 @@ int pcap::sniffpack(void *s, size_t len)
 
 	while (pcap_dispatch(d_pd, 1, one_packet, reinterpret_cast<unsigned char *>(this)) != 1);
 
+	if (d_packet == NULL)
+		return die("pcap::sniffpack: Packet returned is NULL.", STDERR, -1);
+
 	// The pcap source code reads as pcap_next() requires additional copy
 	// operations, so it might be noticable slower on GBit links.
 	// So use pcap_dispatch() for now.
