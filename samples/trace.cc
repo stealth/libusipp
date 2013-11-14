@@ -121,7 +121,7 @@ int tcp_trace(const string &dst, const string &src, const string &dev, int port)
 		tcp.sendpack("");
 		sn.sniffpack(NULL, 0);
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
-		if (sn.get_proto() == IPPROTO_TCP)
+		if (sn.get_proto() == usipp::IPPROTO_TCP)
 			break;
 	}
 	return 0;

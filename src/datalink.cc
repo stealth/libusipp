@@ -52,6 +52,7 @@ pcap::pcap()
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
+	d_packet = NULL;
 	memset(&d_ether, 0, sizeof(d_ether));
 }
 
@@ -72,6 +73,7 @@ pcap::pcap(const string &filterStr)
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
+	d_packet = NULL;
 	memset(&d_ether, 0, sizeof(d_ether));
 }
 
@@ -104,6 +106,8 @@ pcap::pcap(const pcap &rhs)
 	d_localnet = rhs.d_localnet;
 	d_netmask = rhs.d_netmask;
 
+	d_packet = NULL;
+
 	if (rhs.d_pd)
 		init_device(d_dev, d_has_promisc, d_snaplen);
 
@@ -131,6 +135,8 @@ pcap &pcap::operator=(const pcap &rhs)
 
 	d_localnet = rhs.d_localnet;
 	d_netmask = rhs.d_netmask;
+
+	d_packet = NULL;
 
 	if (rhs.d_pd) {
 		if (d_pd)
@@ -347,9 +353,18 @@ string &pcap::sniffpack(string &s)
 }
 
 
+void one_packet(unsigned char *user, const struct pcap_pkthdr *h, const unsigned char *bytes)
+{
+	// "this"
+	pcap *p = reinterpret_cast<pcap *>(user);
+	p->d_packet = reinterpret_cast<const char *>(bytes);
+	memcpy(&p->d_phdr, h, sizeof(*h));
+}
+
+
 int pcap::sniffpack(void *s, size_t len)
 {
-   	char *tmp;
+	d_packet = NULL;
 
 	memset(s, 0, len);
 
@@ -380,19 +395,24 @@ int pcap::sniffpack(void *s, size_t len)
 		}
 	}
 
-	while ((tmp = (char*)pcap_next(d_pd, &d_phdr)) == NULL);
+	while (pcap_dispatch(d_pd, 1, one_packet, reinterpret_cast<unsigned char *>(this)) != 1);
+
+	// The pcap source code reads as pcap_next() requires additional copy
+	// operations, so it might be noticable slower on GBit links.
+	// So use pcap_dispatch() for now.
+	//while ((d_packet = (char*)pcap_next(d_pd, &d_phdr)) == NULL);
 
 	uint16_t cooked_hdr = 0;
 
 	switch (d_datalink) {
 	case DLT_EN10MB:
-		memcpy(&d_ether, tmp, d_framelen);
+		memcpy(&d_ether, d_packet, d_framelen);
 		break;
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
-		cooked_hdr = ((ieee80211_radiotap_header *)tmp)->len;
-		d_cooked = string(tmp, cooked_hdr);
-		memcpy(&d_80211, tmp + cooked_hdr, d_framelen);
+		cooked_hdr = ((ieee80211_radiotap_header *)d_packet)->len;
+		d_cooked = string(d_packet, cooked_hdr);
+		memcpy(&d_80211, d_packet + cooked_hdr, d_framelen);
 		break;
 #endif
 	case DLT_PPP:
@@ -415,7 +435,7 @@ int pcap::sniffpack(void *s, size_t len)
 #endif
 
 	// d_framelen was already calculated by init_device
-	memcpy(s, tmp + cooked_hdr + d_framelen,
+	memcpy(s, d_packet + cooked_hdr + d_framelen,
 	       d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len);
 	return d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len;
 }

@@ -71,6 +71,7 @@ private:
 	// true when timed out
 	bool d_timeout;
 
+	const char *d_packet;
 
 protected:
 
@@ -177,6 +178,8 @@ public:
 	 */
 	int get_framelen();
 
+	/* for pacp_dispatch */
+	friend void one_packet(unsigned char *, const struct pcap_pkthdr *, const unsigned char *);
 
 }; // class pcap {}
 
