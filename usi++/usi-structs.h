@@ -40,7 +40,8 @@ namespace usipp {
 enum  {
 	max_buffer_len = 0x1000000,
 	MAXHOSTLEN = 1000,
-	ETH_ALEN = 6
+	ETH_ALEN = 6,
+	ETH_A_LEN = 6
 };
 
 
@@ -500,39 +501,119 @@ struct icmp6_hdr {
 #endif
 
 
+// icmp6 types and options
 enum {
-	ICMP6_DST_UNREACH       =      1,
-	ICMP6_PACKET_TOO_BIG    =      2,
-	ICMP6_TIME_EXCEEDED     =      3,
-	ICMP6_PARAM_PROB        =      4,
+	ICMP6_DST_UNREACH	=      1,
+	ICMP6_PACKET_TOO_BIG	=      2,
+	ICMP6_TIME_EXCEEDED	=      3,
+	ICMP6_PARAM_PROB	=      4,
 
-	ICMP6_INFOMSG_MASK  = 0x80,    		// all informational messages
+	ICMP6_INFOMSG_MASK	=	0x80,		// all informational messages
 
-	ICMP6_ECHO_REQUEST    =      128,
-	ICMP6_ECHO_REPLY      =      129,
-	ICMP6_MEMBERSHIP_QUERY   =   130,
-	ICMP6_MEMBERSHIP_REPORT  =   131,
-	ICMP6_MEMBERSHIP_REDUCTION =  132,
+	ICMP6_ECHO_REQUEST	=	128,
+	ICMP6_ECHO_REPLY	=	129,
+	ICMP6_MEMBERSHIP_QUERY	=	130,
+	ICMP6_MEMBERSHIP_REPORT	=	131,
+	ICMP6_MEMBERSHIP_REDUCTION	=	132,
 
-	ICMP6_DST_UNREACH_NOROUTE  =   0,	// no route to destination
-	ICMP6_DST_UNREACH_ADMIN    =   1,	// communication with destination
-                                        	// administratively prohibited
-	ICMP6_DST_UNREACH_NOTNEIGHBOR =  2,	// not a neighbor
-	ICMP6_DST_UNREACH_ADDR    =    3,	// address unreachable
-	ICMP6_DST_UNREACH_NOPORT  =    4,	// bad port
+	ICMP6_DST_UNREACH_NOROUTE	= 	0,	// no route to destination
+	ICMP6_DST_UNREACH_ADMIN		=	1,	// communication with destination
+                                        		// administratively prohibited
+	ICMP6_DST_UNREACH_NOTNEIGHBOR	= 	2,	// not a neighbor
+	ICMP6_DST_UNREACH_ADDR		=	3,	// address unreachable
+	ICMP6_DST_UNREACH_NOPORT	=	4,	// bad port
 
-	ICMP6_TIME_EXCEED_TRANSIT =    0,	// Hop Limit == 0 in transit
-	ICMP6_TIME_EXCEED_REASSEMBLY = 1,	// Reassembly time out
+	ICMP6_TIME_EXCEED_TRANSIT	=	0,	// Hop Limit == 0 in transit
+	ICMP6_TIME_EXCEED_REASSEMBLY	=	1,	// Reassembly time out
 
-	ICMP6_PARAMPROB_HEADER    =    0,	// erroneous header field
-	ICMP6_PARAMPROB_NEXTHEADER=    1,	// unrecognized Next Header
-	ICMP6_PARAMPROB_OPTION    =    2,	// unrecognized IPv6 option
+	ICMP6_PARAMPROB_HEADER		=	0,	// erroneous header field
+	ICMP6_PARAMPROB_NEXTHEADER	=	1,	// unrecognized Next Header
+	ICMP6_PARAMPROB_OPTION		=	2,	// unrecognized IPv6 option
 
-	ND_ROUTER_SOLICIT     =      133,
-	ND_ROUTER_ADVERT      =      134,
-	ND_NEIGHBOR_SOLICIT   =      135,
-	ND_NEIGHBOR_ADVERT    =      136,
-	ND_REDIRECT           =      137
+	ICMP6_ND_ROUTER_SOLICIT		=	133,
+	ICMP6_ND_ROUTER_ADVERT		=	134,
+	ICMP6_ND_NEIGHBOR_SOLICIT	=	135,
+	ICMP6_ND_NEIGHBOR_ADVERT	=	136,
+	ICMP6_ND_REDIRECT		=	137,
+
+	ND_OPT_SOURCE_LL_ADDR	=	1,
+	ND_OPT_TARGET_LL_ADDR	=	2,
+	ND_OPT_PREFIX_INFO	=	3,
+	ND_OPT_REDIRECT_HDR	=	4,
+	ND_OPT_MTU		=	5,
+	ND_OPT_ROUTE_INFO	=	24,
+	ND_OPT_RDNSS		=	25,
+	ND_OPT_DNSSL		=	31
+};
+
+
+// RFC 6106 recursive DNS server option
+struct icmp6_rdns_opt {
+	uint8_t type;
+	uint8_t len;
+	uint16_t reserved;
+	uint16_t lifetime;
+	in6_addr addr[1];	// one or more addresses
+} __attribute__((packed));
+
+
+// RFC 6106 domain name search list
+struct icmp6_domain_opt {
+	uint8_t type;
+	uint8_t len;
+	uint16_t reserved;
+	uint16_t lifetime;
+	// encoded domain goes here
+	unsigned char domain[0];
+} __attribute__((packed));
+
+
+// RFC 2461 router advertisement
+struct icmp6_ra {
+	uint32_t time1, time2;
+	// options go here
+} __attribute__((packed));
+
+
+// RFC 2461 source link layer address option
+struct icmp6_sll_opt {
+	uint8_t type;
+	uint8_t len;
+	unsigned char address[0];
+} __attribute__((packed));
+
+
+// RFC 2461 prefix info option
+struct icmp6_prefix_opt {
+	uint8_t type;
+	uint8_t len;
+	uint8_t plen;
+	uint8_t flags;
+	uint32_t vtime;
+	uint32_t lifetime;
+	uint32_t reserved;
+	// one or more
+	in6_addr prefix[1];
+} __attribute__((packed));
+
+
+// RFC 2461 MTU option
+struct icmp6_mtu_opt {
+	uint8_t type;
+	uint8_t len;
+	uint16_t reserved;
+	uint32_t mtu;
+} __attribute__((packed));
+
+
+// RFC 4191 route info option
+struct icmp6_ri_opt {
+	uint8_t type;
+	uint8_t len;
+	uint8_t plen;
+	uint8_t flags;
+	uint32_t lifetime;
+	unsigned char prefix[0];
 };
 
 

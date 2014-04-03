@@ -3,7 +3,7 @@
 
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
-CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c
+CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c -ansi -std=c++11
 CXX=@CXX@
 CC=@CC@
 INSTALL=@INSTALL@
