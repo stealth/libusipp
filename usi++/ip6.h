@@ -105,6 +105,9 @@ public:
 	/*! Get payload len in host byte order */
 	uint16_t get_payloadlen();
 
+	/*! Set payload len */
+	uint16_t set_payloadlen(uint16_t);
+
 	/*! Clear all IP6 extension headers, if any. Resets next header
 	 *  field of IP6 header to the original Upper Layer value given during
 	 *  object construction.

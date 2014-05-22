@@ -70,8 +70,8 @@ int TX_IP6::broadcast()
 			return die("TX_IP6::sendpack::socket", PERROR, errno);
 
 		// let us write IP-headers
-		if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
-			return die("TX_IP6::sendpack::setsockopt", PERROR, errno);
+		//if (setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
+		//	return die("TX_IP6::sendpack::setsockopt", PERROR, errno);
 	}
 
 	if (setsockopt(rawfd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one)) < 0)

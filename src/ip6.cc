@@ -202,6 +202,12 @@ uint16_t IP6::get_payloadlen()
 }
 
 
+uint16_t IP6::set_payloadlen(uint16_t l)
+{
+	return htons(iph.payload_len = l);
+}
+
+
 int IP6::sendpack(const string &s)
 {
 	return sendpack(s.c_str(), s.size());
