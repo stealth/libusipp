@@ -552,7 +552,7 @@ struct icmp6_rdns_opt {
 	uint8_t type;
 	uint8_t len;
 	uint16_t reserved;
-	uint16_t lifetime;
+	uint32_t lifetime;
 	in6_addr addr[1];	// one or more addresses
 } __attribute__((packed));
 
@@ -562,7 +562,7 @@ struct icmp6_domain_opt {
 	uint8_t type;
 	uint8_t len;
 	uint16_t reserved;
-	uint16_t lifetime;
+	uint32_t lifetime;
 	// encoded domain goes here
 	unsigned char domain[0];
 } __attribute__((packed));
