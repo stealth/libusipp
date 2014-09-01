@@ -117,11 +117,11 @@ public:
 	uint32_t get_src();
 
 	/*! Get destination address of packet in network order.
- 	 */
+	 */
 	uint32_t get_dst();
 
 	/*! assingment operator
- 	 */
+	 */
 	IP &operator=(const IP&);
 
 	/*! copy constructor

@@ -30,7 +30,7 @@
 #include <string>
 
 
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 namespace usipp {
 
@@ -43,14 +43,14 @@ namespace usipp {
  */
 class ARP : public Layer2 {
 private:
-   	struct arphdr arphdr;
+	struct arphdr arphdr;
 	TX_dnet_eth *d_tx;
 public:
 
 	/*! Open device 'dev' for packet-capturing (ARP-packets)
 	 *  ARP-objects don't need to call init_device().
 	 */
-   	ARP(const std::string &);
+	ARP(const std::string &);
 
 	virtual ~ARP();
 
@@ -58,7 +58,7 @@ public:
 	uint16_t get_op() const;
 
 	/*! Set the ARP-command.
- 	 */
+	*/
 	uint16_t set_op(uint16_t op) { arphdr.ar_op = htons(op); return op; }
 
 	/*! Get format of hardware address */

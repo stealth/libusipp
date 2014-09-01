@@ -29,6 +29,8 @@
 
 #ifdef HAVE_LIBDNET
 #include <dnet.h>
+#elif HAVE_LIBDUMBNET
+#include <dumbnet.h>
 #endif
 
 
@@ -38,7 +40,7 @@ namespace usipp {
  *  \brief libdnet raw socket TX provider
  *  \example synping.cc
  */
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 class TX_dnet_ip : public TX {
 private:

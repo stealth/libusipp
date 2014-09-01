@@ -34,7 +34,7 @@ namespace usipp {
 
 using namespace std;
 
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 ARP::ARP(const string &dev)
 	: Layer2(NULL, d_tx = new TX_dnet_eth(dev))

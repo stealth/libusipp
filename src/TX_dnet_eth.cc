@@ -29,7 +29,7 @@
 
 namespace usipp {
 
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 using namespace std;
 

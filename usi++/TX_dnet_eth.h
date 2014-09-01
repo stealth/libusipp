@@ -25,10 +25,12 @@
 #include "config.h"
 #include "usi-structs.h"
 #include <sys/socket.h>
+#include <string>
 
 #ifdef HAVE_LIBDNET
 #include <dnet.h>
-#include <string>
+#elif HAVE_LIBDUMBNET
+#include <dumbnet.h>
 #endif
 
 
@@ -38,7 +40,7 @@ namespace usipp {
  * \brief libdnet packet socket TX provider
  * \example martian_dest_test.cc
  */
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 class TX_dnet_eth : public TX {
 private:

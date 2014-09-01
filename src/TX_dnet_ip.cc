@@ -27,7 +27,7 @@
 
 namespace usipp {
 
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 TX_dnet_ip::TX_dnet_ip()
 {
