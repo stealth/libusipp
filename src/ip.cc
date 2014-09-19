@@ -80,7 +80,7 @@ IP::IP(const string &dst, uint8_t proto, RX *rx, TX *tx)
 IP::IP(uint32_t dst, uint8_t proto, RX *rx, TX *tx)
    	: Layer2(rx, tx)
 {
-   	memset(&iph, 0, sizeof(iph));
+	memset(&iph, 0, sizeof(iph));
 	memset(ipOptions, 0, sizeof(ipOptions));
 	memset(&d_pseudo, 0, sizeof(d_pseudo));
 
@@ -158,7 +158,7 @@ uint8_t IP::set_hlen(uint8_t l)
  */
 uint8_t IP::get_vers()
 {
-   	return iph.version;
+	return iph.version;
 }
 
 
@@ -166,21 +166,21 @@ uint8_t IP::get_vers()
  */
 uint8_t IP::set_vers(uint8_t v)
 {
-   	return iph.version = v;
+	return iph.version = v;
 }
 
 
 /*! get TOS field */
 uint8_t IP::get_tos()
 {
-   	return iph.tos;
+	return iph.tos;
 }
 
 
 /*! set TOS field */
 uint8_t IP::set_tos(uint8_t tos)
 {
-   	return iph.tos = tos;
+	return iph.tos = tos;
 }
 
 
@@ -188,7 +188,7 @@ uint8_t IP::set_tos(uint8_t tos)
  */
 uint16_t IP::get_totlen()
 {
-   	return ntohs(iph.tot_len);
+	return ntohs(iph.tot_len);
 }
 
 
@@ -211,7 +211,7 @@ uint16_t IP::set_totlen(uint16_t t)
  */
 uint16_t IP::get_id()
 {
-   	return ntohs(iph.id);
+	return ntohs(iph.id);
 }
 
 
@@ -219,7 +219,7 @@ uint16_t IP::get_id()
  */
 uint16_t IP::set_id(uint16_t id)
 {
-   	iph.id = htons(id);
+	iph.id = htons(id);
 	return id;
 }
 
@@ -250,7 +250,7 @@ int IP::set_options(const string &op)
 /*! get the IP-fragmentation offset */
 uint16_t IP::get_fragoff()
 {
-   	return ntohs(iph.frag_off);
+	return ntohs(iph.frag_off);
 }
 
 
@@ -260,7 +260,7 @@ uint16_t IP::set_fragoff(uint16_t f)
 #ifdef BROKEN_BSD
 	return iph.frag_off = f;
 #else
-   	iph.frag_off = htons(f);
+	iph.frag_off = htons(f);
 	return f;
 #endif
 }
@@ -270,7 +270,7 @@ uint16_t IP::set_fragoff(uint16_t f)
  */
 uint8_t IP::get_ttl()
 {
-   	return iph.ttl;
+	return iph.ttl;
 }
 
 
@@ -278,7 +278,7 @@ uint8_t IP::get_ttl()
  */
 uint8_t IP::set_ttl(uint8_t ttl)
 {
-   	return iph.ttl = ttl;
+	return iph.ttl = ttl;
 }
 
 
@@ -286,7 +286,7 @@ uint8_t IP::set_ttl(uint8_t ttl)
  */
 uint8_t IP::get_proto()
 {
-   	return iph.protocol;
+	return iph.protocol;
 }
 
 
@@ -303,7 +303,7 @@ uint8_t IP::set_proto(uint8_t p)
  */
 uint16_t IP::get_sum()
 {
-   	return iph.check;
+	return iph.check;
 }
 
 
@@ -314,7 +314,7 @@ uint16_t IP::get_sum()
 uint16_t IP::set_sum(uint16_t sum)
 {
 	calc_csum = 0;
-   	return iph.check = sum;
+	return iph.check = sum;
 }
 
 
@@ -345,7 +345,7 @@ string &IP::get_dst(string &s)
  */
 uint32_t IP::get_src()
 {
-   	return iph.saddr;
+	return iph.saddr;
 }
 
 
@@ -366,7 +366,7 @@ string &IP::get_src(string &s)
  */
 uint32_t IP::set_src(uint32_t s)
 {
-   	return iph.saddr = s;
+	return iph.saddr = s;
 }
 
 
@@ -374,7 +374,7 @@ uint32_t IP::set_src(uint32_t s)
  */
 int IP::set_src(const string &host)
 {
-   	struct hostent *he;
+	struct hostent *he;
 
 	if ((he = gethostbyname(host.c_str())) == NULL)
 		return die("IP::set_src::gethostbyname:", RETURN, h_errno);
@@ -522,7 +522,7 @@ int IP::sniffpack(void *buf, size_t len)
 	 */
 	while (i == NULL) {
 		memset(tmp, 0, xlen);
-	   	if ((r = Layer2::sniffpack(tmp, xlen)) == 0 &&
+		if ((r = Layer2::sniffpack(tmp, xlen)) == 0 &&
 		    Layer2::timeout()) {
 			delete [] tmp;
 			return 0;	// timeout
@@ -597,7 +597,7 @@ int IP::init_device(const string &dev, int promisc, size_t snaplen)
  */
 char *IP::reassemble(char *packet, int len, int *resultLen)
 {
-   	static vector<fragments*> pending;
+	static vector<fragments*> pending;
 	fragments *f = NULL;
 	int ihl = 0, xlen = 0, offset = 0;
 	unsigned int i = 0;
@@ -631,7 +631,7 @@ char *IP::reassemble(char *packet, int len, int *resultLen)
 		if (f == NULL) {
 			f = new fragments;
 			f->id = ntohs(ip->id);
-	 		f->data = new char[len + ihl];
+			f->data = new char[len + ihl];
 			f->len = 0;			// # of bytes that are captured yet
 			f->origLen = 0xffff;		// # of bytes IP-packet once contained
 			f->userLen = 0;			// # of bytes saved

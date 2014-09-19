@@ -183,6 +183,7 @@ string &pcap::get_l2src(string &hwaddr)
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		hwaddr = string(reinterpret_cast<char *>(d_ether.ether_shost), ETH_ALEN);
+		break;
 	default:
 		hwaddr = "";
 	}
@@ -199,6 +200,7 @@ string &pcap::get_l2dst(string &hwaddr)
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		hwaddr = string(reinterpret_cast<char *>(d_ether.ether_dhost), ETH_ALEN);
+		break;
 	default:
 		hwaddr = "";
 	}
