@@ -3,6 +3,7 @@
 /* Output looks similar to tcpdump -p arp
  */
 #include <usi++/usi++.h>
+#include <string>
 #include <cstring>
 #include <iostream>
 
@@ -20,12 +21,17 @@ char *print_mac(unsigned char *mac)
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
 	usipp::ether_arp ea;
-   	ARP *a = new ARP("eth0");
 
-	if (a->init_device("eth0", 1, 100) < 0) {
+	string dev = "eth0";
+	if (argc > 1)
+		dev = argv[1];
+
+	ARP *a = new ARP(dev);
+
+	if (a->init_device(dev, 1, 100) < 0) {
 		cerr<<a->why()<<endl;
 		return 1;
 	}

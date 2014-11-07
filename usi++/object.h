@@ -66,7 +66,7 @@ public:
 	/*! Set state of object to 'good' again */
 	void error_reset() { d_error_string = ""; }
 
-	/* Returns true if last operation(s) did not fail. */
+	/*! Returns true if last operation(s) did not fail. */
 	bool good() { return d_error_string.size() == 0; }
 
 	/*! en/disable throwing of exceptions, rather than returning -1 on error */

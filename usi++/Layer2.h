@@ -80,7 +80,8 @@ public:
 	/*! Send a packet */
 	virtual int sendpack(const std::string &);
 
-	/*! Initialize a device for packet capturing */
+	/*! Initialize a device for packet capturing
+	 */
 	virtual int init_device(const std::string &dev, int promisc, size_t snaplen);
 
 	/*! Set a filter rule */

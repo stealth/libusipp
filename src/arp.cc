@@ -79,12 +79,6 @@ uint16_t ARP::get_op() const
 }
 
 
-int ARP::init_device(const string &dev, int p, size_t len)
-{
-	return Layer2::init_device(dev, p, len);
-}
-
-
 int ARP::setfilter(const string &s)
 {
 	return Layer2::setfilter(s);
@@ -101,7 +95,8 @@ int ARP::sendpack(const void *buf, size_t blen)
 {
 	char *tbuf = new (nothrow) char[blen + sizeof(arphdr)];
 	if (!tbuf)
-		return -1;
+		return die("ARP::sendpack: OOM", STDERR, -1);
+
 	memcpy(tbuf, &arphdr, sizeof(arphdr));
 	memcpy(tbuf + sizeof(arphdr), buf, blen);
 
@@ -112,20 +107,36 @@ int ARP::sendpack(const void *buf, size_t blen)
 }
 
 
+string &ARP::sniffpack(string &s)
+{
+	s = "";
+	char buf[4096];
+
+	int r = 0;
+	if ((r = sniffpack(buf, sizeof(buf))) < 0)
+		return s;
+	s = string(buf, r);
+	return s;
+}
+
+
 /* Sniff for an ARP-request/reply ...
  */
 int ARP::sniffpack(void *s, size_t len)
 {
 	char *tbuf = new (nothrow) char[sizeof(arphdr) + len];
 	if (!tbuf)
-		return -1;
+		return die("ARP::sniffpack: OOM", RETURN, -1);
 
 	int r = Layer2::sniffpack(tbuf, sizeof(arphdr) + len);
 
 	if (r == 0 && Layer2::timeout()) {
 		delete [] tbuf;
 		return 0;
-	} else if (r < (int)sizeof(arphdr)) {
+	} else if (r >= 0 && r < (int)sizeof(arphdr)) {
+		delete [] tbuf;
+		return die("ARP::sniffpack:: packet too short", RETURN, -1);
+	} else if (r < 0) {
 		delete [] tbuf;
 		return -1;
 	}

@@ -30,6 +30,7 @@ enum {
 #include "usi-structs.h"
 #include "object.h"
 #include "arp.h"
+#include "eapol.h"
 #include "datalink.h"
 #include "Layer2.h"
 #include "ip.h"

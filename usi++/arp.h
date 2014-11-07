@@ -45,13 +45,15 @@ class ARP : public Layer2 {
 private:
 	struct arphdr arphdr;
 	TX_dnet_eth *d_tx;
+
 public:
 
 	/*! Open device 'dev' for packet-capturing (ARP-packets)
-	 *  ARP-objects don't need to call init_device().
+	 *  dev needs to match device in call to init_device().
 	 */
 	ARP(const std::string &);
 
+	/*! destructor */
 	virtual ~ARP();
 
 	/*! Get the ARP command */
@@ -96,18 +98,16 @@ public:
 	 */
 	virtual int sniffpack(void *, size_t);
 
-	/*! Send a ARP request.You must provide target hw/proto amd source hw/proto address blob.
+	/*! Sniff for an ARP-request/reply */
+	virtual std::string &sniffpack(std::string &);
+
+	/*! Send a ARP request. You must provide target hw/proto amd source hw/proto address blob.
 	 */
 	virtual int sendpack(const void *, size_t);
 
 	/*! Send a ARP request.You must provide target hw/proto amd source hw/proto address blob.
 	 */
 	virtual int sendpack(const std::string &);
-
-	/*! Initialize device for capturing */
-	/*! \example arpw.cc
-	 */
-	virtual int init_device(const std::string &, int, size_t);
 
 	/*! Set a particular filter. Should not be needed for ARP. */
 	virtual int setfilter(const std::string &);
@@ -117,4 +117,4 @@ public:
 
 #endif // HAVE_LIBDNET
 #endif 	// __arp_h__
- 
+

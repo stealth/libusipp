@@ -153,7 +153,7 @@ RECURSIVE            = NO
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE              = src/config.h usi++/usi-structs.h usi++/if.h
+EXCLUDE              = src/config.h usi++/usi-structs.h usi++/if.h usi++/80211.h usi++/radiotap.h
 
 # If the value of the INPUT tag contains directories, you can use the
 # EXCLUDE_PATTERNS tag to specify one or more wildcard patterns to exclude

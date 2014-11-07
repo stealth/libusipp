@@ -14,7 +14,7 @@ all: usi++
 clear:
 	rm -f *.o
 
-usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o ip6.o\
+usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o eapol.o ip6.o\
 	 TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o TX_pcap_eth.o TX_pcap.o object.o
 	ar cr libusi++.a *.o
 	$(CC) *.o -shared -o libusi++.so
@@ -47,6 +47,9 @@ ip6.o: ip6.cc
 
 arp.o: arp.cc
 	$(CXX) $(CXXFLAGS) arp.cc
+
+eapol.o: eapol.cc
+	$(CXX) $(CXXFLAGS) eapol.cc
 
 datalink.o: datalink.cc
 	$(CXX) $(CXXFLAGS) datalink.cc
