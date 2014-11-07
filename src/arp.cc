@@ -79,6 +79,16 @@ uint16_t ARP::get_op() const
 }
 
 
+int ARP::init_device(const string &dev, int promisc, size_t snaplen)
+{
+	int r = Layer2::init_device(dev, promisc, snaplen);
+	if (r < 0)
+		return r;
+	r = Layer2::setfilter("arp");
+	return r;
+}
+
+
 int ARP::setfilter(const string &s)
 {
 	return Layer2::setfilter(s);

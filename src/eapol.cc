@@ -132,4 +132,14 @@ int EAPOL::sendpack(const void *buf, size_t blen)
 }
 
 
+int EAPOL::init_device(const string &dev, int promisc, size_t snaplen)
+{
+	if (Layer2::init_device(dev, promisc, snaplen) < 0)
+		return -1;
+	return Layer2::setfilter("ether[12] == 0x888e");
 }
+
+
+}	// namespace
+
+

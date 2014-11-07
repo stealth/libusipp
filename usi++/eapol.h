@@ -90,6 +90,9 @@ public:
 	 */
 	virtual int sendpack(const std::string &);
 
+	/*! Init the device */
+	virtual int init_device(const std::string &, int promisc, size_t snaplen);
+
 
 	/*! get EAPOL packet type */
 	uint8_t get_type()

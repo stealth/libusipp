@@ -109,6 +109,9 @@ public:
 	 */
 	virtual int sendpack(const std::string &);
 
+	/*! Init the device */
+	virtual int init_device(const std::string &, int promisc, size_t snaplen);
+
 	/*! Set a particular filter. Should not be needed for ARP. */
 	virtual int setfilter(const std::string &);
 };
