@@ -86,7 +86,9 @@ enum {
 	ETH_P_AARP	= 0x80F3,	// Appletalk AARP
 	ETH_P_IPX	= 0x8137,	// IPX over DIX
 	ETH_P_IPV6	= 0x86DD,	// IPv6 over bluebook
-	ETH_P_EAPOL	= 0x888E,	// EAP over LAN
+	ETH_P_EAPOL	= 0x888E,	// 802.1x EAP over LAN
+	ETH_P_PAE	= ETH_P_EAPOL,	// Port Access Entry
+	ETH_P_PRE_AUTH	= 0x88C7,	// WPA2 pre auth
 
 /*
  *	Non DIX types. Won't clash for 1500 types.

@@ -33,6 +33,7 @@ namespace usipp {
 
 enum {
 	EAPOL_PTYPE_PACKET	= 	0,
+	EAPOL_PTYPE_EAP		=	0,
 	EAPOL_PTYPE_START	=	1,
 	EAPOL_PTYPE_LOGOFF	=	2,
 	EAPOL_PTYPE_KEY		=	3,
