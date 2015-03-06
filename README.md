@@ -28,10 +28,11 @@ Since USI++ is GPL there is ABSOLUTELY NO WARRANTY. YOU USE IT AT YOUR OWN RISK.
 2. Install
 ----------
 
-$ autoconf
-$ ./configure
-$ make
-# make install
+
+    $ autoconf
+    $ ./configure
+    $ make
+    # make install
 
 
 3. Compiling the examples
@@ -39,7 +40,7 @@ $ make
 
 Usually like this:
 
-# c++ foo.cc -lusi++ -lpcap
+    # c++ -std=c++11 foo.cc -lusi++ -lpcap
 
 If you compiled usi++ with dnet support, which allows you to also
 send packets at the datalink layer (not just RAW sockets), you also need to
@@ -49,7 +50,7 @@ link against -ldnet.
 4. Function-description
 -----------------------
 
-Please look at the HTML-documentation of libusi++ or at the samples.
+Please look at the HTML-documentation of `libusi++` or at the samples.
 
 
 5. Supported Platforms
@@ -83,12 +84,12 @@ Layer2 {} which contains a RX and a TX object which are used for
 receiving and transmitting data. The class-declarations can be found
 in the coresponding .h files. These classes are abstract, this means
 you must derive your own to get it working. Look at the .h files
-which functions you must implemet. USI++ ships with two classes
-Pcap {} and TX_IP {} which let you capture/send packets. They give you
+which functions you must implemet. USI++ ships with the classes
+`Pcap`, `TX_IP`, `TX_eth_dnet` etc which let you capture/send packets. They give you
 basic functionality so that you can use programs that work with USI++ 1.67 or
 lower as normal.
-By making RX {} and TX {} abstract we make sure that Layer2 {} can access
-routines such as sendpack(). You are free to write your own RX/TX based
+By making `RX` and `TX` abstract we make sure that `Layer2` can access
+routines such as `sendpack()`. You are free to write your own RX/TX based
 classes for different hardware (FDDI,...). You can change RX/TX behaivior at runtime,
 so it is as flexible as possible. For example you could detect that you are
 working with PPP and then you load PPP transimitter.
