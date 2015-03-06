@@ -41,7 +41,7 @@ namespace usipp {
 
 using namespace std;
 
-IP6::IP6(const struct in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
+IP6::IP6(const in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
 	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
 {
 	memset(&iph, 0, sizeof(iph));
@@ -103,7 +103,7 @@ IP6::~IP6()
 }
 
 
-struct in6_addr IP6::get_src()
+in6_addr IP6::get_src()
 {
 	return iph.saddr;
 }
@@ -121,7 +121,7 @@ string &IP6::get_src(string &s)
 }
 
 
-struct in6_addr IP6::get_dst()
+in6_addr IP6::get_dst()
 {
 	return iph.daddr;
 }
@@ -142,7 +142,7 @@ string &IP6::get_dst(string &s)
 int IP6::set_src(const string &src)
 {
 	struct hostent *he = NULL;
-	struct in6_addr in6;
+	in6_addr in6;
 
 	if (inet_pton(AF_INET6, src.c_str(), &in6) < 0) {
 		if ((he = gethostbyname2(src.c_str(), AF_INET6)) == NULL)
@@ -157,7 +157,7 @@ int IP6::set_src(const string &src)
 int IP6::set_dst(const string &dst)
 {
 	struct hostent *he = NULL;
-	struct in6_addr in6;
+	in6_addr in6;
 
 	if (inet_pton(AF_INET6, dst.c_str(), &in6) < 0) {
 		if ((he = gethostbyname2(dst.c_str(), AF_INET6)) == NULL)
@@ -170,14 +170,14 @@ int IP6::set_dst(const string &dst)
 }
 
 
-struct in6_addr &IP6::set_dst(const struct in6_addr &dst)
+in6_addr &IP6::set_dst(const in6_addr &dst)
 {
 	iph.daddr = dst;
 	return iph.daddr;
 }
 
 
-struct in6_addr &IP6::set_src(const struct in6_addr &src)
+in6_addr &IP6::set_src(const in6_addr &src)
 {
 	iph.saddr = src;
 	return iph.saddr;

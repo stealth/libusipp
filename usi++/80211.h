@@ -383,8 +383,8 @@ struct element_tclas_type1_ip4 {
 } __packed;
 
 struct element_tclas_type1_ip6 {
-	struct in6_addr sa;
-	struct in6_addr da;
+	in6_addr sa;
+	in6_addr da;
 	uint16_t sp;
 	uint16_t dp;
 	union {
@@ -431,8 +431,8 @@ struct element_tclas_type4_ip4 {
 } __packed;
 
 struct element_tclas_type4_ip6 {
-	struct in6_addr sa;
-	struct in6_addr da;
+	in6_addr sa;
+	in6_addr da;
 	uint16_t sp;
 	uint16_t dp;
 	uint8_t dscp;

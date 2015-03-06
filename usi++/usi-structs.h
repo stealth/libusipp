@@ -25,6 +25,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifndef USIPP_OWNSTRUCTS
+#include <netinet/in.h>
+#endif
+
 
 /* putting an own version of
  * iphdr, udphdr, tcphdr, icmphdr and pseudohdr
@@ -403,6 +407,9 @@ enum {
 };
 
 
+// global in6_addr should be defined nowadays
+#ifdef USIPP_OWNSTRUCTS
+
 struct in6_addr {
 	union {
 		uint8_t  u6_addr8[16];
@@ -414,6 +421,12 @@ struct in6_addr {
 #define s6_addr32               in6_u.u6_addr32
 */
 };
+
+#else
+
+	using in6_addr = ::in6_addr;
+
+#endif
 
 
 struct ip6_hdr {
@@ -432,8 +445,8 @@ struct ip6_hdr {
 	uint8_t                nexthdr;
 	uint8_t                hop_limit;
 
-        struct  in6_addr        saddr;
-        struct  in6_addr        daddr;
+        in6_addr        saddr;
+        in6_addr        daddr;
 };
 
 

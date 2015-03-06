@@ -47,7 +47,7 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP6(const struct in6_addr &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
+	IP6(const in6_addr &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
 
 	/*! New IP6 packet with destination address (hostname or IP6 string)
 	 *  and next-header 'proto'.
@@ -67,25 +67,25 @@ public:
 	virtual ~IP6();
 
 	/*! Get IP6 source address */
-	struct in6_addr get_src();
+	in6_addr get_src();
 
 	/*! Get IP6 source address, string version */
 	std::string &get_src(std::string &);
 
 	/*! Get IP6 destination address */
-	struct in6_addr get_dst();
+	in6_addr get_dst();
 
 	/*! Get IP6 destination address, string version */
 	std::string &get_dst(std::string &);
 
 	/*! Set IP6 source address */
-	struct in6_addr &set_src(const struct in6_addr &);
+	in6_addr &set_src(const in6_addr &);
 
 	/*! Set IP6 source address, hostname or IP6-string */
 	int set_src(const std::string &);
 
 	/*! Set IP6 destination address */
-	struct in6_addr &set_dst(const struct in6_addr &);
+	in6_addr &set_dst(const in6_addr &);
 
 	/*! Set IP6 destination address, hostname or IP6-string */
 	int set_dst(const std::string &);
