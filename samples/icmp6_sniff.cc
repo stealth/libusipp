@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	while (1) {
 		memset(buf,0,1000);
     		// blocks
-	   	cout<<icmp->sniffpack(buf, 1000)<<endl;
+		cout<<icmp->sniffpack(buf, 1000)<<endl;
 #ifdef PRINT_MAC
 		cout<<"["<<l2mac(icmp->rx()->get_l2src(smac))<<"->"<<l2mac(icmp->rx()->get_l2dst(dmac))<<"]:";
 #endif
