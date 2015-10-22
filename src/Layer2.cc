@@ -79,6 +79,18 @@ int Layer2::sendpack(const void *buf, size_t len, struct sockaddr *s)
 }
 
 
+/* Need a sendpack with this signature for exact overloading with same signature of derived classes
+ * sendpack. Some compilers warn about overloading different signatures with default argument
+ */
+int Layer2::sendpack(const void *buf, size_t len)
+{
+	int r = d_tx->sendpack(buf, len, NULL);
+	if (r < 0)
+		return die(d_tx->why(), STDERR, d_tx->error());
+	return r;
+}
+
+
 int Layer2::sendpack(const string &payload)
 {
 	return sendpack(payload.c_str(), payload.size());

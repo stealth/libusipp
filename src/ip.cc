@@ -680,7 +680,7 @@ char *IP::reassemble(char *packet, int len, int *resultLen)
 		 */
 		if (f->len == f->origLen) {
 			/* should not be necessary, but */
-			if (i >= 0 && i < pending.size())
+			if (i < pending.size())
 				pending[i] = NULL;
 			struct usipp::iphdr *ih = (struct usipp::iphdr*)(f->data);
 			ih->frag_off = 0;

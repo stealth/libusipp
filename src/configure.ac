@@ -39,6 +39,9 @@ case "$host" in
 	*bsd*)
 		CXXFLAGS="$CXXFLAGS -DIMMEDIATE"
 		;;
+	*Darwin*)
+		CXXFLAGS="-DBROKEN_BSD $CXXFLAGS"
+		;;
 	*)
 		echo "Sorry, $host not supported yet."
 		;;

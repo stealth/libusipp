@@ -3,8 +3,6 @@
 
 namespace usipp {
 
-typedef uint16_t u_short;
-
 
 // ripped code, slightly modified
 // to pad odd length automagically (UDP,TCP)
@@ -12,9 +10,8 @@ unsigned short
 in_cksum (unsigned short *ptr, int nbytes, bool may_pad)
 {
 
-  register long sum;		/* assumes long == 32 bits */
-  u_short oddbyte;
-  register u_short answer;	/* assumes u_short == 16 bits */
+  uint32_t sum;
+  uint16_t oddbyte, answer;
 
 
   /* For psuedo-headers: odd len's require

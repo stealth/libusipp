@@ -19,9 +19,8 @@ usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
        eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
        TX_pcap_eth.o TX_pcap.o TX_string.o object.o
 	ar cr libusi++.a $^
-	$(CC) $^ -shared -o libusi++.so
+	$(CC) $^ -shared $(LIBS) -lstdc++ -o libusi++.so
 	$(RANLIB) libusi++.a
-#	rm -f *.o
 
 object.o: object.cc
 	$(CXX) $(CXXFLAGS) $<
@@ -82,10 +81,12 @@ TX_IP.o: TX_IP.cc
 
 install:
 	$(INSTALL) -g bin -o root -m 0755 libusi++.* @prefix@/lib
-	mkdir -m 0755 @prefix@/include/usi++||true
-	$(INSTALL) -g bin -o root -m 0644 -t @prefix@/include/usi++ ../usi++/*
+	mkdir -p -m 0755 @prefix@/include/usi++||true
+	cp ../usi++/* @prefix@/include/usi++
+	chown -R root:bin @prefix@/include/usi++
+	chmod 0644 @prefix@/include/usi++/*
 	ldconfig||true
-	@echo To build programs using libusi++, you have to use \'c++ foo.cc -L@prefix@/lib -lusi++ $(LIBS) $(LDFLAGS)\'
+	@echo To build programs using libusi++, you have to use \'c++ foo.cc -L@prefix@/lib -lusi++ $(LIBS)\'
 
 uninstall:
 	rm -f @prefix@/lib/libusi++.a

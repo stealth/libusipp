@@ -75,7 +75,10 @@ public:
 	virtual int sniffpack(void *, size_t);
 
 	/*! Send a packet */
-	virtual int sendpack(const void *buf, size_t len, struct sockaddr *s = NULL);
+	virtual int sendpack(const void *buf, size_t len, struct sockaddr *s);
+
+	/*! Send a packet */
+	virtual int sendpack(const void *buf, size_t len);
 
 	/*! Send a packet */
 	virtual int sendpack(const std::string &);

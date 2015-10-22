@@ -92,7 +92,7 @@
 #define PACKAGE_NAME "libusi++"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libusi++ 2.01"
+#define PACKAGE_STRING "libusi++ 2.03"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libusi--"
@@ -101,7 +101,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.01"
+#define PACKAGE_VERSION "2.03"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
