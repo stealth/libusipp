@@ -5,8 +5,8 @@
  * Copyright 2012 Daniel Borkmann <daniel@netsniff-ng.org>
  * Subject to the GPL, version 2.
  */
-#ifndef __80211_h__
-#define __80211_h__
+#ifndef usipp_80211_h
+#define usipp_80211_h
 
 
 #include <stdio.h>
@@ -22,7 +22,6 @@ namespace usipp {
 struct ieee80211_frm_ctrl {
 	union {
 		uint16_t frame_control;
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
 		__extension__ uint16_t proto_version:2,
@@ -51,7 +50,6 @@ struct ieee80211_frm_ctrl {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 } __packed;
 
@@ -70,7 +68,7 @@ struct ieee80211_mgmt_auth {
 	uint16_t auth_transaction;
 	uint16_t status_code;
 	/* possibly followed by Challenge text */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_deauth {
@@ -81,7 +79,7 @@ struct ieee80211_mgmt_assoc_req {
 	uint16_t capab_info;
 	uint16_t listen_interval;
 	/* followed by SSID and Supported rates */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_assoc_resp {
@@ -89,7 +87,7 @@ struct ieee80211_mgmt_assoc_resp {
 	uint16_t status_code;
 	uint16_t aid;
 	/* followed by Supported rates */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_reassoc_resp {
@@ -97,7 +95,7 @@ struct ieee80211_mgmt_reassoc_resp {
 	uint16_t status_code;
 	uint16_t aid;
 	/* followed by Supported rates */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_reassoc_req {
@@ -105,7 +103,7 @@ struct ieee80211_mgmt_reassoc_req {
 	uint16_t listen_interval;
 	uint8_t current_ap[6];
 	/* followed by SSID and Supported rates */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_disassoc {
@@ -121,7 +119,7 @@ struct ieee80211_mgmt_beacon {
 	uint16_t capab_info;
 	/* followed by some of SSID, Supported rates,
 	  * FH Params, DS Params, CF Params, IBSS Params, TIM */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_probe_resp {
@@ -130,7 +128,7 @@ struct ieee80211_mgmt_probe_resp {
 	uint16_t capab_info;
 	/* followed by some of SSID, Supported rates,
 	  * FH Params, DS Params, CF Params, IBSS Params, TIM */
-	uint8_t variable[0];
+	uint8_t variable[1];
 } __packed;
 /* Management Frame end */
 
@@ -193,12 +191,12 @@ struct element_reserved {
 
 struct element_ssid {
 	uint8_t len;
-	uint8_t SSID[0];
+	uint8_t SSID[1];
 } __packed;
 
 struct element_supp_rates {
 	uint8_t len;
-	uint8_t rates[0];
+	uint8_t rates[1];
 } __packed;
 
 struct element_fh_ps {
@@ -227,7 +225,7 @@ struct element_tim {
 	uint8_t dtim_cnt;
 	uint8_t dtim_period;
 	uint8_t bmp_cntrl;
-	uint8_t part_virt_bmp[0];
+	uint8_t part_virt_bmp[1];
 } __packed;
 
 struct element_ibss_ps {
@@ -256,9 +254,8 @@ struct element_country {
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
 	/* triplet may repeat */
-	struct element_country_tripled tripled [0];
-	/* end triplet */
-	uint8_t pad[0];
+	struct element_country_tripled tripled [1];
+	/*uint8_t pad[0];*/
 } __packed;
 
 struct element_hop_pp {
@@ -273,12 +270,12 @@ struct element_hop_pt {
 	uint8_t nr_sets;
 	uint8_t modules;
 	uint8_t offs;
-	uint8_t rand_tabl[0];
+	uint8_t rand_tabl[1];
 } __packed;
 
 struct element_req {
 	uint8_t len;
-	uint8_t req_elem_idl[0];
+	uint8_t req_elem_idl[1];
 } __packed;
 
 struct element_bss_load {
@@ -301,7 +298,6 @@ struct element_edca_ps {
 struct element_tspec {
 	union {
 		uint32_t len_ts_info;
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
 		__extension__ uint32_t len:8,
@@ -330,7 +326,6 @@ struct element_tspec {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 	uint16_t nom_msdu_size;
 	uint16_t max_msdu_size;
@@ -352,13 +347,13 @@ struct element_tspec {
 struct element_tclas {
 	uint8_t len;
 	uint8_t user_priority;
-	uint8_t frm_class[0];
+	uint8_t frm_class[1];
 } __packed;
 
 struct element_tclas_frm_class {
 	uint8_t type;
 	uint8_t mask;
-	uint8_t param[0];
+	uint8_t param[1];
 } __packed;
 
 struct element_tclas_type0 {
@@ -369,7 +364,7 @@ struct element_tclas_type0 {
 
 struct element_tclas_type1 {
 	uint8_t version;
-	uint8_t subparam[0];
+	uint8_t subparam[1];
 } __packed;
 
 struct element_tclas_type1_ip4 {
@@ -389,7 +384,6 @@ struct element_tclas_type1_ip6 {
 	uint16_t dp;
 	union {
 		uint8_t flow_label[3];
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		__extension__ uint8_t  flow_label3:8;
 		__extension__ uint8_t  flow_label2:8;
@@ -401,7 +395,6 @@ struct element_tclas_type1_ip6 {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 } __packed;
 
@@ -411,13 +404,12 @@ struct element_tclas_type2 {
 
 struct element_tclas_type3 {
 	uint16_t offs;
-	uint8_t value[0];
-	uint8_t mask[0];
+	uint8_t data[1]; /* value, masks */
 } __packed;
 
 struct element_tclas_type4 {
 	uint8_t version;
-	uint8_t subparam[0];
+	uint8_t subparam[1];
 } __packed;
 
 struct element_tclas_type4_ip4 {
@@ -439,7 +431,6 @@ struct element_tclas_type4_ip6 {
 	uint8_t nxt_hdr;
 	union {
 		uint8_t flow_label[3];
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		__extension__ uint8_t  flow_label3:8;
 		__extension__ uint8_t  flow_label2:8;
@@ -451,7 +442,6 @@ struct element_tclas_type4_ip6 {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 } __packed;
 
@@ -471,7 +461,7 @@ struct element_schedule {
 
 struct element_chall_txt {
 	uint8_t len;
-	uint8_t chall_txt[0];
+	uint8_t chall_txt[1];
 } __packed;
 
 struct element_pwr_constr {
@@ -497,8 +487,7 @@ struct element_tpc_rep {
 
 struct element_supp_ch {
 	uint8_t len;
-	uint8_t first_ch_nr[0];
-	uint8_t nr_ch[0];
+	uint8_t nr_chan[1];
 } __packed;
 
 struct element_supp_ch_tuple {
@@ -536,7 +525,7 @@ struct element_meas_ch_load {
 	uint8_t ch_nr;
 	uint16_t rand_intv;
 	uint16_t dur;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_noise {
@@ -544,7 +533,7 @@ struct element_meas_noise {
 	uint8_t ch_nr;
 	uint16_t rand_intv;
 	uint16_t dur;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_beacon {
@@ -554,7 +543,7 @@ struct element_meas_beacon {
 	uint16_t dur;
 	uint8_t mode;
 	uint8_t bssid[6];
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_frame {
@@ -564,7 +553,7 @@ struct element_meas_frame {
 	uint16_t dur;
 	uint8_t frame;
 	uint8_t mac[6];
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_sta {
@@ -572,7 +561,7 @@ struct element_meas_sta {
 	uint16_t rand_intv;
 	uint16_t dur;
 	uint8_t group_id;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_lci {
@@ -580,7 +569,7 @@ struct element_meas_lci {
 	uint8_t latitude_req_res;
 	uint8_t longitude_req_res;
 	uint8_t altitude_req_res;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_trans_str_cat {
@@ -589,15 +578,14 @@ struct element_meas_trans_str_cat {
 	uint8_t peer_sta_addr[6];
 	uint8_t traffic_id;
 	uint8_t bin_0_range;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_mcast_diag {
 	uint16_t rand_intv;
 	uint16_t dur;
 	uint8_t group_mac[6];
-	uint8_t mcast_triggered[0];
-	uint8_t sub[0];
+	uint8_t data[1]; // mcast_triggered, sub;
 } __packed;
 
 struct element_meas_loc_civic {
@@ -605,19 +593,19 @@ struct element_meas_loc_civic {
 	uint8_t civic_loc;
 	uint8_t loc_srv_intv_unit;
 	uint16_t loc_srv_intv;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_loc_id {
 	uint8_t loc_subj;
 	uint8_t loc_srv_intv_unit;
 	uint16_t loc_srv_intv;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_pause {
 	uint8_t time;
-	uint8_t sub[0];
+	uint8_t sub[1];
 } __packed;
 
 struct element_meas_req {
@@ -625,7 +613,7 @@ struct element_meas_req {
 	uint8_t token;
 	uint8_t req_mode;
 	uint8_t type;
-	uint8_t req[0];
+	uint8_t req[1];
 } __packed;
 
 struct element_meas_rep {
@@ -633,7 +621,7 @@ struct element_meas_rep {
 	uint8_t token;
 	uint8_t rep_mode;
 	uint8_t type;
-	uint8_t rep[0];
+	uint8_t rep[1];
 } __packed;
 
 struct element_quiet {
@@ -648,7 +636,7 @@ struct element_ibss_dfs {
 	uint8_t len;
 	uint8_t owner[6];
 	uint8_t rec_intv;
-	uint8_t ch_map[0];
+	uint8_t ch_map[1];
 } __packed;
 
 struct element_ibss_dfs_tuple {
@@ -675,7 +663,6 @@ struct element_ht_cap {
 	uint8_t len;
 	union {
 		uint16_t info;
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
 		__extension__ uint16_t ldpc:1,
@@ -710,12 +697,10 @@ struct element_ht_cap {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 	uint8_t param;
 	union {
 		uint8_t mcs_set[16];
-		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
 		__extension__ uint8_t  bitmask1:8;
@@ -747,7 +732,6 @@ struct element_ht_cap {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		};
 	};
 	uint16_t ext_cap;
 	uint32_t beam_cap;
@@ -761,20 +745,19 @@ struct element_qos_cap {
 
 struct element_ext_supp_rates {
 	uint8_t len;
-	uint8_t rates[0];
+	uint8_t rates[1];
 } __packed;
 
 struct element_vend_spec {
 	uint8_t len;
-	uint8_t oui[0];
-	uint8_t specific[0];
+	uint8_t data[1]; // oui, specific
 } __packed;
 
 
 struct subelement {
 	uint8_t id;
 	uint8_t len;
-	uint8_t data[0];
+	uint8_t data[1];
 } __packed;
 
 }

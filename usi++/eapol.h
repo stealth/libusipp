@@ -1,8 +1,8 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2014 by Sebastian Krahmer,
- *             sebastian [dot] krahmer [at] gmail [dot] com
+ * (C) 2014-2015 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __eapol_h__
-#define __eapol_h__
+#ifndef usipp_eapol_h
+#define usipp_eapol_h
 
 
 #include "usi-structs.h"

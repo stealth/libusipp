@@ -53,6 +53,7 @@ Layer2 &Layer2::operator=(const Layer2 &rhs)
 {
 	if (&rhs == this)
 		return *this;
+	Object::operator=(rhs);
 	d_rx = rhs.rx();
 	d_tx = rhs.tx();
 	return *this;
@@ -60,6 +61,7 @@ Layer2 &Layer2::operator=(const Layer2 &rhs)
 
 
 Layer2::Layer2(const Layer2 &rhs)
+	: Object(rhs)
 {
 	if (&rhs == this)
 		return;

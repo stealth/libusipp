@@ -393,5 +393,5 @@ int IP6::init_device(const string &dev, int promisc, size_t snaplen)
 }
 
 
-};
+}
 

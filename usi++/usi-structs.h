@@ -19,8 +19,8 @@
  */
 
 
-#ifndef __usi_structs_h__
-#define __usi_structs_h__
+#ifndef usipp_usi_structs_h
+#define usipp_usi_structs_h
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -580,7 +580,7 @@ struct icmp6_domain_opt {
 	uint16_t reserved;
 	uint32_t lifetime;
 	// encoded domain goes here
-	unsigned char domain[0];
+	unsigned char domain[1];
 } __attribute__((packed));
 
 
@@ -595,7 +595,7 @@ struct icmp6_ra {
 struct icmp6_sll_opt {
 	uint8_t type;
 	uint8_t len;
-	unsigned char address[0];
+	unsigned char address[1];
 } __attribute__((packed));
 
 
@@ -629,7 +629,7 @@ struct icmp6_ri_opt {
 	uint8_t plen;
 	uint8_t flags;
 	uint32_t lifetime;
-	unsigned char prefix[0];
+	unsigned char prefix[1];
 };
 
 
@@ -666,11 +666,13 @@ enum {
 	TX_TAG_DNET_ETH,
 	TX_TAG_PCAP,
 	TX_TAG_PCAP_ETH,
+	TX_TAG_STRING,
 
 	RX_TAG_PCAP	= 0x2000
 };
 
 
+// IANA assigned protocol numbers
 enum {
 	IPPROTO_IP		= 0,
 	IPPROTO_HOPOPTS		= 0,		/* IPv6 Hop-by-Hop options.  */
@@ -695,6 +697,7 @@ enum {
 	IPPROTO_NONE		= 59,		/* IPv6 no next header.  */
 	IPPROTO_DSTOPTS		= 60,		/* IPv6 destination options.  */
 	IPPROTO_MTP		= 92,		/* Multicast Transport Protocol.  */
+	IPOROTO_IPIP		= 94,		/* IP in IP encapsulation */
 	IPPROTO_ENCAP		= 98,		/* Encapsulation Header.  */
 	IPPROTO_PIM		= 103,		/* Protocol Independent Multicast.  */
 	IPPROTO_COMP		= 108,		/* Compression Header Protocol.  */
@@ -708,5 +711,5 @@ enum {
 } // namespace usipp
 
 
-#endif	// __usi_structs_h__
+#endif
 

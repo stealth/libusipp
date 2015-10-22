@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2015 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __tx_dnet_ip__
-#define __tx_dnet_ip__
+#ifndef usipp_tx_dnet_ip
+#define usipp_tx_dnet_ip
 
 #include "TX.h"
 #include "config.h"

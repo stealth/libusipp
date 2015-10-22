@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.62])
-AC_INIT(libusi++, 2.01, [BUG-REPORT-ADDRESS])
+AC_INIT(libusi++, 2.03, [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([arp.cc])
 AC_CONFIG_HEADERS([config.h])
 

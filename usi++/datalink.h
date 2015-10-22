@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2015 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -18,14 +18,15 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __datalink_h__
-#define __datalink_h__
+#ifndef usipp_datalink_h
+#define usipp_datalink_h
 
 #include "usi-structs.h"
 #include "RX.h"
 #include <stdio.h>
 #include <string>
 #include <stdint.h>
+#include <sys/time.h>
 
 extern "C" {
 #include <pcap.h>
@@ -79,6 +80,8 @@ protected:
 
 #ifdef HAVE_RADIOTAP
 	struct wifi_hdr d_80211;
+#else
+	int d_80211;	// dummy
 #endif
 
 	std::string d_cooked;

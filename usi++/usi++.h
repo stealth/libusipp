@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2015 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
  */
 
 
-#ifndef __usipp_h__
-#define __usipp_h__
+#ifndef usipp_usipp_h
+#define usipp_usipp_h
 
 enum {
-	usipp_version = 202
+	usipp_version = 203
 };
 
 #include "config.h"
@@ -46,6 +46,7 @@ enum {
 #include "TX_pcap.h"
 #include "TX_IP.h"
 #include "TX_IP6.h"
+#include "TX_string.h"
 #include "RX.h"
 #include <string>
 

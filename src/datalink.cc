@@ -86,6 +86,7 @@ pcap::~pcap()
 
 
 pcap::pcap(const pcap &rhs)
+	: RX(rhs)
 {
 	if (this == &rhs)
 		return;
@@ -119,6 +120,8 @@ pcap &pcap::operator=(const pcap &rhs)
 {
 	if (this == &rhs)
 		return *this;
+	RX::operator=(rhs);
+
 	d_datalink = rhs.d_datalink;
 	d_framelen = rhs.d_framelen;
 	d_filter = rhs.d_filter;
@@ -220,14 +223,16 @@ uint16_t pcap::get_etype()
 /*  Initialize a device ("eth0" for example) for packet-
  *  capturing. It MUST be called before sniffpack() is launched.
  *  Set 'promisc' to 1 if you want the device running in promiscous mode.
- *  Fetch at most 'd_snaplen' bytes per call.
+ *  Fetch at most 'snaplen' bytes per call.
  */
-int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
+int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 {
 	char ebuf[PCAP_ERRBUF_SIZE];
 	memset(ebuf, 0, PCAP_ERRBUF_SIZE);
 
 	string e = "";
+
+	d_snaplen = snaplen;
 
 	if ((d_pd = pcap_open_live(dev.c_str(), d_snaplen, promisc, 500, ebuf)) == NULL) {
 		e = "pcap::init_device::pcap_open_live:";
@@ -310,7 +315,6 @@ int pcap::init_device(const string &dev, int promisc, size_t d_snaplen)
 
 	d_dev = dev;
 	d_has_promisc = promisc;
-	d_snaplen = d_snaplen;
 	return 0;
 }
 

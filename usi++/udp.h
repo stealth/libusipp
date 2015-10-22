@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2015 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
  */
 
 
-#ifndef __udp_h__
-#define __udp_h__
+#ifndef usipp_udp_h
+#define usipp_udp_h
 
 #include <string>
 #include <stdint.h>

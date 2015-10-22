@@ -4,7 +4,7 @@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 DEFS=
-CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c -ansi -std=c++11 $(DEFS)
+CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c -pedantic -std=c++11 $(DEFS)
 CXX=@CXX@
 CC=@CC@
 INSTALL=@INSTALL@
@@ -15,8 +15,9 @@ all: usi++
 clear:
 	rm -f *.o
 
-usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o eapol.o ip6.o\
-	 TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o TX_pcap_eth.o TX_pcap.o object.o
+usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
+       eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
+       TX_pcap_eth.o TX_pcap.o TX_string.o object.o
 	ar cr libusi++.a $^
 	$(CC) $^ -shared -o libusi++.so
 	$(RANLIB) libusi++.a
@@ -35,6 +36,9 @@ TX_dnet_eth.o: TX_dnet_eth.cc
 	$(CXX) $(CXXFLAGS) $<
 
 TX_dnet_ip.o: TX_dnet_ip.cc
+	$(CXX) $(CXXFLAGS) $<
+
+TX_string.o: TX_string.cc
 	$(CXX) $(CXXFLAGS) $<
 
 icmp6.o: icmp6.cc
@@ -77,17 +81,16 @@ TX_IP.o: TX_IP.cc
 	$(CXX) $(CXXFLAGS) $<
 
 install:
-	$(INSTALL) -g bin -o root -m 0755 libusi++.* /usr/lib
-	mkdir -m 0755 /usr/include/usi++||true
-	cp -R ../usi++/* /usr/include/usi++
-	chown -R root /usr/include/usi++
+	$(INSTALL) -g bin -o root -m 0755 libusi++.* @prefix@/lib
+	mkdir -m 0755 @prefix@/include/usi++||true
+	$(INSTALL) -g bin -o root -m 0644 -t @prefix@/include/usi++ ../usi++/*
 	ldconfig||true
-	@echo To build programs using libusi++, you have to do \'c++ foo.cc -lusi++ $(LIBS) $(LDFLAGS)\'
+	@echo To build programs using libusi++, you have to use \'c++ foo.cc -L@prefix@/lib -lusi++ $(LIBS) $(LDFLAGS)\'
 
 uninstall:
-	rm -f /usr/lib/libusi++.a
-	rm -f /usr/lib/libusi++.so
-	rm -rf /usr/include/usi++
+	rm -f @prefix@/lib/libusi++.a
+	rm -f @prefix@/lib/libusi++.so
+	rm -rf @prefix@/include/usi++
 
 clean:
 	rm -f *.o *.a

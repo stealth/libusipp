@@ -18,8 +18,8 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ip6_h__
-#define __ip6_h__
+#ifndef usipp_ip6_h
+#define usipp_ip6_h
 
 #include "usi-structs.h"
 #include "datalink.h"

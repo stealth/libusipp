@@ -1,7 +1,7 @@
 /* Mostly taken from Linux kernel-source/examples, but enum-ified */
 
-#ifndef __radiotap_h__
-#define __radiotap_h__
+#ifndef usipp_radiotap_h
+#define usipp_radiotap_h
 
 #include <stdint.h>
 #include "80211.h"
