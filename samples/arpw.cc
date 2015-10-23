@@ -43,13 +43,13 @@ int main(int argc, char **argv)
 		// we only receive the payload
 		a->sniffpack((char *)&ea + sizeof(ea.ea_hdr),
 		             sizeof(ea) - sizeof(ea.ea_hdr));
-		if (a->get_op() == ARPOP_REQUEST) {
+		if (a->get_op() == numbers::arpop_request) {
 			in_addr in1; memcpy(&in1.s_addr, ea.arp_tpa, 4);
 			in_addr in2; memcpy(&in2.s_addr, ea.arp_spa, 4);
 			cout<<"arp who has "<<inet_ntop(AF_INET, &in1, dip, sizeof(dip))
 			    <<" tell "<<inet_ntop(AF_INET, &in2, sip, sizeof(sip))<<endl;
 		}
-		if (a->get_op() == ARPOP_REPLY) {
+		if (a->get_op() == numbers::arpop_reply) {
 			in_addr in; memcpy(&in.s_addr, ea.arp_spa, 4);
 			cout<<inet_ntop(AF_INET, &in, sip, sizeof(sip))<<" is at "
 			    <<print_mac(ea.arp_sha)<<endl;

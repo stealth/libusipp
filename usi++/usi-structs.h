@@ -30,92 +30,434 @@
 #endif
 
 
-/* putting an own version of
- * iphdr, udphdr, tcphdr, icmphdr and pseudohdr
- * in usipp namespace to avoid collision with
- * kernel ones. Mostly the IP etc. structs from system to system differ
- * and are often broken. Some of this was just copied from standard .h files,
- * but changed to an enum rather than a define.
- */
-
 namespace usipp {
 
 
+namespace numbers {
+
 enum  {
-	max_buffer_len = 0x1000000,
-	MAXHOSTLEN = 1000,
-	ETH_ALEN = 6,
-	ETH_A_LEN = 6
+	max_buffer_len		= 0x1000000,
+	maxhostlen		= 1000,
+	eth_alen		= 6
 };
 
+
+enum {
+	TX_TAG_NONE		= 0,
+	RX_TAG_NONE		= 0,
+
+	TX_TAG_IP		= 0x1000,
+	TX_TAG_IP6,
+	TX_TAG_DNET_IP,
+	TX_TAG_DNET_ETH,
+	TX_TAG_PCAP,
+	TX_TAG_PCAP_ETH,
+	TX_TAG_STRING,
+
+	RX_TAG_PCAP		= 0x2000
+};
+
+
+// Ethernet Protocol ID's.
+enum {
+	eth_p_loop		= 0x0060,	// ethernet loopback packet
+	eth_p_echo		= 0x0200,	// ethernet echo packet
+	eth_p_pup		= 0x0400,	// xerox pup packet
+	eth_p_ip		= 0x0800,	// internet protocol packet
+	eth_p_x25		= 0x0805,	// ccitt x.25
+	eth_p_arp		= 0x0806,	// address resolution packet
+	eth_p_bpq		= 0x08ff,	// g8bpq ax.25 ethernet packet	[ not an officially registered id ]
+	eth_p_dec		= 0x6000,	// dec assigned proto
+	eth_p_dna_dl		= 0x6001,	// dec dna dump/load
+	eth_p_dna_rc		= 0x6002,	// dec dna remote console
+	eth_p_dna_rt		= 0x6003,	// dec dna routing
+	eth_p_lat		= 0x6004,	// dec lat
+	eth_p_diag		= 0x6005,	// dec diagnostics
+	eth_p_cust		= 0x6006,	// dec customer use
+	eth_p_sca		= 0x6007,	// dec systems comms arch
+	eth_p_rarp		= 0x8035,	// reverse addr res packet
+	eth_p_atalk		= 0x809b,	// appletalk ddp
+	eth_p_aarp		= 0x80f3,	// appletalk aarp
+	eth_p_ipx		= 0x8137,	// ipx over dix
+	eth_p_ipv6		= 0x86dd,	// ipv6 over bluebook
+	eth_p_eapol		= 0x888e,	// 802.1x eap over lan
+	eth_p_pae		= eth_p_eapol,	// port access entry
+	eth_p_pre_auth		= 0x88c7,	// wpa2 pre auth
+
+	// Non DIX types. Won't clash for 1500 types
+
+	eth_p_802_3		= 0x0001,	// dummy type for 802.3 frames
+	eth_p_ax25		= 0x0002,	// dummy protocol id for ax.25
+	eth_p_all		= 0x0003,	// every packet (be careful!!!)
+	eth_p_802_2		= 0x0004,	// 802.2 frames
+	eth_p_snap		= 0x0005,	// internal only
+	eth_p_ddcmp		= 0x0006,	// dec ddcmp: internal only
+	eth_p_wan_ppp		= 0x0007,	// dummy type for wan ppp frames
+	eth_p_ppp_mp		= 0x0008,	// dummy type for ppp mp frames
+	eth_p_localtalk		= 0x0009,	// localtalk pseudo type
+	eth_p_ppptalk		= 0x0010,	// dummy type for atalk over ppp
+	eth_p_tr_802_2		= 0x0011,	// 802.2 frames
+	eth_p_mobitex		= 0x0015,	// mobitex (kaz@cafe.net)
+	eth_p_control		= 0x0016,	// card specific control frames
+	eth_p_irda		= 0x0017	// linux/ir
+};
+
+
+// ARP protocol hardware identifiers
+enum {
+	arphrd_netrom		= 0,		// from ka9q: net/rom pseudo
+	arphrd_ether		= 1,		// ethernet 10/100mbps
+	arphrd_eether		= 2,		// experimental ethernet
+	arphrd_ax25		= 3,		// ax.25 level 2
+	arphrd_pronet		= 4,		// pronet token ring
+	arphrd_chaos		= 5,		// chaosnet
+	arphrd_ieee802		= 6,		// ieee 802.2 ethernet/tr/tb
+	arphrd_arcnet		= 7,		// arcnet
+	arphrd_appletlk		= 8,		// appletalk.
+	arphrd_dlci		= 15,		// frame relay dlci
+	arphrd_metricom		= 23,		// metricom strip (new iana id)
+
+	// dummy types for non arp hardware
+	arphrd_slip		= 256,
+	arphrd_cslip		= 257,
+	arphrd_slip6		= 258,
+	arphrd_cslip6		= 259,
+	arphrd_rsrvd		= 260,		// notional kiss type
+	arphrd_adapt		= 64,
+	arphrd_rose		= 270,
+	arphrd_x25		= 271,		// ccitt x.25
+	arphrd_ppp		= 512,
+	arphrd_hdlc		= 513,		// (cisco) hdlc
+	arphrd_lapb		= 516,		// lapb
+
+	arphrd_tunnel		= 768,		// ipip tunnel
+	arphrd_tunnel6		= 769,		// ipip6 tunnel
+	arphrd_frad		= 770,		// frame relay access device.
+	arphrd_skip		= 771,		// skip vif
+	arphrd_loopback		= 772,		// loopback device
+	arphrd_localtlk		= 773,		// localtalk device
+	arphrd_fddi		= 774,		// fiber distributed data interface
+	arphrd_bif		= 775,		// ap1000 bif
+	arphrd_sit		= 776,		// sit0 device - ipv6-in-ipv4
+	arphrd_ipddp		= 777,		// ip-in-ddp tunnel
+	arphrd_ipgre		= 778,		// gre over ip
+	arphrd_pimreg		= 779,		// pimsm register interface
+	arphrd_hippi		= 780,		// high performance parallel i'face
+	arphrd_ash		= 781,		// (nexus electronics) ash
+	arphrd_econet		= 782,		// acorn econet
+	arphrd_irda		= 783,		// linux/ir
+	arphrd_fcpp		= 784,		// point to point fibrechanel
+	arphrd_fcal		= 785,		// fibrechanel arbitrated loop
+	arphrd_fcpl		= 786,		// fibrechanel public loop
+	arphrd_fcpfabric	= 787		// fibrechanel fabric
+};
+
+
+// ARP protocol opcodes
+enum {
+	arpop_request		= 1,		// ARP request
+	arpop_reply		= 2,		// ARP reply
+	arpop_rrequest		= 3,		// RARP request
+	arpop_rreply		= 4		// RARP reply
+};
+
+
+// IANA assigned protocol numbers
+enum {
+	ipproto_ip		= 0,
+	ipproto6_hopopts	= 0,		// ipv6 hop-by-hop options
+	ipproto_icmp		= 1,		// internet control message protocol
+	ipproto_igmp		= 2,		// internet group management protocol
+	ipproto_ipip		= 4,		// ipip tunnels (older ka9q tunnels use 94)
+	ipproto_tcp		= 6,		// transmission control protocol
+	ipproto_egp		= 8,		// exterior gateway protocol
+	ipproto_pup		= 12,		// pup protocol
+	ipproto_udp		= 17,		// user datagram protocol
+	ipproto_idp		= 22,		// xns idp protocol
+	ipproto_tp		= 29,		// so transport protocol class 4
+	ipproto_dccp		= 33,		// datagram congestion control protocol
+	ipproto_3pc		= 34,		// 3rd party connect protocol
+	ipproto_idpr		= 35,		// inter domain policy routing protocol
+	ipproto_xtp		= 36,		// XTP
+	ipproto_ddp		= 37,		// Datagram Delivery Protocol
+	ipproto_idpr_cmtp	= 38,		// IDPR control message transport protocol
+	ipproto_il		= 40,		// IL transport protocol
+	ipproto_ipv6		= 41,		// ipv6 header
+	ipproto_sdrp		= 42,		// source demand routing protocol
+	ipproto6_routing	= 43,		// ipv6 routing header
+	ipproto6_fragment	= 44,		// ipv6 fragmentation header
+	ipproto_idrp		= 45,		// inter domain routing protocol
+	ipproto_rsvp		= 46,		// reservation protocol
+	ipproto_gre		= 47,		// general routing encapsulation
+	ipproto_dsr		= 48,		// dynamic source routing protocol
+	ipproto_bna		= 49,		// BNA
+	ipproto_esp		= 50,		// encapsulating security payload
+	ipproto_ah		= 51,		// authentication header
+	ipproto_inslp		= 52,		// integrated net layer security TUBA
+	ipproto_swipe		= 53,		// ip with encryption
+	ipproto_narp		= 54,		// NBMA address resolution protocol
+	ipproto_mobile		= 55,		// IP mobility
+	ipproto_tlsp		= 56,		// transport layer security protocol using kryptonet
+	ipproto_skip		= 57,		// SKIP
+	ipproto_icmpv6		= 58,		// icmpv6
+	ipproto6_none		= 59,		// ipv6 no next header
+	ipproto6_dstopts	= 60,		// ipv6 destination options
+	ipproto_cftp		= 62,		// CFTP
+	ipproto_kryptolan	= 65,		// KRYPTOLAN
+	ipproto_ippc		= 67,		// Internet Pluribus Packet Core
+	ipproto_satnetmon	= 69,		// SATNET monitoring
+	ipproto_visa		= 70,		// VISA
+	ipproto_ipcv		= 71,		// Internet Packet Core Utility
+	ipproto_cphb		= 73,		// Computer Protocol Heart Beat
+	ipproto_wasn		= 74,		// Wang Span Network
+	ipproto_pvp		= 75,		// packet video protocol
+	ipproto_brsatmon	= 76,		// Backroom SATNET monitoring
+	ipproto_wbmon		= 78,		// WIDEBAND monitoring
+	ipproto_wbexpak		= 79,		// WIDEBAND expak
+	ipproto_vmtp		= 81,		// VMTP
+	ipproto_svmtp		= 82,		// secure VMTP
+	ipproto_vines		= 83,		// VINES
+	ipproto_ttp_iptm	= 84,		// TTP or IPTM
+	ipproto_eigrp		= 88,		// EIGRP
+	ipproto_ospfigp		= 89,		// OSPFIGP
+	ipproto_spriterpc	= 90,		// sprite RPC
+	ipproto_larp		= 91,		// Lotus Address Resolution protocol
+	ipproto_mtp		= 92,		// multicast transport protocol
+	ipproto_ax25		= 93,		// AX.25
+	ipproto_oldipip		= 94,		// IP in IP encapsulation
+	ipproto_etherip		= 97,		// Ethernet within IP encapsulation
+	ipproto_encap		= 98,		// encapsulation header
+	ipproto_gmtp		= 100,		// GMTP
+	ipproto_pim		= 103,		// protocol independent multicast
+	ipproto_comp		= 108,		// compression header protocol
+	ipproto_snp		= 109,		// Sitara Network protocols
+	ipproto_compqp		= 110,		// compaq Peer Procotol
+	ipproto_ipxip		= 111,		// IPX in IP
+	ipproto_vrrp		= 112,		// Virtual Router Redunancy Protocol
+	ipproto_smp		= 121,		// Simple Message Protocol
+	ipproto_fire		= 125,		// FIRE
+	ipproto_crtp		= 126,		// Combat Radio Transport Protocol
+	ipproto_crudp		= 127,		// Combat Radio User Datagram
+	ipproto_sps		= 128,		// Secure Packet Shield
+	ipproto_pipe		= 131,		// Private IP Encapsulation within IP
+	ipproto_sctp		= 132,		// stream control transmission protocol
+	ipproto_fc		= 133,		// Fibre Channel
+	ipproto_udplite		= 136,		// udp-lite protocol
+	ipproto_shim6		= 140,		// Shim6
+	ipproto_rohc		= 142		// Robust Header Compression
+	//ipproto_raw		= 255,		// raw ip packets, use os, its not a packet protocol
+};
+
+
+// ICMP types
+enum {
+	icmp_echoreply		= 0,	// echo reply
+	icmp_dest_unreach	= 3,	// destination unreachable
+	icmp_source_quench	= 4,	// source quench
+	icmp_redirect		= 5,	// redirect (change route)
+	icmp_echo		= 8,	// echo request
+	icmp_time_exceeded	= 11,	// time exceeded
+	icmp_parameterprob	= 12,	// parameter problem
+	icmp_timestamp		= 13,	// timestamp request
+	icmp_timestampreply	= 14,	// timestamp reply
+	icmp_info_request	= 15,	// information request
+	icmp_info_reply		= 16,	// information reply
+	icmp_address		= 17,	// address mask reques
+	icmp_addressreply	= 18,	// address mask reply
+	nr_icmp_types		= 18
+};
+
+
+// ICMP Codes for UNREACH
+enum {
+	icmp_net_unreach	= 0,	// network unreachable
+	icmp_host_unreach	= 1,	// host unreachable
+	icmp_prot_unreach	= 2,	// protocol unreachable
+	icmp_port_unreach	= 3,	// port unreachable
+	icmp_frag_needed	= 4,	// fragmentation needed/df set
+	icmp_sr_failed		= 5,	// source route failed
+	icmp_net_unknown	= 6,
+	icmp_host_unknown	= 7,
+	icmp_host_isolated	= 8,
+	icmp_net_ano		= 9,
+	icmp_host_ano		= 10,
+	icmp_net_unr_tos	= 11,
+	icmp_host_unr_tos	= 12,
+	icmp_pkt_filtered	= 13,	// packet filtered
+	icmp_prec_violation	= 14,	// precedence violation
+	icmp_prec_cutoff	= 15,	// precedence cut off
+	nr_icmp_unreach		= 15	// instead of hardcoding immediate value
+};
+
+
+// ICMP Codes for REDIRECT
+enum {
+	icmp_redir_net		= 0,	// redirect net
+	icmp_redir_host		= 1,	// redirect host
+	icmp_redir_nettos	= 2,	// redirect net for tos
+	icmp_redir_hosttos	= 3	// redirect host for tos
+};
+
+
+// Codes for TIME_EXCEEDED.
+enum {
+	icmp_exc_ttli		= 0,	// ttl count exceeded
+	icmp_exc_fragtime	= 1	// fragment reass time exceeded
+};
+
+
+// IP flags
+enum {
+	ip_rf			= 0x8000,
+	ip_df			= 0x4000,
+	ip_mf			= 0x2000,
+	ip_offmask		= 0x1fff
+};
+
+
+// TCP flags
+enum {
+	th_fin			= 0x01,
+	th_syn			= 0x02,
+	th_rst			= 0x04,
+	th_push			= 0x08,
+	th_ack			= 0x10,
+	th_urg			= 0x20,
+	th_ece			= 0x40,
+	th_cwr			= 0x80,
+	th_ns			= 0x100
+};
+
+
+// TCP options
+enum {
+	tcpopt_eol		= 0,
+	tcpopt_nop		= 1,
+	tcpopt_maxseg		= 2,
+	tcpolen_maxseg		= 4,
+	tcpopt_window		= 3,
+	tcpolen_window		= 3,
+	tcpopt_sack_permitted	= 4,			// experimental
+	tcpolen_sack_permitted	= 2,
+	tcpopt_sack		= 5,			// experimental
+	tcpopt_timestamp	= 8,
+	tcpolen_timestamp	= 10,
+	tcpolen_tstamp_appa	= (tcpolen_timestamp+2)	// appendix a
+};
+
+
+// IPv6 flow control
+enum {
+	ipv6_fl_a_get		= 0,
+	ipv6_fl_a_put		= 1,
+	ipv6_fl_a_renew		= 2,
+	ipv6_fl_f_create	= 1,
+	ipv6_fl_f_excl		= 2,
+	ipv6_fl_s_none		= 0,
+	ipv6_fl_s_excl		= 1,
+	ipv6_fl_s_process	= 2,
+	ipv6_fl_s_user		= 3,
+	ipv6_fl_s_any		= 255
+};
+
+
+/*
+ * Bitmask constant declarations to help applications select out the
+ * flow label and priority fields.
+ *
+ * Note that this are in host byte order while the flowinfo field of
+ * sockaddr_in6 is in network byte order.
+ */
+
+enum {
+	ipv6_flowinfo_flowlabel	= 0x000fffff,
+	ipv6_flowinfo_priority	= 0x0ff00000
+};
+
+
+// IPv6 TLV options
+enum {
+	ipv6_tlv_pad0		= 0,
+	ipv6_tlv_padn		= 1,
+	ipv6_tlv_routeralert	= 5,
+	ipv6_tlv_jumbo		= 194
+};
+
+
+// ICMP6 types and options
+enum {
+	icmp6_dst_unreach	= 1,
+	icmp6_packet_too_big	= 2,
+	icmp6_time_exceeded	= 3,
+	icmp6_param_prob	= 4,
+
+	icmp6_infomsg_mask	= 0x80,			// all informational messages
+
+	icmp6_echo_request	= 128,
+	icmp6_echo_reply	= 129,
+	icmp6_membership_query	= 130,
+	icmp6_membership_report	= 131,
+	icmp6_membership_reduction	= 132,
+
+	icmp6_dst_unreach_noroute	= 0,	// no route to destination
+	icmp6_dst_unreach_admin		= 1,	// communication with destination administratively prohibited
+	icmp6_dst_unreach_notneighbor	= 2,	// not a neighbor
+	icmp6_dst_unreach_addr		= 3,	// address unreachable
+	icmp6_dst_unreach_noport	= 4,	// bad port
+
+	icmp6_time_exceed_transit	= 0,	// hop limit == 0 in transit
+	icmp6_time_exceed_reassembly	= 1,	// reassembly time out
+
+	icmp6_paramprob_header		= 0,	// erroneous header field
+	icmp6_paramprob_nextheader	= 1,	// unrecognized next header
+	icmp6_paramprob_option		= 2,	// unrecognized ipv6 option
+
+	icmp6_nd_router_solicit		= 133,
+	icmp6_nd_router_advert		= 134,
+	icmp6_nd_neighbor_solicit	= 135,
+	icmp6_nd_neighbor_advert	= 136,
+	icmp6_nd_redirect		= 137,
+
+	nd_opt_source_ll_addr	= 1,
+	nd_opt_target_ll_addr	= 2,
+	nd_opt_prefix_info	= 3,
+	nd_opt_redirect_hdr	= 4,
+	nd_opt_mtu		= 5,
+	nd_opt_route_info	= 24,
+	nd_opt_rdnss		= 25,
+	nd_opt_dnssl		= 31
+};
+
+
+// IPv6 extension headers now found in ipproto_ numbers
+
+
+}	// namespace numbers
+
+
+using namespace numbers;
+
+
+namespace headers {
 
 /*  This is a name for the 48 bit ethernet address available on many
  *  systems.
  */
 struct ether_addr
 {
-	uint8_t ether_addr_octet[ETH_ALEN];
+	uint8_t ether_addr_octet[eth_alen];
 };
 
 
 struct ether_header
 {
-	uint8_t  ether_dhost[ETH_ALEN];	// destination eth addr
-	uint8_t  ether_shost[ETH_ALEN];	// source ether addr
+	uint8_t  ether_dhost[eth_alen];	// destination eth addr
+	uint8_t  ether_shost[eth_alen];	// source ether addr
 	uint16_t ether_type;		// packet type ID field
 };
 
 
-/*
- *	These are the defined Ethernet Protocol ID's.
- */
-enum {
-	ETH_P_LOOP	= 0x0060,	// Ethernet Loopback packet
-	ETH_P_ECHO	= 0x0200,	// Ethernet Echo packet
-	ETH_P_PUP	= 0x0400,	// Xerox PUP packet
-	ETH_P_IP	= 0x0800,	// Internet Protocol packet
-	ETH_P_X25	= 0x0805,	// CCITT X.25
-	ETH_P_ARP	= 0x0806,	// Address Resolution packet
-	ETH_P_BPQ	= 0x08FF,	// G8BPQ AX.25 Ethernet Packet	[ NOT AN OFFICIALLY REGISTERED ID ]
-	ETH_P_DEC	= 0x6000,	// DEC Assigned proto
-	ETH_P_DNA_DL	= 0x6001,	// DEC DNA Dump/Load
-	ETH_P_DNA_RC	= 0x6002,	// DEC DNA Remote Console
-	ETH_P_DNA_RT	= 0x6003,	// DEC DNA Routing
-	ETH_P_LAT	= 0x6004,	// DEC LAT
-	ETH_P_DIAG	= 0x6005,	// DEC Diagnostics
-	ETH_P_CUST	= 0x6006,	// DEC Customer use
-	ETH_P_SCA	= 0x6007,	// DEC Systems Comms Arch
-	ETH_P_RARP	= 0x8035,	// Reverse Addr Res packet
-	ETH_P_ATALK	= 0x809B,	// Appletalk DDP
-	ETH_P_AARP	= 0x80F3,	// Appletalk AARP
-	ETH_P_IPX	= 0x8137,	// IPX over DIX
-	ETH_P_IPV6	= 0x86DD,	// IPv6 over bluebook
-	ETH_P_EAPOL	= 0x888E,	// 802.1x EAP over LAN
-	ETH_P_PAE	= ETH_P_EAPOL,	// Port Access Entry
-	ETH_P_PRE_AUTH	= 0x88C7,	// WPA2 pre auth
-
-/*
- *	Non DIX types. Won't clash for 1500 types.
- */
-
-	ETH_P_802_3	= 0x0001,	// Dummy type for 802.3 frames
-	ETH_P_AX25	= 0x0002,	// Dummy protocol id for AX.25
-	ETH_P_ALL	= 0x0003,	// Every packet (be careful!!!)
-	ETH_P_802_2	= 0x0004,	// 802.2 frames
-	ETH_P_SNAP	= 0x0005,	// Internal only
-	ETH_P_DDCMP	= 0x0006,	// DEC DDCMP: Internal only
-	ETH_P_WAN_PPP	= 0x0007,	// Dummy type for WAN PPP frames
-	ETH_P_PPP_MP	= 0x0008,	// Dummy type for PPP MP frames
-	ETH_P_LOCALTALK = 0x0009,	// Localtalk pseudo type
-	ETH_P_PPPTALK	= 0x0010,	// Dummy type for Atalk over PPP
-	ETH_P_TR_802_2	= 0x0011,	// 802.2 frames
-	ETH_P_MOBITEX	= 0x0015,	// Mobitex (kaz@cafe.net)
-	ETH_P_CONTROL	= 0x0016,	// Card specific control frames
-	ETH_P_IRDA	= 0x0017	// Linux/IR
-};
-
-
-/*  See RFC 826 for protocol description.  ARP packets are variable
+/*  see rfc 826 for protocol description.  arp packets are variable
  *  in size; the arphdr structure defines the fixed-length portion.
  *  Protocol type values are the same as those for 10 Mb/s Ethernet.
  *  It is followed by the variable-sized fields ar_sha, arp_spa,
@@ -123,80 +465,13 @@ enum {
  *  specified.  Field names used correspond to RFC 826.
  */
 struct arphdr {
-	uint16_t ar_hrd;	// Format of hardware address.
-	uint16_t ar_pro;	// Format of protocol address.
-	unsigned char ar_hln;	// Length of hardware address.
-	unsigned char ar_pln;	// Length of protocol address.
-	uint16_t ar_op;		// ARP opcode (command).
-#if 0
-    /* Ethernet looks like this : This bit is variable sized
-       however...
-     */
-        unsigned char __ar_sha[ETH_ALEN];	// Sender hardware address.
-        unsigned char __ar_sip[4];		// Sender IP address.
-        unsigned char __ar_tha[ETH_ALEN];	// Target hardware address.
-        unsigned char __ar_tip[4];		// Target IP address.
-#endif
+	uint16_t ar_hrd;	// Format of hardware address
+	uint16_t ar_pro;	// Format of protocol address
+	unsigned char ar_hln;	// Length of hardware address
+	unsigned char ar_pln;	// Length of protocol address
+	uint16_t ar_op;		// ARP opcode (command)
 };
 
-
-/* ARP protocol opcodes. */
-enum {
-	ARPOP_REQUEST =	1,		// ARP request.
-	ARPOP_REPLY   =	2,		// ARP reply.
-	ARPOP_RREQUEST=	3,		// RARP request.
-	ARPOP_RREPLY  =	4,		// RARP reply.
-};
-
-
-/* ARP protocol HARDWARE identifiers. */
-enum {
-	ARPHRD_NETROM =	0,		// From KA9Q: NET/ROM pseudo.
-	ARPHRD_ETHER  =	1,		// Ethernet 10/100Mbps.
-	ARPHRD_EETHER =	2,		// Experimental Ethernet.
-	ARPHRD_AX25   =	3,		// AX.25 Level 2.
-	ARPHRD_PRONET =	4,		// PROnet token ring.
-	ARPHRD_CHAOS  =	5,		// Chaosnet.
-	ARPHRD_IEEE802 = 6,		// IEEE 802.2 Ethernet/TR/TB.
-	ARPHRD_ARCNET  = 7,		// ARCnet.
-	ARPHRD_APPLETLK = 8,		// APPLEtalk.
-	ARPHRD_DLCI  =	15,		// Frame Relay DLCI.
-	ARPHRD_METRICOM = 23,		// Metricom STRIP (new IANA id).
-
-	/* Dummy types for non ARP hardware */
-	ARPHRD_SLIP  =	256,
-	ARPHRD_CSLIP =	257,
-	ARPHRD_SLIP6 =	258,
-	ARPHRD_CSLIP6 =	259,
-	ARPHRD_RSRVD =	260,		/* Notional KISS type.  */
-	ARPHRD_ADAPT =	264,
-	ARPHRD_ROSE  =	270,
-	ARPHRD_X25   =	271,		/* CCITT X.25.  */
-	ARPHRD_PPP   =	512,
-	ARPHRD_HDLC  =	513,		/* (Cisco) HDLC.  */
-	ARPHRD_LAPB  =	516,		/* LAPB.  */
-
-	ARPHRD_TUNNEL =	768,		/* IPIP tunnel.  */
-	ARPHRD_TUNNEL6 = 769,		/* IPIP6 tunnel.  */
-	ARPHRD_FRAD  =	770,            /* Frame Relay Access Device.  */
-	ARPHRD_SKIP  =	771,		/* SKIP vif.  */
-	ARPHRD_LOOPBACK = 772,		/* Loopback device.  */
-	ARPHRD_LOCALTLK = 773,		/* Localtalk device.  */
-	ARPHRD_FDDI  =	774,		/* Fiber Distributed Data Interface. */
-	ARPHRD_BIF   =	775,            /* AP1000 BIF.  */
-	ARPHRD_SIT   =	776,		/* sit0 device - IPv6-in-IPv4.  */
-	ARPHRD_IPDDP =	777,		/* IP-in-DDP tunnel.  */
-	ARPHRD_IPGRE =	778,		/* GRE over IP.  */
-	ARPHRD_PIMREG =	779,		/* PIMSM register interface.  */
-	ARPHRD_HIPPI  =	780,		/* High Performance Parallel I'face. */
-	ARPHRD_ASH   =	781,		/* (Nexus Electronics) Ash.  */
-	ARPHRD_ECONET =	782,		/* Acorn Econet.  */
-	ARPHRD_IRDA  =	783,		/* Linux/IR.  */
-	ARPHRD_FCPP  =	784,		/* Point to point fibrechanel.  */
-	ARPHRD_FCAL  =	785,		/* Fibrechanel arbitrated loop.  */
-	ARPHRD_FCPL  =	786,		/* Fibrechanel public loop.  */
-	ARPHRD_FCPFABRIC =  787		/* Fibrechanel fabric.  */
-};
 
 
 /* See RFC 826 for protocol description.  Structure below is adapted
@@ -205,21 +480,14 @@ enum {
  */
 struct	ether_arp {
 	struct	arphdr ea_hdr;		// fixed-size header
-	uint8_t arp_sha[ETH_ALEN];	// sender hardware address
+	uint8_t arp_sha[eth_alen];	// sender hardware address
 	uint8_t arp_spa[4];		// sender protocol address
-	uint8_t arp_tha[ETH_ALEN];	// target hardware address
+	uint8_t arp_tha[eth_alen];	// target hardware address
 	uint8_t arp_tpa[4];		// target protocol address
 };
 
 
-#define	arp_hrd	ea_hdr.ar_hrd
-#define	arp_pro	ea_hdr.ar_pro
-#define	arp_hln	ea_hdr.ar_hln
-#define	arp_pln	ea_hdr.ar_pln
-#define	arp_op	ea_hdr.ar_op
-
-
-/**/
+// ICMP header
 struct icmphdr {
 	uint8_t type;
 	uint8_t code;
@@ -239,62 +507,6 @@ struct icmphdr {
 };
 
 
-enum {
-	ICMP_ECHOREPLY	   =	0,	// Echo Reply
-	ICMP_DEST_UNREACH  =	3,	// Destination Unreachable
-	ICMP_SOURCE_QUENCH =	4,	// Source Quench
-	ICMP_REDIRECT	   =	5,	// Redirect (change route)
-	ICMP_ECHO	   =	8,	// Echo Request
-	ICMP_TIME_EXCEEDED =	11,	// Time Exceeded
-	ICMP_PARAMETERPROB =	12,	// Parameter Problem
-	ICMP_TIMESTAMP	   =	13,	// Timestamp Request
-	ICMP_TIMESTAMPREPLY=	14,	// Timestamp Reply
-	ICMP_INFO_REQUEST  =	15,	// Information Request
-	ICMP_INFO_REPLY	   =	16,	// Information Reply
-	ICMP_ADDRESS	   =	17,	// Address Mask Reques
-	ICMP_ADDRESSREPLY  =	18,	// Address Mask Reply
-	NR_ICMP_TYPES	   =	18
-};
-
-
-// Codes for UNREACH.
-enum {
-	ICMP_NET_UNREACH   =	0,	// Network Unreachable
-	ICMP_HOST_UNREACH  =	1,	// Host Unreachable
-	ICMP_PROT_UNREACH  =	2,	// Protocol Unreachable
-	ICMP_PORT_UNREACH  =	3,	// Port Unreachable
-	ICMP_FRAG_NEEDED   =	4,	// Fragmentation Needed/DF set
-	ICMP_SR_FAILED	   =	5,	// Source Route failed
-	ICMP_NET_UNKNOWN   =	6,
-	ICMP_HOST_UNKNOWN  =	7,
-	ICMP_HOST_ISOLATED =	8,
-	ICMP_NET_ANO	   =	9,
-	ICMP_HOST_ANO	   =	10,
-	ICMP_NET_UNR_TOS   =	11,
-	ICMP_HOST_UNR_TOS  =	12,
-	ICMP_PKT_FILTERED  =	13,	// Packet filtered
-	ICMP_PREC_VIOLATION =	14,	// Precedence violation
-	ICMP_PREC_CUTOFF    =	15,	// Precedence cut off
-	NR_ICMP_UNREACH	    =	15	// instead of hardcoding immediate value
-};
-
-
-// Codes for REDIRECT.
-enum {
-	ICMP_REDIR_NET	   =	0,	// Redirect Net
-	ICMP_REDIR_HOST	   =	1,	// Redirect Host
-	ICMP_REDIR_NETTOS  =	2,	// Redirect Net for TOS
-	ICMP_REDIR_HOSTTOS =	3	// Redirect Host for TOS
-};
-
-
-// Codes for TIME_EXCEEDED.
-enum {
-	ICMP_EXC_TTL =	0,	// TTL count exceeded
-	ICMP_EXC_FRAGTIME = 1	// Fragment Reass time exceeded
-};
-
-
 struct udphdr {
 	uint16_t source;
 	uint16_t dest;
@@ -303,10 +515,7 @@ struct udphdr {
 };
 
 
-/*
- *  The pseudo-header is used to calculate checksums over UDP
- *  and TCP packets.
- */
+// pseudo-header is used to calculate checksums over UDP and TCP packets
 struct pseudohdr {
 	uint32_t saddr;
 	uint32_t daddr;
@@ -316,19 +525,7 @@ struct pseudohdr {
 };
 
 
-enum {
-	TH_FIN	= 0x001,
-	TH_SYN	= 0x002,
-	TH_RST	= 0x004,
-	TH_PUSH	= 0x008,
-	TH_ACK	= 0x010,
-	TH_URG	= 0x020,
-	TH_ECE  = 0x040,
-	TH_CWR  = 0x080,
-	TH_NS   = 0x100
-};
-
-
+// TCP header
 struct tcphdr
 {
 	uint16_t th_sport;		// source port
@@ -349,14 +546,7 @@ struct tcphdr
 };
 
 
-enum {
-	IP_RF = 0x8000,
-	IP_DF = 0x4000,
-	IP_MF = 0x2000,
-	IP_OFFMASK = 0x1fff
-};
-
-
+// IPv4 header
 struct iphdr
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -383,28 +573,13 @@ struct iphdr
 
 // describes a fragment for re-assembling routines
 struct fragments {
-	int id;		// the IP id-filed
-	int len;	// how much data received yet?
-	int origLen;	// and how much has it to be?
-	int userLen;	// and how much did we saved?
-	char *data;     // the packet itself
+	int id;				// the IP id-filed
+	int len;			// how much data received yet?
+	int origLen;			// and how much has it to be?
+	int userLen;			// and how much did we saved?
+	char *data;     		// the packet itself
 };
 
-
-enum {
-	TCPOPT_EOL	=	0,
-	TCPOPT_NOP	=	1,
-	TCPOPT_MAXSEG	=	2,
-	TCPOLEN_MAXSEG	=	4,
-	TCPOPT_WINDOW	=	3,
-	TCPOLEN_WINDOW	=	3,
-	TCPOPT_SACK_PERMITTED =	4,			// Experimental
-	TCPOLEN_SACK_PERMITTED=	2,
-	TCPOPT_SACK	=	5,			// Experimental
-	TCPOPT_TIMESTAMP   =	8,
-	TCPOLEN_TIMESTAMP  =	10,
-	TCPOLEN_TSTAMP_APPA  =	(TCPOLEN_TIMESTAMP+2)	// appendix A
-};
 
 
 // global in6_addr should be defined nowadays
@@ -416,16 +591,10 @@ struct in6_addr {
 		uint16_t u6_addr16[8];
 		uint32_t u6_addr32[4];
 	} in6_u;
-/*#define s6_addr                 in6_u.u6_addr8
-#define s6_addr16               in6_u.u6_addr16
-#define s6_addr32               in6_u.u6_addr32
-*/
 };
 
 #else
-
 	using in6_addr = ::in6_addr;
-
 #endif
 
 
@@ -450,61 +619,20 @@ struct ip6_hdr {
 };
 
 
-enum {
-	IPV6_FL_A_GET  	=	0,
-	IPV6_FL_A_PUT   =	1,
-	IPV6_FL_A_RENEW =	2,
-	IPV6_FL_F_CREATE   =    1,
-	IPV6_FL_F_EXCL     =    2,
-	IPV6_FL_S_NONE     =    0,
-	IPV6_FL_S_EXCL     =    1,
-	IPV6_FL_S_PROCESS  =    2,
-	IPV6_FL_S_USER     =    3,
-	IPV6_FL_S_ANY      =    255
-};
-
-
-
-/*
- *      Bitmask constant declarations to help applications select out the
- *      flow label and priority fields.
- *
- *      Note that this are in host byte order while the flowinfo field of
- *      sockaddr_in6 is in network byte order.
- */
-
-enum {
-	IPV6_FLOWINFO_FLOWLABEL    =     0x000fffff,
-	IPV6_FLOWINFO_PRIORITY     =     0x0ff00000
-};
-
-
-/*
- *      IPv6 TLV options.
- */
-enum {
-	IPV6_TLV_PAD0     =      0,
-	IPV6_TLV_PADN     =      1,
-	IPV6_TLV_ROUTERALERT  =  5,
-	IPV6_TLV_JUMBO        =  194
-};
-
 
 struct icmp6_hdr {
 	uint8_t icmp6_type;			// type field
 	uint8_t icmp6_code;			// code field
 	uint16_t icmp6_cksum;			// checksum field
 	union {
-		uint32_t icmp6_un_data32[1];	// type-specific field
-		uint16_t icmp6_un_data16[2];	// type-specific field
-		uint8_t icmp6_un_data8[4];	// type-specific field
-	} icmp6_dataun;
+		uint32_t icmp6_data32[1];	// type-specific field
+		uint16_t icmp6_data16[2];	// type-specific field
+		uint8_t icmp6_data8[4];		// type-specific field
+	} un;
 };
 
 
-#ifndef _NETINET_ICMP6_H
-#define _NETINET_ICMP6_H
-
+/*
 #define icmp6_data32    icmp6_dataun.icmp6_un_data32
 #define icmp6_data16    icmp6_dataun.icmp6_un_data16
 #define icmp6_data8     icmp6_dataun.icmp6_un_data8
@@ -513,54 +641,7 @@ struct icmp6_hdr {
 #define icmp6_id        icmp6_data16[0]		// echo request/reply
 #define icmp6_seq       icmp6_data16[1]		// echo request/reply
 #define icmp6_maxdelay  icmp6_data16[0]		// mcast group membership
-
-#endif
-
-
-// icmp6 types and options
-enum {
-	ICMP6_DST_UNREACH	=      1,
-	ICMP6_PACKET_TOO_BIG	=      2,
-	ICMP6_TIME_EXCEEDED	=      3,
-	ICMP6_PARAM_PROB	=      4,
-
-	ICMP6_INFOMSG_MASK	=	0x80,		// all informational messages
-
-	ICMP6_ECHO_REQUEST	=	128,
-	ICMP6_ECHO_REPLY	=	129,
-	ICMP6_MEMBERSHIP_QUERY	=	130,
-	ICMP6_MEMBERSHIP_REPORT	=	131,
-	ICMP6_MEMBERSHIP_REDUCTION	=	132,
-
-	ICMP6_DST_UNREACH_NOROUTE	= 	0,	// no route to destination
-	ICMP6_DST_UNREACH_ADMIN		=	1,	// communication with destination
-                                        		// administratively prohibited
-	ICMP6_DST_UNREACH_NOTNEIGHBOR	= 	2,	// not a neighbor
-	ICMP6_DST_UNREACH_ADDR		=	3,	// address unreachable
-	ICMP6_DST_UNREACH_NOPORT	=	4,	// bad port
-
-	ICMP6_TIME_EXCEED_TRANSIT	=	0,	// Hop Limit == 0 in transit
-	ICMP6_TIME_EXCEED_REASSEMBLY	=	1,	// Reassembly time out
-
-	ICMP6_PARAMPROB_HEADER		=	0,	// erroneous header field
-	ICMP6_PARAMPROB_NEXTHEADER	=	1,	// unrecognized Next Header
-	ICMP6_PARAMPROB_OPTION		=	2,	// unrecognized IPv6 option
-
-	ICMP6_ND_ROUTER_SOLICIT		=	133,
-	ICMP6_ND_ROUTER_ADVERT		=	134,
-	ICMP6_ND_NEIGHBOR_SOLICIT	=	135,
-	ICMP6_ND_NEIGHBOR_ADVERT	=	136,
-	ICMP6_ND_REDIRECT		=	137,
-
-	ND_OPT_SOURCE_LL_ADDR	=	1,
-	ND_OPT_TARGET_LL_ADDR	=	2,
-	ND_OPT_PREFIX_INFO	=	3,
-	ND_OPT_REDIRECT_HDR	=	4,
-	ND_OPT_MTU		=	5,
-	ND_OPT_ROUTE_INFO	=	24,
-	ND_OPT_RDNSS		=	25,
-	ND_OPT_DNSSL		=	31
-};
+*/
 
 
 // RFC 6106 recursive DNS server option
@@ -629,6 +710,7 @@ struct icmp6_ri_opt {
 	uint8_t plen;
 	uint8_t flags;
 	uint32_t lifetime;
+	// one or more
 	unsigned char prefix[1];
 };
 
@@ -641,132 +723,15 @@ struct pseudohdr6 {
 };
 
 
-enum {
-	NEXT_HDR_HBH	= 0,		// hop by hop
-	NEXT_HDR_RH	= 43,		// routing header
-	NEXT_HDR_FH	= 44,		// fragmentation header
-	NEXT_HDR_DOH	= 60,		// destination option
-	NEXT_HDR_MOB	= 135		// mobility header
-};
-
-
 struct ip6_opt {
 	uint8_t  ip6o_type;
 	uint8_t  ip6o_len;
 };
 
 
-enum {
-	TX_TAG_NONE	= 0,
-	RX_TAG_NONE	= 0,
+} // namespace headers
 
-	TX_TAG_IP	= 0x1000,
-	TX_TAG_IP6,
-	TX_TAG_DNET_IP,
-	TX_TAG_DNET_ETH,
-	TX_TAG_PCAP,
-	TX_TAG_PCAP_ETH,
-	TX_TAG_STRING,
-
-	RX_TAG_PCAP	= 0x2000
-};
-
-
-// IANA assigned protocol numbers. OSX defines them in in.h so we need to #ifdef around it
-enum {
-#ifndef IPPROTO_IP
-	IPPROTO_IP		= 0,
-#endif
-#ifndef IPPROTO_HOPOPTS
-	IPPROTO_HOPOPTS		= 0,		/* IPv6 Hop-by-Hop options.  */
-#endif
-#ifndef IPPROTO_ICMP
-	IPPROTO_ICMP		= 1,		/* Internet Control Message Protocol.  */
-#endif
-#ifndef IPPROTO_IGMP
-	IPPROTO_IGMP		= 2,		/* Internet Group Management Protocol. */
-#endif
-#ifndef IPPROTO_IPIP
-	IPPROTO_IPIP		= 4,		/* IPIP tunnels (older KA9Q tunnels use 94).  */
-#endif
-#ifndef IPPROTO_TCP
-	IPPROTO_TCP		= 6,		/* Transmission Control Protocol.  */
-#endif
-#ifndef IPPROTO_EGP
-	IPPROTO_EGP		= 8,		/* Exterior Gateway Protocol.  */
-#endif
-#ifndef IPPROTO_PUP
-	IPPROTO_PUP		= 12,		/* PUP protocol.  */
-#endif
-#ifndef IPPROTO_UDP
-	IPPROTO_UDP		= 17,		/* User Datagram Protocol.  */
-#endif
-#ifndef IPPROTO_IDP
-	IPPROTO_IDP		= 22,		/* XNS IDP protocol.  */
-#endif
-#ifndef IPPROTO_TP
-	IPPROTO_TP		= 29,		/* SO Transport Protocol Class 4.  */
-#endif
-#ifndef IPPROTO_DCCP
-	IPPROTO_DCCP		= 33,		/* Datagram Congestion Control Protocol.  */
-#endif
-#ifndef IPPROTO_IPV6
-	IPPROTO_IPV6		= 41,		/* IPv6 header.  */
-#endif
-#ifndef IPPROTO_ROUTING
-	IPPROTO_ROUTING		= 43,		/* IPv6 routing header.  */
-#endif
-#ifndef IPPROTO_FRAGMENT
-	IPPROTO_FRAGMENT	= 44,		/* IPv6 fragmentation header.  */
-#endif
-#ifndef IPPROTO_RSVP
-	IPPROTO_RSVP		= 46,		/* Reservation Protocol.  */
-#endif
-#ifndef IPPROTO_GRE
-	IPPROTO_GRE		= 47,		/* General Routing Encapsulation.  */
-#endif
-#ifndef IPPROTO_ESP
-	IPPROTO_ESP		= 50,		/* encapsulating security payload.  */
-#endif
-#ifndef IPPROTO_AH
-	IPPROTO_AH		= 51,		/* authentication header.  */
-#endif
-#ifndef IPPROTO_ICMPV6
-	IPPROTO_ICMPV6		= 58,		/* ICMPv6.  */
-#endif
-#ifndef IPPROTO_NONE
-	IPPROTO_NONE		= 59,		/* IPv6 no next header.  */
-#endif
-#ifndef IPPROTO_DSTOPTS
-	IPPROTO_DSTOPTS		= 60,		/* IPv6 destination options.  */
-#endif
-#ifndef IPPROTO_MTP
-	IPPROTO_MTP		= 92,		/* Multicast Transport Protocol.  */
-#endif
-#ifndef IPPROTO_IPIP
-	IPOROTO_IPIP		= 94,		/* IP in IP encapsulation */
-#endif
-#ifndef IPPROTO_ENCAP
-	IPPROTO_ENCAP		= 98,		/* Encapsulation Header.  */
-#endif
-#ifndef IPPROTO_PIM
-	IPPROTO_PIM		= 103,		/* Protocol Independent Multicast.  */
-#endif
-#ifndef IPPROTO_COMP
-	IPPROTO_COMP		= 108,		/* Compression Header Protocol.  */
-#endif
-#ifndef IPPROTO_SCTP
-	IPPROTO_SCTP		= 132,		/* Stream Control Transmission Protocol.  */
-#endif
-#ifndef IPPROTO_UDPLITE
-	IPPROTO_UDPLITE		= 136,		/* UDP-Lite protocol.  */
-#endif
-	//IPPROTO_RAW		= 255,		/* Raw IP packets, use OS, its not a packet protocol  */
-
-	IPPROTO_USIPP		= 255		/* dummy to have at least one enum */
-};
-
-
+using namespace headers;
 
 } // namespace usipp
 

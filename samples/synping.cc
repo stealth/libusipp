@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	tcp.init_device(argv[4], 1, 100);
 	tcp.setfilter("tcp and dst port 8000");
 
-	tcp.set_flags(TH_SYN|TH_CWR);
+	tcp.set_flags(numbers::th_syn|numbers::th_cwr);
 	tcp.set_dstport(atoi(argv[2]));
 	tcp.set_srcport(8000);
 

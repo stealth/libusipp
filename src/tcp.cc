@@ -41,7 +41,7 @@ using namespace std;
 /*! create a TCP object destined to 'host' */
 template<typename T>
 TCP<T>::TCP(const string &host, RX *rx, TX *tx)
-     : T(host, IPPROTO_TCP, rx, tx)
+     : T(host, numbers::ipproto_tcp, rx, tx)
 {
 	srand(time(NULL));
 	memset(&tcph, 0, sizeof(tcph));
@@ -271,7 +271,7 @@ int TCP<T>::sendpack(const void *buf, size_t paylen)
 
 	uint32_t zero = 0;
 	memcpy(&this->d_pseudo.zero, &zero, sizeof(this->d_pseudo.zero));
-	T::d_pseudo.proto = IPPROTO_TCP;
+	T::d_pseudo.proto = numbers::ipproto_tcp;
 
 	if (sizeof(T::d_pseudo.len) == sizeof(uint16_t))
 		T::d_pseudo.len = htons((tcph.th_off<<2) + paylen);

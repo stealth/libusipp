@@ -129,5 +129,6 @@ public:
 typedef ICMP ICMP4;
 
 } // namespace usipp
-#endif // _ICMP_H_
+
+#endif
 

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
 	eth->set_l2dst(argv[1]);
 	eth->set_l2src(argv[2]);
-	eth->set_type(usipp::ETH_P_IP);
+	eth->set_type(numbers::eth_p_ip);
 	icmp.set_src(argv[3]);
 
 	// We registered a non-IP layer TX provider which cannot
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	icmp.checksum(1);
 	icmp.register_tx(eth);
 
-	icmp.set_type(ICMP_ECHO);
+	icmp.set_type(numbers::icmp_echo);
 
 	if (icmp.sendpack(ping) < 0)
 		cerr<<icmp.why()<<endl;

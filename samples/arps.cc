@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	// Not really needed, ARP class is doing that for us
 	// by itself
 	req->raw_tx()->broadcast();
-	req->set_op(usipp::ARPOP_REQUEST);
+	req->set_op(numbers::arpop_request);
 
 	memcpy(blob.arp_sha, "\x11\x22\x33\x44\x55\x66", 6);
 	memcpy(blob.arp_spa, "\x01\x00\x00\x02", 4);
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
 	rep->set_l2src("77:88:99:aa:bb:cc");
 
-	rep->set_op(ARPOP_REPLY);
+	rep->set_op(numbers::arpop_reply);
 	rep->sendpack(&blob, sizeof(blob));
 
 	delete rep;

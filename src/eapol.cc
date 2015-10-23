@@ -50,7 +50,7 @@ EAPOL::EAPOL(const string &dev)
 	Layer2::register_tx(d_tx = new TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_rx())));
 
 	d_tx->set_l2dst("01:80:c2:00:00:03");
-	d_tx->set_type(ETH_P_EAPOL);
+	d_tx->set_type(numbers::eth_p_eapol);
 }
 
 

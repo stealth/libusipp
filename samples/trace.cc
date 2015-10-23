@@ -107,10 +107,7 @@ int tcp_trace(const string &dst, const string &src, const string &dev, int port)
 	tcp.set_srcport(1234);
 	tcp.set_ack(0);
 
-	// The dnet includes poison global namespace with a lot of #define's.
-	// If you want to use usipp's definitions, you have to undef them first
-#undef TH_SYN
-	tcp.set_flags(usipp::TH_SYN);
+	tcp.set_flags(numbers::th_syn);
 
 	sn.init_device(dev, 0, 500);
 	sn.setfilter("(icmp and icmp[0] == 11) or (tcp and dst port 1234)");
@@ -121,7 +118,7 @@ int tcp_trace(const string &dst, const string &src, const string &dev, int port)
 		tcp.sendpack("");
 		sn.sniffpack(NULL, 0);
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
-		if (sn.get_proto() == usipp::IPPROTO_TCP)
+		if (sn.get_proto() == numbers::ipproto_tcp)
 			break;
 	}
 	return 0;

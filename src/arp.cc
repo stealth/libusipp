@@ -42,13 +42,13 @@ ARP::ARP(const string &dev)
 	memset(&arphdr, 0, sizeof(arphdr));
 
 	// some sane default variables
-	arphdr.ar_op = htons(ARPOP_REQUEST);
-	arphdr.ar_hrd = htons(ARPHRD_ETHER);
-	arphdr.ar_pro = htons(ETH_P_IP);
+	arphdr.ar_op = htons(numbers::arpop_request);
+	arphdr.ar_hrd = htons(numbers::arphrd_ether);
+	arphdr.ar_pro = htons(numbers::eth_p_ip);
 	arphdr.ar_hln = 6;
 	arphdr.ar_pln = 4;
 
-	d_tx->set_type(ETH_P_ARP);
+	d_tx->set_type(numbers::eth_p_arp);
 	d_tx->broadcast();
 }
 

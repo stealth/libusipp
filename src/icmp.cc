@@ -38,7 +38,7 @@ using namespace std;
 
 
 ICMP::ICMP(const string &host, RX *rx, TX *tx)
-      : IP(host, IPPROTO_ICMP, rx, tx)
+      : IP(host, numbers::ipproto_icmp, rx, tx)
 {
 	// clear memory
 	memset(&icmphdr, 0, sizeof(icmphdr));

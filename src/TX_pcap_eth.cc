@@ -45,13 +45,13 @@ int TX_pcap_eth::set_l2src(const string &src)
 {
 	unsigned char mac[6];
 
-	if (src.size() == ETH_ALEN) {
-		memcpy(ehdr.ether_dhost, src.c_str(), ETH_ALEN);
+	if (src.size() == numbers::eth_alen) {
+		memcpy(ehdr.ether_dhost, src.c_str(), numbers::eth_alen);
 		return 0;
 	}
 
 	if (sscanf(src.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != ETH_ALEN)
+	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != numbers::eth_alen)
 		return die("TX_pcap_eth::set_l2src::sscanf: invalid ethernet address", RETURN, -1);
 
 	memcpy(ehdr.ether_shost, mac, sizeof(ehdr.ether_shost));
@@ -63,13 +63,13 @@ int TX_pcap_eth::set_l2dst(const string &dst)
 {
 	unsigned char mac[6];
 
-	if (dst.size() == ETH_ALEN) {
-		memcpy(ehdr.ether_dhost, dst.c_str(), ETH_ALEN);
+	if (dst.size() == numbers::eth_alen) {
+		memcpy(ehdr.ether_dhost, dst.c_str(), numbers::eth_alen);
 		return 0;
 	}
 
 	if (sscanf(dst.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != ETH_ALEN)
+	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != numbers::eth_alen)
 		die("TX_pcap_eth::set_l2dst::sscanf: invalid ethernet address", RETURN, -1);
 
 	memcpy(ehdr.ether_dhost, mac, sizeof(ehdr.ether_dhost));

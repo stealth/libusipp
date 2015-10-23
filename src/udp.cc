@@ -43,7 +43,7 @@ using namespace std;
 
 template<typename T>
 UDP<T>::UDP(const string &host, RX *rx, TX *tx)
-      : T(host, IPPROTO_UDP, rx, tx)
+      : T(host, numbers::ipproto_udp, rx, tx)
 {
 	memset(&d_udph, 0, sizeof(d_udph));
 }
@@ -178,7 +178,7 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 
 	uint32_t zero = 0;
 	memcpy(&this->d_pseudo.zero, &zero, sizeof(this->d_pseudo.zero));
-	T::d_pseudo.proto = IPPROTO_UDP;
+	T::d_pseudo.proto = numbers::ipproto_udp;
 
 	if (d_udph.len == 0)
 		d_udph.len = htons(paylen + sizeof(d_udph));

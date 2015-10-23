@@ -23,11 +23,11 @@ int main(int argc, char **argv)
 
 	eth->set_l2dst(argv[1]);
 	eth->set_l2src(argv[2]);
-	eth->set_type(ETH_P_IPV6);
+	eth->set_type(numbers::eth_p_ipv6);
 	icmp.set_src(argv[3]);
 
 	icmp.register_tx(eth);
-	icmp.set_type(ICMP6_ECHO_REQUEST);
+	icmp.set_type(numbers::icmp6_echo_request);
 
 	if (icmp.sendpack(ping) < 0)
 		cerr<<icmp.why()<<endl;

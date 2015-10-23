@@ -351,9 +351,9 @@ int IP6::sniffpack(void *buf, size_t blen)
 	uint16_t offset = 0;
 
 	// Any IP6 extension headers?
-	if (iph.nexthdr == NEXT_HDR_HBH || iph.nexthdr == NEXT_HDR_RH ||
-	    iph.nexthdr == NEXT_HDR_FH || iph.nexthdr == NEXT_HDR_DOH ||
-	    iph.nexthdr == NEXT_HDR_MOB) {
+	if (iph.nexthdr == ipproto6_hopopts || iph.nexthdr == ipproto6_routing ||
+	    iph.nexthdr == ipproto6_fragment || iph.nexthdr == ipproto6_dstopts ||
+	    iph.nexthdr == ipproto_mobile) {
 		ip6_opt *op = (ip6_opt *)(&iph + 1);
 		do {
 			totlen -= (8*op->ip6o_len + 8);
@@ -362,9 +362,9 @@ int IP6::sniffpack(void *buf, size_t blen)
 			offset += (8*op->ip6o_len + 8);
 			e_hdrs.push_back(string((char *)op, 8*op->ip6o_len + 8));
 			op = (ip6_opt *)((char *)op + 8*op->ip6o_len + 8);
-		} while (op->ip6o_type == NEXT_HDR_HBH || op->ip6o_type == NEXT_HDR_RH ||
-		         op->ip6o_type == NEXT_HDR_FH ||op->ip6o_type == NEXT_HDR_DOH ||
-	        	 op->ip6o_type == NEXT_HDR_MOB);
+		} while (op->ip6o_type == ipproto6_hopopts || op->ip6o_type == ipproto6_routing ||
+		         op->ip6o_type == ipproto6_fragment ||op->ip6o_type == ipproto6_dstopts ||
+	        	 op->ip6o_type == ipproto_mobile);
 	}
 
 	e_hdrs_len = offset;
