@@ -8,13 +8,9 @@ USI++ README
 
 usi++ (UNIX Socket Interface) is a low-level network-library for sending/receiving
 IP, IP6, ARP etc. packets directly on RAW or PACKET sockets. It can also be used for
-network-monitoring and rapid development of pentesting tools.
+network-monitoring and rapid development of pentesting tools. It requires `libpcap`
+and `libdnet` if you want the Layer2 DNET provider.
 
-Since version 1.2 it uses the packet capture library libpcap.
-
-To get the latest libpcap with full linux-features, you should visit
-
-http://www.tcpdump.org
 
 1. License
 ----------
@@ -42,40 +38,33 @@ Since USI++ is GPL there is ABSOLUTELY NO WARRANTY. YOU USE IT AT YOUR OWN RISK.
 
 Usually like this:
 
-    # c++ -std=c++11 foo.cc -lusi++ -lpcap
 
-If you compiled usi++ with dnet support, which allows you to also
+    # c++ -std=c++11 foo.cc -lusi++ -lpcap -L/usr/local/lib -I/usr/local/include
+
+
+If you compiled usi++ with _dnet_ support, which allows you to also
 send packets at the datalink layer (not just RAW sockets), you also need to
-link against -ldnet.
+link against `-ldnet`. Newer _libpcap_ may already contain `pcap_inject()` so
+you can also build usi++ without _libdnet_, as this function also
+provides a portable way to send datalink frames.
 
 
 4. Function-description
 -----------------------
 
-Please look at the HTML-documentation of `libusi++` or at the samples.
+Please look at the HTML-documentation (generated via doxygen) of `libusi++` or at the samples.
 
 
 5. Supported Platforms
 ----------------------
 
-To make usi++ work properly on new Linux 2.4 kernels,
-make sure you disable 'connection tracking' in kernel.
-At best you compile connection tracking (if you need it for NAT)
-as modules and remove them when playing with usi++.
-This is because connection tracking forbids to send arbitrary
-TCP or ICMP packets which don't belong to any connection.
+Linux, BSD, OSX.
 
 
 6. BUGS/TODO
 ------------
 
-The TCP-options are alpha-state. I need to play around with different
-(little/big-endian) systems to figure out complete behaivior.
-
-The STL-headerfiles shipped with redhat 6.x and freeBSD 3.3 are broken (g++3).
-If you get compiler-errors when compiling ip.cc that tell you that there is
-a mess with stl_alloc.h, you can copy the fixed stl_alloc.h (directory fix)
-to the specified dir.
+None.
 
 
 7. Background for Layer 2

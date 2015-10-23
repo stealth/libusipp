@@ -611,7 +611,7 @@ char *IP::reassemble(char *packet, int len, int *resultLen)
 
 	/* if fragment-offset and DF-bit not set */
 	if (ntohs(ip->frag_off) != 0 &&
-	   (ntohs(ip->frag_off) & IP_DF) != IP_DF) {
+	   (ntohs(ip->frag_off) & numbers::ip_df) != numbers::ip_df) {
 
 		/* for all pending fragments */
 		for (i = 0; i < pending.size(); i++) {
@@ -640,7 +640,7 @@ char *IP::reassemble(char *packet, int len, int *resultLen)
 			pending.push_back(f);
 		}
 
-		offset = 8*(ntohs(ip->frag_off) & IP_OFFMASK);
+		offset = 8*(ntohs(ip->frag_off) & numbers::ip_offmask);
 
 		if (offset + ntohs(ip->tot_len) - ihl <= len)
 			xlen = ntohs(ip->tot_len) - ihl;
@@ -669,7 +669,7 @@ char *IP::reassemble(char *packet, int len, int *resultLen)
 		 * how the original size of this packet was
 		 */
 		if ((ntohs(ip->frag_off) != 0 &&
-		    (ntohs(ip->frag_off) & IP_MF) == 0)) {
+		    (ntohs(ip->frag_off) & numbers::ip_mf) == 0)) {
 			f->origLen = ntohs(ip->tot_len) + offset - ihl;
 		}
 

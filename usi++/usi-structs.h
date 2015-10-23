@@ -435,6 +435,7 @@ enum {
 }	// namespace numbers
 
 
+namespace flags = numbers;
 using namespace numbers;
 
 

@@ -18,18 +18,10 @@
  * along with psc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// include this in usi++.h instead of usi-structs.h if you want uppercase
-// enums for compatibility
+// include this if you want uppercase enums for compatibility
 
 #ifndef usipp_usi_structs_compat_h
 #define usipp_usi_structs_compat_h
-
-#include <sys/types.h>
-#include <stdint.h>
-
-#ifndef USIPP_OWNSTRUCTS
-#include <netinet/in.h>
-#endif
 
 
 /* putting an own version of
@@ -44,27 +36,9 @@ namespace usipp {
 
 
 enum  {
-	max_buffer_len = 0x1000000,
 	MAXHOSTLEN = 1000,
 	ETH_ALEN = 6,
 	ETH_A_LEN = 6
-};
-
-
-/*  This is a name for the 48 bit ethernet address available on many
- *  systems.
- */
-struct ether_addr
-{
-	uint8_t ether_addr_octet[ETH_ALEN];
-};
-
-
-struct ether_header
-{
-	uint8_t  ether_dhost[ETH_ALEN];	// destination eth addr
-	uint8_t  ether_shost[ETH_ALEN];	// source ether addr
-	uint16_t ether_type;		// packet type ID field
 };
 
 
@@ -114,31 +88,6 @@ enum {
 	ETH_P_MOBITEX	= 0x0015,	// Mobitex (kaz@cafe.net)
 	ETH_P_CONTROL	= 0x0016,	// Card specific control frames
 	ETH_P_IRDA	= 0x0017	// Linux/IR
-};
-
-
-/*  See RFC 826 for protocol description.  ARP packets are variable
- *  in size; the arphdr structure defines the fixed-length portion.
- *  Protocol type values are the same as those for 10 Mb/s Ethernet.
- *  It is followed by the variable-sized fields ar_sha, arp_spa,
- *  arp_tha and arp_tpa in that order, according to the lengths
- *  specified.  Field names used correspond to RFC 826.
- */
-struct arphdr {
-	uint16_t ar_hrd;	// Format of hardware address.
-	uint16_t ar_pro;	// Format of protocol address.
-	unsigned char ar_hln;	// Length of hardware address.
-	unsigned char ar_pln;	// Length of protocol address.
-	uint16_t ar_op;		// ARP opcode (command).
-#if 0
-    /* Ethernet looks like this : This bit is variable sized
-       however...
-     */
-        unsigned char __ar_sha[ETH_ALEN];	// Sender hardware address.
-        unsigned char __ar_sip[4];		// Sender IP address.
-        unsigned char __ar_tha[ETH_ALEN];	// Target hardware address.
-        unsigned char __ar_tip[4];		// Target IP address.
-#endif
 };
 
 
@@ -201,46 +150,6 @@ enum {
 };
 
 
-/* See RFC 826 for protocol description.  Structure below is adapted
- * to resolving internet addresses.  Field names used correspond to
- * RFC 826.
- */
-struct	ether_arp {
-	struct	arphdr ea_hdr;		// fixed-size header
-	uint8_t arp_sha[ETH_ALEN];	// sender hardware address
-	uint8_t arp_spa[4];		// sender protocol address
-	uint8_t arp_tha[ETH_ALEN];	// target hardware address
-	uint8_t arp_tpa[4];		// target protocol address
-};
-
-
-#define	arp_hrd	ea_hdr.ar_hrd
-#define	arp_pro	ea_hdr.ar_pro
-#define	arp_hln	ea_hdr.ar_hln
-#define	arp_pln	ea_hdr.ar_pln
-#define	arp_op	ea_hdr.ar_op
-
-
-/**/
-struct icmphdr {
-	uint8_t type;
-	uint8_t code;
-	uint16_t sum;
-
-	union {
-		struct {
-			uint16_t id;
-			uint16_t sequence;
-		} echo;
-		uint32_t gateway;
-		struct {
-			uint16_t unused;
-			uint16_t mtu;
-		} frag;
-	} un;
-};
-
-
 enum {
 	ICMP_ECHOREPLY	   =	0,	// Echo Reply
 	ICMP_DEST_UNREACH  =	3,	// Destination Unreachable
@@ -297,27 +206,6 @@ enum {
 };
 
 
-struct udphdr {
-	uint16_t source;
-	uint16_t dest;
-	uint16_t len;
-	uint16_t check;
-};
-
-
-/*
- *  The pseudo-header is used to calculate checksums over UDP
- *  and TCP packets.
- */
-struct pseudohdr {
-	uint32_t saddr;
-	uint32_t daddr;
-	uint8_t zero;
-	uint8_t proto;
-	uint16_t len;
-};
-
-
 enum {
 	TH_FIN	= 0x001,
 	TH_SYN	= 0x002,
@@ -331,65 +219,11 @@ enum {
 };
 
 
-struct tcphdr
-{
-	uint16_t th_sport;		// source port
-	uint16_t th_dport;		// destination port
-	uint32_t th_seq;		// sequence number
-	uint32_t th_ack;		// acknowledgement number
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t th_x2:4;		// (unused)
-	uint8_t th_off:4;		// data offset
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t th_off:4;		// data offset
-	uint8_t th_x2:4;		// (unused)
-#endif
-	uint8_t th_flags;
-	uint16_t th_win;		// window
-	uint16_t th_sum;		// checksum
-	uint16_t th_urp;		// urgent pointer
-};
-
-
 enum {
 	IP_RF = 0x8000,
 	IP_DF = 0x4000,
 	IP_MF = 0x2000,
 	IP_OFFMASK = 0x1fff
-};
-
-
-struct iphdr
-{
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint32_t ihl:4;
-	uint32_t version:4;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	uint32_t version:4;
-	uint32_t ihl:4;
-#else
-# error	"Please fix <bits/endian.h>"
-#endif
-	uint8_t tos;
-	uint16_t tot_len;
-	uint16_t id;
-	uint16_t frag_off;
-	uint8_t ttl;
-	uint8_t protocol;
-	uint16_t check;
-	uint32_t saddr;
-	uint32_t daddr;
-	/* The options start here. */
-};
-
-
-// describes a fragment for re-assembling routines
-struct fragments {
-	int id;		// the IP id-filed
-	int len;	// how much data received yet?
-	int origLen;	// and how much has it to be?
-	int userLen;	// and how much did we saved?
-	char *data;     // the packet itself
 };
 
 
@@ -406,49 +240,6 @@ enum {
 	TCPOPT_TIMESTAMP   =	8,
 	TCPOLEN_TIMESTAMP  =	10,
 	TCPOLEN_TSTAMP_APPA  =	(TCPOLEN_TIMESTAMP+2)	// appendix A
-};
-
-
-// global in6_addr should be defined nowadays
-#ifdef USIPP_OWNSTRUCTS
-
-struct in6_addr {
-	union {
-		uint8_t  u6_addr8[16];
-		uint16_t u6_addr16[8];
-		uint32_t u6_addr32[4];
-	} in6_u;
-/*#define s6_addr                 in6_u.u6_addr8
-#define s6_addr16               in6_u.u6_addr16
-#define s6_addr32               in6_u.u6_addr32
-*/
-};
-
-#else
-
-	using in6_addr = ::in6_addr;
-
-#endif
-
-
-struct ip6_hdr {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t                priority:4,
-                                version:4;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t                version:4,
-                	        priority:4;
-#else
-#error  "Please fix <asm/byteorder.h>"
-#endif
-	uint8_t                flow_lbl[3];
-
-	uint16_t               payload_len;
-	uint8_t                nexthdr;
-	uint8_t                hop_limit;
-
-        in6_addr        saddr;
-        in6_addr        daddr;
 };
 
 
@@ -491,32 +282,6 @@ enum {
 	IPV6_TLV_JUMBO        =  194
 };
 
-
-struct icmp6_hdr {
-	uint8_t icmp6_type;			// type field
-	uint8_t icmp6_code;			// code field
-	uint16_t icmp6_cksum;			// checksum field
-	union {
-		uint32_t icmp6_un_data32[1];	// type-specific field
-		uint16_t icmp6_un_data16[2];	// type-specific field
-		uint8_t icmp6_un_data8[4];	// type-specific field
-	} icmp6_dataun;
-};
-
-
-#ifndef _NETINET_ICMP6_H
-#define _NETINET_ICMP6_H
-
-#define icmp6_data32    icmp6_dataun.icmp6_un_data32
-#define icmp6_data16    icmp6_dataun.icmp6_un_data16
-#define icmp6_data8     icmp6_dataun.icmp6_un_data8
-#define icmp6_pptr      icmp6_data32[0]		// parameter prob
-#define icmp6_mtu       icmp6_data32[0]		// packet too big
-#define icmp6_id        icmp6_data16[0]		// echo request/reply
-#define icmp6_seq       icmp6_data16[1]		// echo request/reply
-#define icmp6_maxdelay  icmp6_data16[0]		// mcast group membership
-
-#endif
 
 
 // icmp6 types and options
@@ -565,96 +330,12 @@ enum {
 };
 
 
-// RFC 6106 recursive DNS server option
-struct icmp6_rdns_opt {
-	uint8_t type;
-	uint8_t len;
-	uint16_t reserved;
-	uint32_t lifetime;
-	in6_addr addr[1];	// one or more addresses
-} __attribute__((packed));
-
-
-// RFC 6106 domain name search list
-struct icmp6_domain_opt {
-	uint8_t type;
-	uint8_t len;
-	uint16_t reserved;
-	uint32_t lifetime;
-	// encoded domain goes here
-	unsigned char domain[1];
-} __attribute__((packed));
-
-
-// RFC 2461 router advertisement
-struct icmp6_ra {
-	uint32_t time1, time2;
-	// options go here
-} __attribute__((packed));
-
-
-// RFC 2461 source link layer address option
-struct icmp6_sll_opt {
-	uint8_t type;
-	uint8_t len;
-	unsigned char address[1];
-} __attribute__((packed));
-
-
-// RFC 2461 prefix info option
-struct icmp6_prefix_opt {
-	uint8_t type;
-	uint8_t len;
-	uint8_t plen;
-	uint8_t flags;
-	uint32_t vtime;
-	uint32_t lifetime;
-	uint32_t reserved;
-	// one or more
-	in6_addr prefix[1];
-} __attribute__((packed));
-
-
-// RFC 2461 MTU option
-struct icmp6_mtu_opt {
-	uint8_t type;
-	uint8_t len;
-	uint16_t reserved;
-	uint32_t mtu;
-} __attribute__((packed));
-
-
-// RFC 4191 route info option
-struct icmp6_ri_opt {
-	uint8_t type;
-	uint8_t len;
-	uint8_t plen;
-	uint8_t flags;
-	uint32_t lifetime;
-	unsigned char prefix[1];
-};
-
-
-struct pseudohdr6 {
-	in6_addr saddr, daddr;
-	uint32_t len;
-	uint8_t zero[3];
-	uint8_t proto;
-};
-
-
 enum {
 	NEXT_HDR_HBH	= 0,		// hop by hop
 	NEXT_HDR_RH	= 43,		// routing header
 	NEXT_HDR_FH	= 44,		// fragmentation header
 	NEXT_HDR_DOH	= 60,		// destination option
 	NEXT_HDR_MOB	= 135		// mobility header
-};
-
-
-struct ip6_opt {
-	uint8_t  ip6o_type;
-	uint8_t  ip6o_len;
 };
 
 
