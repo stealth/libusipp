@@ -4,7 +4,7 @@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 DEFS=
-CXXFLAGS=@CXXFLAGS@ -I/usr/include/pcap -I. -I.. -Wall -c -pedantic -std=c++11 $(DEFS)
+CXXFLAGS=-I . -I .. @CXXFLAGS@ -I/usr/include/pcap -Wall -c -pedantic -std=c++11 $(DEFS)
 CXX=@CXX@
 CC=@CC@
 INSTALL=@INSTALL@
