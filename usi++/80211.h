@@ -188,20 +188,24 @@ struct ieee80211_data {
 /* Data Frame end */
 
 struct element_reserved {
+	uint8_t etype;
 	uint8_t len;
 } __packed;
 
 struct element_ssid {
+	uint8_t etype;
 	uint8_t len;
-	uint8_t SSID[1];
+	uint8_t SSID[32];
 } __packed;
 
 struct element_supp_rates {
+	uint8_t etype;
 	uint8_t len;
-	uint8_t rates[1];
+	uint8_t rates[8];
 } __packed;
 
 struct element_fh_ps {
+	uint8_t etype;
 	uint8_t len;
 	uint16_t dwell_time;
 	uint8_t hop_set;
@@ -210,11 +214,13 @@ struct element_fh_ps {
 } __packed;
 
 struct element_dsss_ps {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t curr_ch;
 } __packed;
 
 struct element_cf_ps {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t cfp_cnt;
 	uint8_t cfp_period;
@@ -223,6 +229,7 @@ struct element_cf_ps {
 } __packed;
 
 struct element_tim {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t dtim_cnt;
 	uint8_t dtim_period;
@@ -231,17 +238,20 @@ struct element_tim {
 } __packed;
 
 struct element_ibss_ps {
+	uint8_t etype;
 	uint8_t len;
 	uint16_t atim_win;
 } __packed;
 
 struct element_country_tripled {
+	uint8_t etype;
 	uint8_t frst_ch;
 	uint8_t nr_ch;
 	uint8_t max_trans;
 } __packed;
 
 struct element_country {
+	uint8_t etype;
 	uint8_t len;
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
@@ -261,12 +271,14 @@ struct element_country {
 } __packed;
 
 struct element_hop_pp {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t prime_radix;
 	uint8_t nr_ch;
 } __packed;
 
 struct element_hop_pt {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t flag;
 	uint8_t nr_sets;
@@ -276,11 +288,13 @@ struct element_hop_pt {
 } __packed;
 
 struct element_req {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t req_elem_idl[1];
 } __packed;
 
 struct element_bss_load {
+	uint8_t etype;
 	uint8_t len;
 	uint16_t station_cnt;
 	uint8_t ch_util;
@@ -288,6 +302,7 @@ struct element_bss_load {
 } __packed;
 
 struct element_edca_ps {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t qos_inf;
 	uint8_t res;
@@ -298,6 +313,7 @@ struct element_edca_ps {
 } __packed;
 
 struct element_tspec {
+	uint8_t etype;
 	union {
 		uint32_t len_ts_info;
 		struct {
@@ -349,13 +365,13 @@ struct element_tspec {
 } __packed;
 
 struct element_tclas {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t user_priority;
 	uint8_t frm_class[1];
 } __packed;
 
 struct element_tclas_frm_class {
-	uint8_t type;
 	uint8_t mask;
 	uint8_t param[1];
 } __packed;
@@ -460,6 +476,7 @@ struct element_tclas_type5 {
 } __packed;
 
 struct element_schedule {
+	uint8_t etype;
 	uint8_t len;
 	uint16_t inf;
 	uint32_t start;
@@ -468,42 +485,51 @@ struct element_schedule {
 } __packed;
 
 struct element_chall_txt {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t chall_txt[1];
 } __packed;
 
 struct element_pwr_constr {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t local_pwr_constr;
 } __packed;
 
 struct element_pwr_cap {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t min_pwr_cap;
 	uint8_t max_pwr_cap;
 } __packed;
 
 struct element_tpc_req {
+	uint8_t etype;
 	uint8_t len;
 } __packed;
 
 struct element_tpc_rep {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t trans_pwr;
 	uint8_t link_marg;
 } __packed;
 
 struct element_supp_ch {
+	uint8_t etype;
 	uint8_t len;
-	uint8_t nr_chan[1];
+	uint8_t chan[1];
 } __packed;
 
 struct element_supp_ch_tuple {
+	uint8_t etype;
+	uint8_t len;
 	uint8_t first_ch_nr;
 	uint8_t nr_ch;
 } __packed;
 
 struct element_ch_sw_ann {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t switch_mode;
 	uint8_t new_nr;
@@ -617,6 +643,7 @@ struct element_meas_pause {
 } __packed;
 
 struct element_meas_req {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t token;
 	uint8_t req_mode;
@@ -625,6 +652,7 @@ struct element_meas_req {
 } __packed;
 
 struct element_meas_rep {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t token;
 	uint8_t rep_mode;
@@ -633,6 +661,7 @@ struct element_meas_rep {
 } __packed;
 
 struct element_quiet {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t cnt;
 	uint8_t period;
@@ -641,6 +670,7 @@ struct element_quiet {
 } __packed;
 
 struct element_ibss_dfs {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t owner[6];
 	uint8_t rec_intv;
@@ -653,21 +683,25 @@ struct element_ibss_dfs_tuple {
 } __packed;
 
 struct element_erp {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t param;
 } __packed;
 
 struct element_ts_del {
+	uint8_t etype;
 	uint8_t len;
 	uint32_t delay;
 } __packed;
 
 struct element_tclas_proc {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t proc;
 } __packed;
 
 struct element_ht_cap {
+	uint8_t etype;
 	uint8_t len;
 	union {
 		uint16_t info;
@@ -751,26 +785,23 @@ struct element_ht_cap {
 } __packed;
 
 struct element_qos_cap {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t info;
 } __packed;
 
 struct element_ext_supp_rates {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t rates[1];
 } __packed;
 
 struct element_vend_spec {
+	uint8_t etype;
 	uint8_t len;
 	uint8_t data[1]; // oui, specific
 } __packed;
 
-
-struct subelement {
-	uint8_t id;
-	uint8_t len;
-	uint8_t data[1];
-} __packed;
 
 }
 

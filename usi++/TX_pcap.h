@@ -88,12 +88,26 @@ public:
 
 
 	/*! Set the layer2 frame */
+	void set_frame(const void *buf, size_t blen)
+	{
+		d_frame = std::string(reinterpret_cast<const char *>(buf), blen);
+	}
+
+	
+	/*! Set the layer2 frame */
 	void set_frame(const std::string &s)
 	{
 		d_frame = s;
 	}
 
 
+	/*! Set any cooked header, e.g. radiotap */
+	void set_cooked(const void *buf, size_t blen)
+	{
+		d_cooked = std::string(reinterpret_cast<const char *>(buf), blen);
+	}
+
+	
 	/*! Set any cooked header, e.g. radiotap */
 	void set_cooked(const std::string &s)
 	{
