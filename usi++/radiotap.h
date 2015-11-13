@@ -167,7 +167,7 @@ struct wifi_hdr {
 	union {
 		struct ieee80211_mgmt mgmt;
 		struct ieee80211_data data;
-	} u;
+	};
 };
 
 }

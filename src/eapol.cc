@@ -35,17 +35,17 @@ namespace usipp {
 using namespace std;
 
 
-// construct a dummy TX_IP, which has almost no overhead
+// construct a dummy TX_string, which has almost no overhead
 // and which is destroyed/substituted right after by TX_pcap_eth().
 // We cant create a TX_pcap_eth in the Layer2 constructor, since it needs
 // the pcap RX object that is only ready after Layer2() returns.
 EAPOL::EAPOL(const string &dev)
-	: Layer2(NULL, new TX_IP)
+	: Layer2(NULL, new TX_string)
 {
 	memset(&eapol_hdr, 0, sizeof(eapol_hdr));
 	eapol_hdr.version = 1;
 
-	// substitute dummy TX_IP
+	// substitute dummy TX_string
 	// by a TX_pcap_eth, constructed from the default created RX
 	Layer2::register_tx(d_tx = new TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_rx())));
 

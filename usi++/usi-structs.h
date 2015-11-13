@@ -429,6 +429,20 @@ enum {
 };
 
 
+enum {
+	eapol_ptype_packet		= 0,
+	eapol_ptype_eap			= 0,
+	eapol_ptype_start		= 1,
+	eapol_ptype_logoff		= 2,
+	eapol_ptype_key			= 3,
+	eapol_ptype_asf_atert		= 4,
+	eapol_ptype_mka			= 5,
+	eapol_ptype_announce_gen	= 6,
+	eapol_ptype_announce_spec	= 7,
+	eapol_announce_req		= 8
+};
+
+
 // IPv6 extension headers now found in ipproto_ numbers
 
 
@@ -727,6 +741,13 @@ struct pseudohdr6 {
 struct ip6_opt {
 	uint8_t  ip6o_type;
 	uint8_t  ip6o_len;
+};
+
+
+struct eapol_p {
+	uint8_t version;
+	uint8_t type;
+	uint16_t len;
 };
 
 

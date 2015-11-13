@@ -22,34 +22,36 @@ namespace usipp {
 struct ieee80211_frm_ctrl {
 	union {
 		uint16_t frame_control;
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
-		__extension__ uint16_t proto_version:2,
-				  type:2,
-				  subtype:4,
-				  to_ds:1,
-				  from_ds:1,
-				  more_frags:1,
-				  retry:1,
-				  power_mgmt:1,
-				  more_data:1,
-				  wep:1,
-				  order:1;
+		uint16_t version:2,
+			  type:2,
+			  subtype:4,
+			  to_ds:1,
+			  from_ds:1,
+			  more_frags:1,
+			  retry:1,
+			  power_mgmt:1,
+			  more_data:1,
+			  wep:1,
+			  order:1;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint16_t subtype:4,
-				  type:2,
-				  proto_version:2,
-				  order:1,
-				  wep:1,
-				  more_data:1,
-				  power_mgmt:1,
-				  retry:1,
-				  more_frags:1,
-				  from_ds:1,
-				  to_ds:1;
+		uint16_t subtype:4,
+			  type:2,
+			  version:2,
+			  order:1,
+			  wep:1,
+			  more_data:1,
+			  power_mgmt:1,
+			  retry:1,
+			  more_frags:1,
+			  from_ds:1,
+			  to_ds:1;
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+	} bits;
 	};
 } __packed;
 
@@ -68,7 +70,7 @@ struct ieee80211_mgmt_auth {
 	uint16_t auth_transaction;
 	uint16_t status_code;
 	/* possibly followed by Challenge text */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_deauth {
@@ -79,7 +81,7 @@ struct ieee80211_mgmt_assoc_req {
 	uint16_t capab_info;
 	uint16_t listen_interval;
 	/* followed by SSID and Supported rates */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_assoc_resp {
@@ -87,7 +89,7 @@ struct ieee80211_mgmt_assoc_resp {
 	uint16_t status_code;
 	uint16_t aid;
 	/* followed by Supported rates */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_reassoc_resp {
@@ -95,7 +97,7 @@ struct ieee80211_mgmt_reassoc_resp {
 	uint16_t status_code;
 	uint16_t aid;
 	/* followed by Supported rates */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_reassoc_req {
@@ -103,7 +105,7 @@ struct ieee80211_mgmt_reassoc_req {
 	uint16_t listen_interval;
 	uint8_t current_ap[6];
 	/* followed by SSID and Supported rates */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_disassoc {
@@ -119,7 +121,7 @@ struct ieee80211_mgmt_beacon {
 	uint16_t capab_info;
 	/* followed by some of SSID, Supported rates,
 	  * FH Params, DS Params, CF Params, IBSS Params, TIM */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 
 struct ieee80211_mgmt_probe_resp {
@@ -128,7 +130,7 @@ struct ieee80211_mgmt_probe_resp {
 	uint16_t capab_info;
 	/* followed by some of SSID, Supported rates,
 	  * FH Params, DS Params, CF Params, IBSS Params, TIM */
-	uint8_t variable[1];
+	//uint8_t variable[1];
 } __packed;
 /* Management Frame end */
 
@@ -298,9 +300,10 @@ struct element_edca_ps {
 struct element_tspec {
 	union {
 		uint32_t len_ts_info;
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
-		__extension__ uint32_t len:8,
+		 uint32_t len:8,
 				  traffic_type:1,
 				  tsid:4,
 				  direction:2,
@@ -312,7 +315,7 @@ struct element_tspec {
 				  schedule:1,
 				  res:7;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint32_t len:8,
+		 uint32_t len:8,
 				  res:7,
 				  schedule:1,
 				  tsinfo_ack_pol:2,
@@ -326,6 +329,7 @@ struct element_tspec {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+	} bits;
 	};
 	uint16_t nom_msdu_size;
 	uint16_t max_msdu_size;
@@ -384,17 +388,19 @@ struct element_tclas_type1_ip6 {
 	uint16_t dp;
 	union {
 		uint8_t flow_label[3];
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-		__extension__ uint8_t  flow_label3:8;
-		__extension__ uint8_t  flow_label2:8;
-		__extension__ uint8_t  flow_label1:8;
+		 uint8_t  flow_label3:8;
+		 uint8_t  flow_label2:8;
+		 uint8_t  flow_label1:8;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint8_t  flow_label1:8;
-		__extension__ uint8_t  flow_label2:8;
-		__extension__ uint8_t  flow_label3:8;
+		 uint8_t  flow_label1:8;
+		 uint8_t  flow_label2:8;
+		 uint8_t  flow_label3:8;
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+		} bits;
 	};
 } __packed;
 
@@ -431,17 +437,19 @@ struct element_tclas_type4_ip6 {
 	uint8_t nxt_hdr;
 	union {
 		uint8_t flow_label[3];
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-		__extension__ uint8_t  flow_label3:8;
-		__extension__ uint8_t  flow_label2:8;
-		__extension__ uint8_t  flow_label1:8;
+		 uint8_t  flow_label3:8;
+		 uint8_t  flow_label2:8;
+		 uint8_t  flow_label1:8;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint8_t  flow_label1:8;
-		__extension__ uint8_t  flow_label2:8;
-		__extension__ uint8_t  flow_label3:8;
+		 uint8_t  flow_label1:8;
+		 uint8_t  flow_label2:8;
+		 uint8_t  flow_label3:8;
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+		} bits;
 	};
 } __packed;
 
@@ -663,9 +671,10 @@ struct element_ht_cap {
 	uint8_t len;
 	union {
 		uint16_t info;
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
-		__extension__ uint16_t ldpc:1,
+		 uint16_t ldpc:1,
 				  supp_width:1,
 				  sm_pwr:2,
 				  ht_green:1,
@@ -680,7 +689,7 @@ struct element_ht_cap {
 				  forty_int:1,
 				  prot_supp:1;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint16_t rx_stbc:2,
+		 uint16_t rx_stbc:2,
 				  ht_ack:1,
 				  max_msdu_length:1,
 				  dsss_ck_mode:1,
@@ -697,41 +706,44 @@ struct element_ht_cap {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+		} bits;
 	};
 	uint8_t param;
 	union {
 		uint8_t mcs_set[16];
+		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
-		__extension__ uint8_t  bitmask1:8;
-		__extension__ uint8_t  bitmask2:8;
-		__extension__ uint8_t  bitmask3:8;
-		__extension__ uint8_t  bitmask4:8;
-		__extension__ uint8_t  bitmask5:8;
-		__extension__ uint8_t  bitmask6:8;
-		__extension__ uint8_t  bitmask7:8;
-		__extension__ uint8_t  bitmask8:8;
-		__extension__ uint8_t  bitmask9:8;
-		__extension__ uint8_t  bitmask10_res:8;
-		__extension__ uint16_t supp_rate_res:16;
-		__extension__ uint32_t tx_param_res:32;
+		 uint8_t  bitmask1:8;
+		 uint8_t  bitmask2:8;
+		 uint8_t  bitmask3:8;
+		 uint8_t  bitmask4:8;
+		 uint8_t  bitmask5:8;
+		 uint8_t  bitmask6:8;
+		 uint8_t  bitmask7:8;
+		 uint8_t  bitmask8:8;
+		 uint8_t  bitmask9:8;
+		 uint8_t  bitmask10_res:8;
+		 uint16_t supp_rate_res:16;
+		 uint32_t tx_param_res:32;
 
 #elif defined(__BIG_ENDIAN_BITFIELD)
-		__extension__ uint32_t tx_param_res:32;
-		__extension__ uint16_t supp_rate_res:16;
-		__extension__ uint8_t  bitmask10_res:8;
-		__extension__ uint8_t  bitmask9:8;
-		__extension__ uint8_t  bitmask8:8;
-		__extension__ uint8_t  bitmask7:8;
-		__extension__ uint8_t  bitmask6:8;
-		__extension__ uint8_t  bitmask5:8;
-		__extension__ uint8_t  bitmask4:8;
-		__extension__ uint8_t  bitmask3:8;
-		__extension__ uint8_t  bitmask2:8;
-		__extension__ uint8_t  bitmask1:8;
+		 uint32_t tx_param_res:32;
+		 uint16_t supp_rate_res:16;
+		 uint8_t  bitmask10_res:8;
+		 uint8_t  bitmask9:8;
+		 uint8_t  bitmask8:8;
+		 uint8_t  bitmask7:8;
+		 uint8_t  bitmask6:8;
+		 uint8_t  bitmask5:8;
+		 uint8_t  bitmask4:8;
+		 uint8_t  bitmask3:8;
+		 uint8_t  bitmask2:8;
+		 uint8_t  bitmask1:8;
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
+		} bits2;
 	};
 	uint16_t ext_cap;
 	uint32_t beam_cap;

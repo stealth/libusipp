@@ -31,25 +31,6 @@
 
 namespace usipp {
 
-enum {
-	EAPOL_PTYPE_PACKET	= 	0,
-	EAPOL_PTYPE_EAP		=	0,
-	EAPOL_PTYPE_START	=	1,
-	EAPOL_PTYPE_LOGOFF	=	2,
-	EAPOL_PTYPE_KEY		=	3,
-	EAPOL_PTYPE_ASF_ALERT	=	4,
-	EAPOL_PTYPE_MKA		=	5,
-	EAPOL_PTYPE_ANNOUNCE_GEN	=	6,
-	EAPOL_PTYPE_ANNOUNCE_SPEC	=	7,
-	EAPOL_PTYPE_ANNOUNCE_REQ	=	8
-};
-
-
-struct eapol_p {
-	uint8_t version;
-	uint8_t type;
-	uint16_t len;
-};
 
 /*! \class EAPOL
  *  \brief send and capture EAP over LAN packets (802.1x)
