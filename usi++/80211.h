@@ -18,10 +18,11 @@
 
 namespace usipp {
 
+namespace ieee80211 {
+
 /* Note: Fields are encoded in little-endian! */
-struct ieee80211_frm_ctrl {
+struct frame_ctrl {
 	union {
-		uint16_t frame_control;
 		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
@@ -52,12 +53,13 @@ struct ieee80211_frm_ctrl {
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
 	} bits;
+	uint16_t value;
 	};
 } __packed;
 
 /* Management Frame start */
 /* Note: Fields are encoded in little-endian! */
-struct ieee80211_mgmt {
+struct mgmt {
 	uint16_t duration;
 	uint8_t da[6];
 	uint8_t sa[6];
@@ -65,7 +67,7 @@ struct ieee80211_mgmt {
 	uint16_t seq_ctrl;
 } __packed;
 
-struct ieee80211_mgmt_auth {
+struct mgmt_auth {
 	uint16_t auth_alg;
 	uint16_t auth_transaction;
 	uint16_t status_code;
@@ -73,18 +75,18 @@ struct ieee80211_mgmt_auth {
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_deauth {
+struct mgmt_deauth {
 	uint16_t reason_code;
 } __packed;
 
-struct ieee80211_mgmt_assoc_req {
+struct mgmt_assoc_req {
 	uint16_t capab_info;
 	uint16_t listen_interval;
 	/* followed by SSID and Supported rates */
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_assoc_resp {
+struct mgmt_assoc_resp {
 	uint16_t capab_info;
 	uint16_t status_code;
 	uint16_t aid;
@@ -92,7 +94,7 @@ struct ieee80211_mgmt_assoc_resp {
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_reassoc_resp {
+struct mgmt_reassoc_resp {
 	uint16_t capab_info;
 	uint16_t status_code;
 	uint16_t aid;
@@ -100,7 +102,7 @@ struct ieee80211_mgmt_reassoc_resp {
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_reassoc_req {
+struct mgmt_reassoc_req {
 	uint16_t capab_info;
 	uint16_t listen_interval;
 	uint8_t current_ap[6];
@@ -108,14 +110,14 @@ struct ieee80211_mgmt_reassoc_req {
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_disassoc {
+struct mgmt_disassoc {
 	uint16_t reason_code;
 } __packed;
 
-struct ieee80211_mgmt_probe_req {
+struct mgmt_probe_req {
 } __packed;
 
-struct ieee80211_mgmt_beacon {
+struct mgmt_beacon {
 	uint64_t timestamp;
 	uint16_t beacon_int;
 	uint16_t capab_info;
@@ -124,7 +126,7 @@ struct ieee80211_mgmt_beacon {
 	//uint8_t variable[1];
 } __packed;
 
-struct ieee80211_mgmt_probe_resp {
+struct mgmt_probe_resp {
 	uint8_t timestamp[8];
 	uint16_t beacon_int;
 	uint16_t capab_info;
@@ -134,40 +136,36 @@ struct ieee80211_mgmt_probe_resp {
 } __packed;
 /* Management Frame end */
 
-/* Control Frame start */
-/* Note: Fields are encoded in little-endian! */
-struct ieee80211_ctrl {
-} __packed;
 
-struct ieee80211_ctrl_rts {
+struct ctrl_rts {
 	uint16_t duration;
 	uint8_t da[6];
 	uint8_t sa[6];
 } __packed;
 
-struct ieee80211_ctrl_cts {
+struct ctrl_cts {
 	uint16_t duration;
 	uint8_t da[6];
 } __packed;
 
-struct ieee80211_ctrl_ack {
+struct ctrl_ack {
 	uint16_t duration;
 	uint8_t da[6];
 } __packed;
 
-struct ieee80211_ctrl_ps_poll {
+struct ctrl_ps_poll {
 	uint16_t aid;
 	uint8_t bssid[6];
 	uint8_t sa[6];
 } __packed;
 
-struct ieee80211_ctrl_cf_end {
+struct ctrl_cf_end {
 	uint16_t duration;
 	uint8_t bssid[6];
 	uint8_t sa[6];
 } __packed;
 
-struct ieee80211_ctrl_cf_end_ack {
+struct ctrl_cf_end_ack {
 	uint16_t duration;
 	uint8_t bssid[6];
 	uint8_t sa[6];
@@ -176,7 +174,7 @@ struct ieee80211_ctrl_cf_end_ack {
 
 /* Data Frame start */
 /* Note: Fields are encoded in little-endian! */
-struct ieee80211_data {
+struct data_frame {
 	uint16_t duration;
 	uint8_t da[6];
 	uint8_t sa[6];
@@ -201,7 +199,7 @@ struct element_ssid {
 struct element_supp_rates {
 	uint8_t etype;
 	uint8_t len;
-	uint8_t rates[8];
+	uint8_t rates[8];	// no more than 8 rates. more must use ext_rates
 } __packed;
 
 struct element_fh_ps {
@@ -227,6 +225,20 @@ struct element_cf_ps {
 	uint16_t cfp_max_dur;
 	uint16_t cfp_dur_rem;
 } __packed;
+
+
+struct element_rsn {
+	uint8_t etype;
+	uint8_t len;
+	uint16_t version;
+	uint32_t gcs;		// group cipher suite
+	uint16_t gcs_count;
+	uint32_t pcsl;		// pairwise cipher suite list
+	uint16_t akms_count;	// akm suite count
+	uint32_t akml;		// auth key management list
+	uint16_t rsn_caps;	// RSN capabilities
+} __packed;
+
 
 struct element_tim {
 	uint8_t etype;
@@ -403,7 +415,6 @@ struct element_tclas_type1_ip6 {
 	uint16_t sp;
 	uint16_t dp;
 	union {
-		uint8_t flow_label[3];
 		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		 uint8_t  flow_label3:8;
@@ -417,7 +428,8 @@ struct element_tclas_type1_ip6 {
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
 		} bits;
-	};
+		uint8_t value[3];
+	} flow_label;
 } __packed;
 
 struct element_tclas_type2 {
@@ -452,7 +464,6 @@ struct element_tclas_type4_ip6 {
 	uint8_t dscp;
 	uint8_t nxt_hdr;
 	union {
-		uint8_t flow_label[3];
 		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		 uint8_t  flow_label3:8;
@@ -466,7 +477,8 @@ struct element_tclas_type4_ip6 {
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
 		} bits;
-	};
+		uint8_t value[3];
+	} flow_label;
 } __packed;
 
 struct element_tclas_type5 {
@@ -518,14 +530,7 @@ struct element_tpc_rep {
 struct element_supp_ch {
 	uint8_t etype;
 	uint8_t len;
-	uint8_t chan[1];
-} __packed;
-
-struct element_supp_ch_tuple {
-	uint8_t etype;
-	uint8_t len;
-	uint8_t first_ch_nr;
-	uint8_t nr_ch;
+	uint8_t value[2]; 	// first channel nr., nr. of channels
 } __packed;
 
 struct element_ch_sw_ann {
@@ -704,7 +709,6 @@ struct element_ht_cap {
 	uint8_t etype;
 	uint8_t len;
 	union {
-		uint16_t info;
 		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
@@ -741,10 +745,10 @@ struct element_ht_cap {
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
 		} bits;
-	};
+		uint16_t value;
+	} info;
 	uint8_t param;
 	union {
-		uint8_t mcs_set[16];
 		struct {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
 		/* Correct order here ... */
@@ -777,8 +781,9 @@ struct element_ht_cap {
 #else
 # error  "Adjust your <asm/byteorder.h> defines"
 #endif
-		} bits2;
-	};
+		} bits;
+		uint8_t value[16];
+	} mcs_set;
 	uint16_t ext_cap;
 	uint32_t beam_cap;
 	uint8_t asel_cap;
@@ -793,7 +798,7 @@ struct element_qos_cap {
 struct element_ext_supp_rates {
 	uint8_t etype;
 	uint8_t len;
-	uint8_t rates[1];
+	uint8_t rates[4];		// no more than 4 for now
 } __packed;
 
 struct element_vend_spec {
@@ -802,6 +807,24 @@ struct element_vend_spec {
 	uint8_t data[1]; // oui, specific
 } __packed;
 
+
+enum {
+	etype_ssid		= 0,
+	etype_rates		= 1,
+	etype_fh_params		= 2,
+	etype_ds_params		= 3,
+	etype_cf_params		= 4,
+	etype_tim		= 5,
+	etype_ibbs_params	= 6,
+	etype_challenge		= 16,
+	etype_power		= 33,
+	etype_chan		= 36,
+	etype_rsn		= 48,
+	etype_ext_rates		= 50
+};
+
+
+} // namespace ieeee80211
 
 }
 

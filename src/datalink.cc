@@ -419,7 +419,7 @@ int pcap::sniffpack(void *s, size_t len)
 		break;
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
-		cooked_hdr = ((ieee80211_radiotap_header *)d_packet)->len;
+		cooked_hdr = ((ieee80211::radiotap_hdr *)d_packet)->hlen;
 		d_cooked = string(d_packet, cooked_hdr);
 		memcpy(&d_80211, d_packet + cooked_hdr, d_framelen);
 		break;

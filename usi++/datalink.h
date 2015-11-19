@@ -79,7 +79,7 @@ protected:
 	struct ether_header d_ether;
 
 #ifdef HAVE_RADIOTAP
-	struct wifi_hdr d_80211;
+	struct ieee80211::wifi_hdr d_80211;
 #else
 	int d_80211;	// dummy
 #endif

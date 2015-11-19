@@ -21,6 +21,7 @@
 #include "usi++/TX_pcap_eth.h"
 #include "usi++/object.h"
 #include "usi++/datalink.h"
+#include "usi++/misc.h"
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <string>
@@ -43,36 +44,20 @@ TX_pcap_eth::TX_pcap_eth(usipp::pcap *p)
 
 int TX_pcap_eth::set_l2src(const string &src)
 {
-	unsigned char mac[6];
-
-	if (src.size() == numbers::eth_alen) {
-		memcpy(ehdr.ether_dhost, src.c_str(), numbers::eth_alen);
-		return 0;
-	}
-
-	if (sscanf(src.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != numbers::eth_alen)
-		return die("TX_pcap_eth::set_l2src::sscanf: invalid ethernet address", RETURN, -1);
-
-	memcpy(ehdr.ether_shost, mac, sizeof(ehdr.ether_shost));
+	string mac_s = mac2bin(src);
+	if (mac_s.size() != sizeof(ehdr.ether_shost))
+		return -1;
+	memcpy(ehdr.ether_shost, mac_s.c_str(), sizeof(ehdr.ether_shost));
 	return 0;
 }
 
 
 int TX_pcap_eth::set_l2dst(const string &dst)
 {
-	unsigned char mac[6];
-
-	if (dst.size() == numbers::eth_alen) {
-		memcpy(ehdr.ether_dhost, dst.c_str(), numbers::eth_alen);
-		return 0;
-	}
-
-	if (sscanf(dst.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-	       &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) != numbers::eth_alen)
-		die("TX_pcap_eth::set_l2dst::sscanf: invalid ethernet address", RETURN, -1);
-
-	memcpy(ehdr.ether_dhost, mac, sizeof(ehdr.ether_dhost));
+	string mac_s = mac2bin(dst);
+	if (mac_s.size() != sizeof(ehdr.ether_dhost))
+		return -1;
+	memcpy(ehdr.ether_dhost, mac_s.c_str(), sizeof(ehdr.ether_dhost));
 	return 0;
 }
 

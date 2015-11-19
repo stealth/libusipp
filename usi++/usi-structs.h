@@ -443,20 +443,6 @@ enum {
 };
 
 
-enum {
-	ieee80211_element_ssid		= 0,
-	ieee80211_element_rates		= 1,
-	ieee80211_element_fh_params	= 2,
-	ieee80211_element_ds_params	= 3,
-	ieee80211_element_cf_params	= 4,
-	ieee80211_element_tim		= 5,
-	ieee80211_element_ibbs_params	= 6,
-	ieee80211_element_challenge	= 16,
-	ieee80211_element_power		= 33,
-	ieee80211_element_chantuple	= 36,
-};
-
-
 // IPv6 extension headers now found in ipproto_ numbers
 
 

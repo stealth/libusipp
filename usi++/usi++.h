@@ -48,6 +48,7 @@ enum {
 #include "TX_IP6.h"
 #include "TX_string.h"
 #include "RX.h"
+#include "misc.h"
 #include <string>
 
 namespace usipp {
@@ -69,7 +70,6 @@ public:
 	const char *why() { return fault.c_str(); }
 };
 
-extern unsigned short in_cksum(unsigned short *ptr, int len, bool may_pad);
 
 
 } // namespace usipp

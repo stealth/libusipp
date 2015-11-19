@@ -8,6 +8,11 @@
 
 namespace usipp {
 
+
+namespace ieee80211 {
+
+#if 0
+
 struct ieee80211_radiotap_header {
 	uint8_t version;	/* Version 0. Only increases
 				 * for drastic changes,
@@ -29,9 +34,10 @@ struct ieee80211_radiotap_header {
 				 */
 } __attribute__((packed));
 
+#endif
 
 
-enum ieee80211_radiotap_type {
+enum radiotap_type {
 	IEEE80211_RADIOTAP_TSFT			= 0,
 	IEEE80211_RADIOTAP_FLAGS		= 1,
 	IEEE80211_RADIOTAP_RATE			= 2,
@@ -61,7 +67,7 @@ enum ieee80211_radiotap_type {
 
 
 /* Channel flags. */
-enum ieee80211_channel_flags {
+enum channel_flags {
 	IEEE80211_CHAN_TURBO	= 0x0010,	/* Turbo channel */
 	IEEE80211_CHAN_CCK	= 0x0020,	/* CCK channel */
 	IEEE80211_CHAN_OFDM	= 0x0040,	/* OFDM channel */
@@ -74,7 +80,7 @@ enum ieee80211_channel_flags {
 
 
 /* For IEEE80211_RADIOTAP_FLAGS */
-enum ieee80211_radiotap_flags {
+enum radiotap_flags {
 
 	IEEE80211_RADIOTAP_F_CFP	= 0x01,	/* sent/received
 						 * during CFP
@@ -125,50 +131,137 @@ enum ieee80211_radiotap_flags {
 };
 
 
-/* Radiotap header iteration
- *   implemented in net/wireless/radiotap.c
- *   docs in Documentation/networking/radiotap-headers.txt
- */
-/**
- * struct ieee80211_radiotap_iterator - tracks walk thru present radiotap args
- * @rtheader: pointer to the radiotap header we are walking through
- * @max_length: length of radiotap header in cpu byte ordering
- * @this_arg_index: IEEE80211_RADIOTAP_... index of current arg
- * @this_arg: pointer to current radiotap arg
- * @arg_index: internal next argument index
- * @arg: internal next argument pointer
- * @next_bitmap: internal pointer to next present u32
- * @bitmap_shifter: internal shifter for curr u32 bitmap, b0 set == arg present
- */
-
-struct ieee80211_radiotap_iterator {
-	struct ieee80211_radiotap_header *rtheader;
-	int max_length;
-	int this_arg_index;
-	uint8_t *this_arg;
-
-	int arg_index;
-	uint8_t *arg;
-	uint32_t *next_bitmap;
-	uint32_t bitmap_shifter;
-};
-
-extern int ieee80211_radiotap_iterator_init(
-   struct ieee80211_radiotap_iterator *iterator,
-   struct ieee80211_radiotap_header *radiotap_header,
-   int max_length);
-
-extern int ieee80211_radiotap_iterator_next(
-   struct ieee80211_radiotap_iterator *iterator);
-
-
 struct wifi_hdr {
-	struct ieee80211_frm_ctrl fc;
+	struct ieee80211::frame_ctrl fc;
 	union {
-		struct ieee80211_mgmt mgmt;
-		struct ieee80211_data data;
+		struct ieee80211::mgmt mgmt;
+		struct ieee80211::data_frame data;
 	};
 };
+
+
+/*
+unsigned char rtap_hdr[] = {
+        0x00, 0x00,		// radiotap version
+        0x19, 0x00,		// radiotap header length
+        0x6f, 0x08, 0x00, 0x00, // bitmap
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // timestamp
+        0x00,			// flags
+	//0x6c, // rate
+	0x02,	// rate (1MBit/s) 
+	//0x71, 0x09, // channel freq
+	//0xc0, 0x00, // channel type
+	0x8a, 0x09,	// 0x098a = 2442MHz (channel 7)
+	0xa0, 0x00,  	// 802.11b
+	0xde,		// antsignal
+        0,		// antnoise
+        0,		// antenna
+};
+*/
+
+
+enum {
+	channel1		= 2412,
+	channel2		= 2417,
+	channel3		= 2422,
+	channel4		= 2427,
+	channel5		= 2432,
+	channel6		= 2437,
+	channel7		= 2442,
+	channel8		= 2447,
+	channel9		= 2452,
+	channel10		= 2457,
+	channel11		= 2462,
+	channel12		= 2467,
+	channel13		= 2472,
+	channel14		= 2484
+};
+
+
+// little endian
+struct radiotap_hdr {
+	uint16_t version;
+	uint16_t hlen;
+	union {
+		struct {
+		uint32_t tsft:1;
+		uint32_t flags:1;
+		uint32_t rate:1;
+		uint32_t channel:1;
+		uint32_t fhss:1;
+		uint32_t asignal:1;	// dbm antenna signal
+		uint32_t anoise:1;	// dbm antenna noise
+		uint32_t lquality:1;	// locak quality
+		uint32_t txatten:1;	// TX attenuation
+		uint32_t dbtxatten:1;	// db TX attenuation
+		uint32_t dbmtxpower:1;	//
+		uint32_t antenna:1;
+		uint32_t dbantennas:1;	// db antenna signal
+		uint32_t dbantennan:1;	// db antenna noise
+		uint32_t rxflags:1;
+		uint32_t txflags:1;
+		uint32_t rtsretries:1;
+		uint32_t dataretries:1;
+		uint32_t channelpus:1;
+		uint32_t htinfo:1;
+		uint32_t mcs:1;
+		uint32_t unused:8;
+		uint32_t rtnsnext:1;	// radiotap NS next
+		uint32_t vnsnext:1;	// vendor NS next
+		uint32_t ext:1;
+		} bits;
+		uint32_t value;
+	} pflags;
+	uint8_t timestamp[8];
+	union {
+		struct {
+		uint8_t cfp:1;
+		uint8_t preamle:1;
+		uint8_t wep:1;
+		uint8_t frag:1;
+		uint8_t fcs:1;
+		uint8_t datapad:1;
+		uint8_t badfcs:1;
+		uint8_t shortgi:1;
+		} bits;
+		uint8_t value;
+	} flags;
+	// depends on pflags
+	uint8_t rate;
+	uint16_t ch_freq;
+	uint16_t ch_type;
+	uint8_t asignal;
+	uint8_t anoise;
+	uint8_t antenna;
+
+
+	// construct a sane default
+	radiotap_hdr() : version(0), hlen(0x19),
+	                 timestamp{0,0,0,0,0,0,0,0},
+	                 rate(2),		// 1MBit/s
+	                 ch_freq(channel7),	// 2442 Mhz
+	                 ch_type(0x00a0),	// 802.11b
+	                 asignal(0xde),
+	                 anoise(0),
+	                 antenna(0)
+	{
+		pflags.value = 0;
+		pflags.bits.tsft = 1;
+		pflags.bits.flags = 1;
+		pflags.bits.rate = 1;
+		pflags.bits.channel = 1;
+		pflags.bits.fhss = 0;
+		pflags.bits.asignal = 1;
+		pflags.bits.anoise = 1;
+		pflags.bits.antenna = 1;
+
+		flags.value = 0;
+	}
+
+	~radiotap_hdr() {}
+};
+
+} // namespace ieee80211
 
 }
 
