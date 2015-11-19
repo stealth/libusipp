@@ -102,12 +102,16 @@ public:
 	 */
 	TX *register_tx(TX *);
 
+	const ref_count<TX>& register_tx(const ref_count<TX> &r);
+
 
 	/*! Register a new receiver and return the argument.
 	 *  Layer2{} is taking ownership (ref counting), so you must
 	 *  not delete the RX object.
 	 */
 	RX *register_rx(RX *);
+
+	const ref_count<RX>& register_rx(const ref_count<RX> &ref);
 
 	/*! return RAW TX object for fast access. You must not delete or
 	 *   mess with it.

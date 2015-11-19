@@ -120,11 +120,24 @@ int Layer2::setfilter(const string &fstring)
 	return r;
 }
 
+const ref_count<TX> &Layer2::register_tx(const ref_count<TX> &ref)
+{
+	d_tx = ref;
+	return d_tx;
+}
+
 
 TX *Layer2::register_tx(TX *t)
 {
 	d_tx = ref_count<TX>(t);
 	return t;
+}
+
+
+const ref_count<RX> &Layer2::register_rx(const ref_count<RX> &ref)
+{
+	d_rx = ref;
+	return d_rx;
 }
 
 

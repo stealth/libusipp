@@ -24,13 +24,12 @@
 
 #include "usi-structs.h"
 #include "Layer2.h"
-#include "TX_dnet_eth.h"
+#include "datalink.h"
+#include "TX_pcap_eth.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
 
-
-#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
 namespace usipp {
 
@@ -44,14 +43,13 @@ namespace usipp {
 class ARP : public Layer2 {
 private:
 	struct arphdr arphdr;
-	TX_dnet_eth *d_tx;
+	TX_pcap_eth *pcap_eth_tx;
 
 public:
 
-	/*! Open device 'dev' for packet-capturing (ARP-packets)
-	 *  dev needs to match device in call to init_device().
+	/*! create an ARP object. must call init_device()
 	 */
-	ARP(const std::string &);
+	ARP();
 
 	/*! destructor */
 	virtual ~ARP();
@@ -118,6 +116,5 @@ public:
 
 } // namespace usipp
 
-#endif // HAVE_LIBDNET
 #endif 	// __arp_h__
 

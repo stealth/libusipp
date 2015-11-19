@@ -38,14 +38,13 @@ namespace usipp {
 class EAPOL : public Layer2 {
 
 	eapol_p eapol_hdr;
-	TX_pcap_eth *d_tx;
+	TX_pcap_eth *pcap_eth_tx;
 
 public:
 
-	/*! Open device 'dev' for packet-capturing
-	 * dev needs to match device in call to init_device().
+	/*! Create an EAPOL object. Must also call init_device().
 	 */
-	EAPOL(const std::string &);
+	EAPOL();
 
 	/*! destructor */
 	virtual ~EAPOL();

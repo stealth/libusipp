@@ -24,6 +24,8 @@
 #include "usi++/arp.h"
 #include "usi++/Layer2.h"
 #include "usi++/datalink.h"
+#include "usi++/TX_pcap_eth.h"
+#include "usi++/TX_string.h"
 
 #include <string>
 #include <cstring>
@@ -34,10 +36,9 @@ namespace usipp {
 
 using namespace std;
 
-#if defined(HAVE_LIBDNET) || defined(HAVE_LIBDUMBNET)
 
-ARP::ARP(const string &dev)
-	: Layer2(NULL, d_tx = new TX_dnet_eth(dev))
+ARP::ARP()
+	: Layer2(NULL, new (nothrow) TX_string)
 {
 	memset(&arphdr, 0, sizeof(arphdr));
 
@@ -48,26 +49,29 @@ ARP::ARP(const string &dev)
 	arphdr.ar_hln = 6;
 	arphdr.ar_pln = 4;
 
-	d_tx->set_type(numbers::eth_p_arp);
-	d_tx->broadcast();
+	// substitute dummy TX_string
+	// by a TX_pcap_eth, constructed from the default created RX
+	// register_tx() will also delete old d_tx
+	register_tx(pcap_eth_tx = new (nothrow) TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_rx())));
 }
 
 
 ARP::~ARP()
 {
-	// dont delete d_tx, its ref-counted and GC'ed by Layer2{}
+	// dont delete pcap_eth_tx, its refcounted via register_tx()
 }
 
 
+// Layer2 protocols like ARP have convenience functions for setting l2 addresses.
 int ARP::set_l2src(const string &src)
 {
-	return d_tx->set_l2src(src);
+	return pcap_eth_tx->set_l2src(src);
 }
 
 
 int ARP::set_l2dst(const string &dst)
 {
-	return d_tx->set_l2dst(dst);
+	return pcap_eth_tx->set_l2dst(dst);
 }
 
 
@@ -83,8 +87,13 @@ int ARP::init_device(const string &dev, int promisc, size_t snaplen)
 {
 	int r = Layer2::init_device(dev, promisc, snaplen);
 	if (r < 0)
-		return r;
-	r = Layer2::setfilter("arp");
+		return -1;
+	if ((r = Layer2::setfilter("arp")) < 0)
+		return -1;
+
+	pcap_eth_tx->set_type(numbers::eth_p_arp);
+	pcap_eth_tx->broadcast();
+
 	return r;
 }
 
@@ -106,7 +115,6 @@ int ARP::sendpack(const void *buf, size_t blen)
 	char *tbuf = new (nothrow) char[blen + sizeof(arphdr)];
 	if (!tbuf)
 		return die("ARP::sendpack: OOM", STDERR, -1);
-
 	memcpy(tbuf, &arphdr, sizeof(arphdr));
 	memcpy(tbuf + sizeof(arphdr), buf, blen);
 
@@ -159,9 +167,6 @@ int ARP::sniffpack(void *s, size_t len)
 	return r;
 }
 
-#else
-#warning "!!! No libdnet support !!!"
-#endif // HAVE_LIBDNET
 
 } // namespace usipp
 

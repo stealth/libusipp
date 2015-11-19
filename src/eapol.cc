@@ -39,35 +39,34 @@ using namespace std;
 // and which is destroyed/substituted right after by TX_pcap_eth().
 // We cant create a TX_pcap_eth in the Layer2 constructor, since it needs
 // the pcap RX object that is only ready after Layer2() returns.
-EAPOL::EAPOL(const string &dev)
-	: Layer2(NULL, new TX_string)
+EAPOL::EAPOL()
+	: Layer2(NULL, new (nothrow) TX_string)
 {
 	memset(&eapol_hdr, 0, sizeof(eapol_hdr));
 	eapol_hdr.version = 1;
 
 	// substitute dummy TX_string
 	// by a TX_pcap_eth, constructed from the default created RX
-	Layer2::register_tx(d_tx = new TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_rx())));
-
-	d_tx->set_l2dst("01:80:c2:00:00:03");
-	d_tx->set_type(numbers::eth_p_eapol);
+	// register_tx() will also delete old d_tx
+	register_tx(pcap_eth_tx = new (nothrow) TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_tx())));
 }
 
 
 EAPOL::~EAPOL()
 {
+	// dont delete pcap_eth_tx, its ref-counted via register_tx()
 }
 
 
 int EAPOL::set_l2src(const string &src)
 {
-	return d_tx->set_l2src(src);
+	return pcap_eth_tx->set_l2src(src);
 }
 
 
 int EAPOL::set_l2dst(const string &dst)
 {
-	return d_tx->set_l2dst(dst);
+	return pcap_eth_tx->set_l2dst(dst);
 }
 
 
@@ -134,6 +133,9 @@ int EAPOL::sendpack(const void *buf, size_t blen)
 
 int EAPOL::init_device(const string &dev, int promisc, size_t snaplen)
 {
+	pcap_eth_tx->set_l2dst("01:80:c2:00:00:03");
+	pcap_eth_tx->set_type(numbers::eth_p_eapol);
+
 	if (Layer2::init_device(dev, promisc, snaplen) < 0)
 		return -1;
 	return Layer2::setfilter("ether[12] == 0x888e");

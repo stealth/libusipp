@@ -24,8 +24,11 @@ int main(int argc, char **argv)
 
 	memset(&blob, 0, sizeof(blob));
 
-	ARP *req = new ARP(dev), req2(dev);
-	ARP *rep = new ARP(dev);
+	ARP *req = new ARP, req2;
+	ARP *rep = new ARP;
+
+	if (req->init_device(dev, 1, 500) < 0 || rep->init_device(dev, 1, 500) < 0)
+		return -1;
 
 	// set src address of underlying TX
 	req->set_l2src("77:88:99:aa:bb:cc");

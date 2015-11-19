@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		dev = argv[1];
 
-	ARP *a = new ARP(dev);
+	ARP *a = new ARP;
 
 	if (a->init_device(dev, 1, 100) < 0) {
 		cerr<<a->why()<<endl;
