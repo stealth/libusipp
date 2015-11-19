@@ -23,7 +23,7 @@
 #define usipp_usipp_h
 
 enum {
-	usipp_version = 210
+	usipp_version = 220
 };
 
 #include "config.h"
