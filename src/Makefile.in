@@ -86,7 +86,7 @@ install:
 	chown -R root:bin @prefix@/include/usi++
 	chmod 0644 @prefix@/include/usi++/*
 	ldconfig||true
-	@echo To build programs using libusi++, you have to use \'c++ foo.cc -L@prefix@/lib -lusi++ $(LIBS)\'
+	@echo To build programs using libusi++, you have to use \'c++ -std=c++11 foo.cc -L@prefix@/lib -lusi++ $(LIBS)\'
 
 uninstall:
 	rm -f @prefix@/lib/libusi++.a

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -48,6 +48,9 @@ pcap::pcap()
 	d_localnet = d_netmask = 0;
 	d_filter_string = "";
 	d_cooked = "";
+	d_frame2 = "";
+	d_llc = "";
+	d_qos = "";
 	d_dev = "";
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
@@ -69,6 +72,9 @@ pcap::pcap(const string &filterStr)
 	d_localnet = d_netmask = 0;
 	d_filter_string = filterStr;
 	d_cooked = "";
+	d_frame2 = "";
+	d_llc = "";
+	d_qos = "";
 	d_dev = "";
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
@@ -98,6 +104,9 @@ pcap::pcap(const pcap &rhs)
 	d_ether = rhs.d_ether;
 	d_80211 = rhs.d_80211;
 	d_cooked = rhs.d_cooked;
+	d_frame2 = rhs.d_frame2;
+	d_llc = rhs.d_llc;
+	d_qos = rhs.d_qos;
 
 	d_filter_string = rhs.d_filter_string;
 	d_dev = rhs.d_dev;
@@ -130,6 +139,9 @@ pcap &pcap::operator=(const pcap &rhs)
 	d_ether = rhs.d_ether;
 	d_80211 = rhs.d_80211;
 	d_cooked = rhs.d_cooked;
+	d_frame2 = rhs.d_frame2;
+	d_llc = rhs.d_llc;
+	d_qos = rhs.d_qos;
 
 	d_filter_string = rhs.d_filter_string;
 	d_dev = rhs.d_dev;
@@ -232,12 +244,23 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 
 	string e = "";
 
+	bool is_file = (dev.find("file://") == 0);
+
 	d_snaplen = snaplen;
 
-	if ((d_pd = pcap_open_live(dev.c_str(), d_snaplen, promisc, 500, ebuf)) == NULL) {
-		e = "pcap::init_device::pcap_open_live:";
-		e += ebuf;
-		return die(e, STDERR, -1);
+	if (is_file) {
+		if ((d_pd = pcap_open_offline(dev.c_str() + 7, ebuf)) == NULL) {
+			e = "pcap::init_device::pcap_open_offline:";
+			e += ebuf;
+			return die(e, STDERR, -1);
+		}
+		pcap_set_snaplen(d_pd, snaplen);
+	} else {
+		if ((d_pd = pcap_open_live(dev.c_str(), d_snaplen, promisc, 500, ebuf)) == NULL) {
+			e = "pcap::init_device::pcap_open_live:";
+			e += ebuf;
+			return die(e, STDERR, -1);
+		}
 	}
 
 // Ehem, BSD workarounnd. BSD won't timeout on select()
@@ -245,7 +268,7 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 // for uncomplete packets (queue not full?)
 #ifdef IMMEDIATE
 	int v = 1;
-	if (ioctl(pcap_fileno(d_pd), BIOCIMMEDIATE, &v) < 0) {
+	if (!is_file && ioctl(pcap_fileno(d_pd), BIOCIMMEDIATE, &v) < 0) {
 		e = "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1):";
 		e += strerror(errno);
 		return die(e, STDERR, -1);
@@ -253,7 +276,8 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 #endif
 
 	// ignore error, as device might be down or not IP-based
-	pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf);
+	if (!is_file)
+		pcap_lookupnet(dev.c_str(), &d_localnet, &d_netmask, ebuf);
 
 	if (d_filter_string.size() > 0) {
 		/* The d_filter_string must be filled by derived classes, such
@@ -401,7 +425,7 @@ int pcap::sniffpack(void *s, size_t len)
 		}
 	}
 
-	while (pcap_dispatch(d_pd, 1, one_packet, reinterpret_cast<unsigned char *>(this)) != 1);
+	while (pcap_dispatch(d_pd, 1, one_packet, reinterpret_cast<unsigned char *>(this)) != 1 || d_phdr.caplen < d_framelen);
 
 	if (d_packet == NULL)
 		return die("pcap::sniffpack: Packet returned is NULL.", STDERR, -1);
@@ -411,7 +435,11 @@ int pcap::sniffpack(void *s, size_t len)
 	// So use pcap_dispatch() for now.
 	//while ((d_packet = (char*)pcap_next(d_pd, &d_phdr)) == NULL);
 
-	uint16_t cooked_hdr = 0;
+	string::size_type cooked_hdr = 0, idx = d_framelen;
+
+	d_frame2 = "";
+	d_llc = "";
+	d_qos = "";
 
 	switch (d_datalink) {
 	case DLT_EN10MB:
@@ -422,6 +450,21 @@ int pcap::sniffpack(void *s, size_t len)
 		cooked_hdr = ((ieee80211::radiotap_hdr *)d_packet)->hlen;
 		d_cooked = string(d_packet, cooked_hdr);
 		memcpy(&d_80211, d_packet + cooked_hdr, d_framelen);
+		idx += cooked_hdr;
+
+		// WDS contain 4th address field
+		if (d_80211.fc.bits.from_ds && d_80211.fc.bits.to_ds && (idx + 6 <= d_phdr.caplen)) {
+			d_frame2 = string(d_packet + idx, 6);
+			idx += 6;
+		}
+		if (d_80211.fc.bits.type == 2 && idx + 8 <= d_phdr.caplen) {			// Data ...
+			if (d_80211.fc.bits.subtype == 8 && idx + 10 <= d_phdr.caplen) {	// ... with QoS
+				d_qos = string(d_packet + idx, 2);
+				idx += 2;
+			}
+			d_llc = string(d_packet + idx, 8);
+			idx += 8;
+		}
 		break;
 #endif
 	case DLT_PPP:
@@ -443,30 +486,21 @@ int pcap::sniffpack(void *s, size_t len)
  	cerr<<"pcap::d_framelen="<<d_framelen<<endl;
 #endif
 
-	// d_framelen was already calculated by init_device
-	memcpy(s, d_packet + cooked_hdr + d_framelen,
-	       d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len);
-	return d_phdr.len - cooked_hdr - d_framelen < len ? d_phdr.len - cooked_hdr - d_framelen : len;
+	memcpy(s, d_packet + idx, d_phdr.caplen - idx < len ? d_phdr.caplen - idx : len);
+	return d_phdr.caplen - idx < len ? d_phdr.caplen - idx : len;
 }
 
 
-// give back layer2 frame
+// return layer2 frame
 void *pcap::get_frame(void *hwframe, size_t len)
 {
-	// switch over the hardware-layer of the packet
-	switch (d_datalink) {
-   	case DLT_EN10MB:
-		memcpy(hwframe, &d_ether, (len<sizeof(d_ether)?len:sizeof(d_ether)));
-		break;
-#ifdef HAVE_RADIOTAP
-	case DLT_IEEE802_11_RADIO:
-		memcpy(hwframe, &d_80211, (len<sizeof(d_80211)?len:sizeof(d_80211)));
-		break;
-#endif
-	default:
-	   	return NULL;
+	string s = "";
+	get_frame(s);
+	if (s.size() <= len) {
+		memcpy(hwframe, s.c_str(), s.size());
+		return hwframe;
 	}
-	return hwframe;
+	return NULL;
 }
 
 string &pcap::get_frame(string &frame)
@@ -474,6 +508,7 @@ string &pcap::get_frame(string &frame)
 	frame = "";
 
 	char buf[1024];
+	string::size_type blen = 0;
 
 	switch (d_datalink) {
 	case DLT_EN10MB:
@@ -483,7 +518,12 @@ string &pcap::get_frame(string &frame)
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		memcpy(buf, &d_80211, sizeof(d_80211));
-		frame = string(buf, sizeof(d_80211));
+		blen = sizeof(d_80211);
+		if (d_frame2.size() > 0 && d_frame2.size() < sizeof(buf) - sizeof(d_80211)) {
+			memcpy(buf + sizeof(d_80211), d_frame2.c_str(), d_frame2.size());
+			blen += d_frame2.size();
+		}
+		frame = string(buf, blen);
 		break;
 #endif
 	default:

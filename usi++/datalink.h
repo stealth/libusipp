@@ -84,7 +84,10 @@ protected:
 	int d_80211;	// dummy
 #endif
 
-	std::string d_cooked;
+	std::string d_frame2;	// remaining part of the frame, if any. For example
+				// 802.11 From-DS=1 and To-DS=1 frames have the 4th
+				// address field available
+	std::string d_cooked, d_llc, d_qos;
 	std::string d_filter_string;
 
 public:
