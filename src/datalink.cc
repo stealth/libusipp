@@ -256,24 +256,24 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 		}
 		pcap_set_snaplen(d_pd, snaplen);
 	} else {
-		if ((d_pd = pcap_open_live(dev.c_str(), d_snaplen, promisc, 500, ebuf)) == NULL) {
-			e = "pcap::init_device::pcap_open_live:";
+		if ((d_pd = pcap_create(dev.c_str(), ebuf)) == NULL) {
+			e = "pcap::init_device::pcap_create:";
 			e += ebuf;
 			return die(e, STDERR, -1);
 		}
-	}
+		if (pcap_set_immediate_mode(d_pd, 1) < 0)
+			return die("pcap::init_device: Unable to set immediate mode.", STDERR, -1);
 
-// Ehem, BSD workarounnd. BSD won't timeout on select()
-// unless we force immediate return for read() (in pcap)
-// for uncomplete packets (queue not full?)
-#ifdef IMMEDIATE
-	int v = 1;
-	if (!is_file && ioctl(pcap_fileno(d_pd), BIOCIMMEDIATE, &v) < 0) {
-		e = "pcap::init_device::ioctl(..., BIOCIMMEDIATE, 1):";
-		e += strerror(errno);
-		return die(e, STDERR, -1);
+		pcap_set_promisc(d_pd, 1);
+		pcap_set_timeout(d_pd, 0);
+
+		if (pcap_set_snaplen(d_pd, snaplen) < 0)
+			return die("pcap::init_device: Unable to set snaplen.", STDERR, -1);
+
+		int r = pcap_activate(d_pd);
+		if (r < 0 && r != PCAP_WARNING_PROMISC_NOTSUP)
+			return die("pcap::init_device: Cant activate device.", STDERR, -1);
 	}
-#endif
 
 	// ignore error, as device might be down or not IP-based
 	if (!is_file)
@@ -339,6 +339,7 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 
 	d_dev = dev;
 	d_has_promisc = promisc;
+
 	return 0;
 }
 
