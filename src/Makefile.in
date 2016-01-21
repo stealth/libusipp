@@ -17,7 +17,7 @@ clear:
 
 usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
        eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
-       TX_pcap_eth.o TX_pcap.o TX_string.o object.o
+       TX_pcap_eth.o TX_pcap.o TX_string.o RX_fd.o RX_string.o object.o
 	ar cr libusi++.a $^
 	$(CC) $^ -shared $(LIBS) -lstdc++ -o libusi++.so
 	$(RANLIB) libusi++.a
@@ -38,6 +38,12 @@ TX_dnet_ip.o: TX_dnet_ip.cc
 	$(CXX) $(CXXFLAGS) $<
 
 TX_string.o: TX_string.cc
+	$(CXX) $(CXXFLAGS) $<
+
+RX_fd.o: RX_fd.cc
+	$(CXX) $(CXXFLAGS) $<
+
+RX_string.o: RX_string.cc
 	$(CXX) $(CXXFLAGS) $<
 
 icmp6.o: icmp6.cc

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -318,7 +318,7 @@ uint16_t IP::set_sum(uint16_t sum)
 }
 
 
-/*! get the destination-adress in network byteorder.
+/*! get the destination-address in network byteorder.
  */
 uint32_t IP::get_dst()
 {
@@ -340,7 +340,7 @@ string &IP::get_dst(string &s)
 
 
 
-/*! return the source-adress of actuall IP-packet
+/*! return the source-address of actuall IP-packet
  *  in network-byte order.
  */
 uint32_t IP::get_src()
@@ -370,7 +370,7 @@ uint32_t IP::set_src(uint32_t s)
 }
 
 
-/*! Set the sourceadress, use hostname or IP.
+/*! Set the sourceaddress, use hostname or IP.
  */
 int IP::set_src(const string &host)
 {
@@ -391,7 +391,7 @@ uint32_t IP::set_dst(uint32_t d)
 }
 
 
-/*! set destinationadress, similar to set_src()
+/*! set destinationaddress, similar to set_src()
  */
 int IP::set_dst(const string &host)
 {

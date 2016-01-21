@@ -228,7 +228,7 @@ string &pcap::get_l2dst(string &hwaddr)
  */
 uint16_t pcap::get_etype()
 {
-   	return ntohs(d_ether.ether_type);
+	return ntohs(d_ether.ether_type);
 }
 
 

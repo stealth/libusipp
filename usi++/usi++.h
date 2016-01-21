@@ -48,6 +48,8 @@ enum {
 #include "TX_IP6.h"
 #include "TX_string.h"
 #include "RX.h"
+#include "RX_fd.h"
+#include "RX_string.h"
 #include "misc.h"
 #include <string>
 
