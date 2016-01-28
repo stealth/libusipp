@@ -95,6 +95,9 @@ public:
 	/*! Sniff a ICMP6 packet and set up internal fields. */
 	virtual int sniffpack(void *, size_t);
 
+	/*! Sniff a ICMP6 packet and set up internal fields. */
+	virtual int sniffpack(void *, size_t, int &);
+
 };
 
 }

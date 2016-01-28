@@ -375,11 +375,12 @@ int pcap::setfilter(const string &s)
 
 string &pcap::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
@@ -395,8 +396,28 @@ void one_packet(unsigned char *user, const struct pcap_pkthdr *h, const unsigned
 
 int pcap::sniffpack(void *s, size_t len)
 {
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
+
+
+int pcap::sniffpack(void *s, size_t len, int &off)
+{
+	if (len > max_buffer_len || len < min_packet_size)
+		return die("pcap::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+
 	d_packet = NULL;
 
+	// Until now, off will always be 0 here, as we need to memcpy
+	// from pcap's internal buffer anyway
+	off = 0;
 	memset(s, 0, len);
 
 	d_timeout = false;
@@ -487,8 +508,10 @@ int pcap::sniffpack(void *s, size_t len)
  	cerr<<"pcap::d_framelen="<<d_framelen<<endl;
 #endif
 
-	memcpy(s, d_packet + idx, d_phdr.caplen - idx < len ? d_phdr.caplen - idx : len);
-	return d_phdr.caplen - idx < len ? d_phdr.caplen - idx : len;
+	off = (int)idx;
+
+	memcpy(s, d_packet, d_phdr.caplen < len ? d_phdr.caplen : len);
+	return d_phdr.caplen < len ? d_phdr.caplen : len;
 }
 
 

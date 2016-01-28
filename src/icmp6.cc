@@ -158,51 +158,47 @@ int ICMP6::sendpack(const string &payload)
 }
 
 
-int ICMP6::sniffpack(void *buf, size_t blen)
-{
-	if (blen > max_buffer_len)
-		return die("ICMP6::sniffpack: Insane large buffer len", STDERR, -1);
-
-	int r = 0;
-	char *tmp = new (nothrow) char[blen + sizeof(icmp6hdr)];
-	if (!tmp)
-		return die("ICMP6::sniffpack: OOM", STDERR, -1);
-
-	memset(tmp, 0, blen + sizeof(icmp6hdr));
-	memset(&icmp6hdr, 0, sizeof(icmp6hdr));
-
-	r = IP6::sniffpack(tmp, blen + sizeof(icmp6hdr));
-
-	if (r == 0 && Layer2::timeout()) {
-		delete [] tmp;
-		return 0;
-	} else if (r < (int)sizeof(icmp6hdr)) {
-		delete [] tmp;
-		return -1;
-	}
-
-	memcpy(&icmp6hdr, tmp, sizeof(icmp6hdr));
-	r -= sizeof(icmp6hdr);
-
-	if (buf)
-		memcpy(buf, tmp + sizeof(icmp6hdr), r < (int)blen ? r : blen);
-
-	delete [] tmp;
-	return r < (int)blen ? r : blen;
-}
-
-
+/*! sniff a ICMPv6 packet */
 string &ICMP6::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
+
+int ICMP6::sniffpack(void *s, size_t len)
+{
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
+
+
+int ICMP6::sniffpack(void *buf, size_t blen, int &off)
+{
+	off = 0;
+	int r = IP6::sniffpack(buf, blen, off);
+
+	if (r == 0 && Layer2::timeout())
+		return 0;
+	else if (r < off + (int)sizeof(icmp6hdr))
+		return die("ICMP6::sniffpack: short packet", STDERR, -1);
+
+	memcpy(&icmp6hdr, reinterpret_cast<char *>(buf) + off, sizeof(icmp6hdr));
+	off += sizeof(icmp6hdr);
+	return r;
+}
 
 }
 

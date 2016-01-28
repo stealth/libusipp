@@ -102,9 +102,26 @@ string &Layer2::sniffpack(string &s)
 	return d_rx->sniffpack(s);
 }
 
+
+// delegate sniff request to the receiver
+int Layer2::sniffpack(void *buf, size_t len, int &off)
+{
+	if (len > max_buffer_len || len < min_packet_size)
+		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+
+	int r = d_rx->sniffpack(buf, len, off);
+	if (r < 0)
+		return die(d_rx->why(), STDERR, d_rx->error());
+	return r;
+}
+
+
 // delegate sniff request to the receiver
 int Layer2::sniffpack(void *buf, size_t len)
 {
+	if (len > max_buffer_len || len < min_packet_size)
+		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+
 	int r = d_rx->sniffpack(buf, len);
 	if (r < 0)
 		return die(d_rx->why(), STDERR, d_rx->error());

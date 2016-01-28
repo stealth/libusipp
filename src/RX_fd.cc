@@ -163,22 +163,41 @@ int RX_fd::setfilter(const string &s)
 
 string &RX_fd::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
 
 int RX_fd::sniffpack(void *s, size_t len)
 {
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
+
+
+// modifies offset for the upper layers ("where the payload really starts"
+// and returns all received bytes
+int RX_fd::sniffpack(void *s, size_t len, int &off)
+{
 	d_timeout = 0;
 	d_cooked = "";
 	memset(&d_ether, 0, sizeof(d_ether));
 
-	int idx = d_offset;
+	off = 0;
+
+	int idx = d_offset;	// cooked header if any
 	if (d_has_ether)
 		idx += sizeof(d_ether);
 
@@ -215,11 +234,14 @@ int RX_fd::sniffpack(void *s, size_t len)
 		// Ether header if any
 		if (idx > d_offset)
 			memcpy(&d_ether, reinterpret_cast<char *>(s) + d_offset, sizeof(d_ether));
-		// The IP packet
-		memmove(s, reinterpret_cast<char *>(s) + idx, r - idx);
 
 	}
-	return r - idx;
+
+	// adjust offset, so above functions or string versions can splitt
+	// if off right away, without us needing to memmove() it
+	off = idx;
+
+	return r;	// returns 'full' r. will be subtracted by string versions
 }
 
 

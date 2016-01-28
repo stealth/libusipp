@@ -56,6 +56,10 @@ public:
 	 *  At most a given len. */
 	virtual int sniffpack(void *, size_t) = 0;
 
+	/*! Capture a packet from the network.
+	 *  At most a given len. memcpy-less version using offsets as return */
+	virtual int sniffpack(void *, size_t, int &) = 0;
+
 	/*! Init a device before capturing */
 	virtual int init_device(const std::string &, int, size_t) = 0;
 

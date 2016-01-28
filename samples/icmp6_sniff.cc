@@ -8,25 +8,12 @@
 using namespace std;
 using namespace usipp;
 
-#define PRINT_MAC
-
-string l2mac(string &l2)
-{
-	char m[100];
-
-	memset(m, 0, sizeof(m));
-	const unsigned char *mac = reinterpret_cast<const unsigned char *>(l2.c_str());
-	snprintf(m, sizeof(m), "%02x:%02x:%02x:%02x:%02x:%02x", *mac, mac[1], mac[2],
-		mac[3], mac[4], mac[5]);
-	return m;
-}
-
 
 int main(int argc, char **argv)
 {
 	ICMP6 *icmp = new ICMP6("::1");
-	char buf[1000] = {0};
-	string src, dst;
+	char buf[usipp::min_packet_size] = {0};
+	string src = "", dst = "", l2 = "";
 
 	if (argc < 2) {
 		cout<<argv[0]<<" [intf]\n";
@@ -40,16 +27,12 @@ int main(int argc, char **argv)
 
 	string smac, dmac;
 	while (1) {
-		memset(buf,0,1000);
     		// blocks
-		cout<<icmp->sniffpack(buf, 1000)<<endl;
-#ifdef PRINT_MAC
-		cout<<"["<<l2mac(icmp->rx()->get_l2src(smac))<<"->"<<l2mac(icmp->rx()->get_l2dst(dmac))<<"]:";
-#endif
+		cout<<icmp->sniffpack(buf, sizeof(buf))<<endl;
+		cout<<"["<<bin2mac(icmp->rx()->get_l2src(l2))<<"->"<<bin2mac(icmp->rx()->get_l2dst(l2))<<"]:";
 		cout<<"type:"<<(int)icmp->get_type()<<" ["<<icmp->get_src(src)<<" -> "
 		    <<icmp->get_dst(dst)<<"] "<<"seq: "<<icmp->get_seq()
 		    <<" ttl: "<<(int)icmp->get_hoplimit()<<" id: "<<icmp->get_icmpId()<<endl;
-		    //<<buf<<endl;
 
 	}
 	return 0;

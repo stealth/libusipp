@@ -491,89 +491,71 @@ int IP::sendpack(const string &payload)
 /*! sniff a IP packet */
 string &IP::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
+}
+
+
+int IP::sniffpack(void *s, size_t len)
+{
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
 }
 
 
 /*! handle packets, that are NOT actually for the
  *  local address
  */
-int IP::sniffpack(void *buf, size_t len)
+int IP::sniffpack(void *buf, size_t len, int &off)
 {
-	if (len > max_buffer_len)
-		return die("IP::sniffpack: insane large buffer len", STDERR, -1);
-
 	int r = 0;
-	int xlen = len + sizeof(iph) + sizeof(ipOptions);
-	struct usipp::iphdr *i = NULL;
+	off = 0;
 
-	char *tmp = new (nothrow) char[xlen];
-	if (!tmp)
-		return die("IP::snifpack: OOM", STDERR, -1);
+	r = Layer2::sniffpack(buf, len, off);
 
-	memset(tmp, 0, xlen);
+	if (r == 0 && Layer2::timeout())
+		return 0;	// timeout
+	else if (r < 0)
+		return -1;	// forward downstream errors
+	else if (r < off + (int)sizeof(usipp::iphdr))
+		return die("IP::sniffpack: short packet", STDERR, -1);
 
-	/* until we assembled fragments or we received and unfragemented packet
-	 */
-	while (i == NULL) {
-		memset(tmp, 0, xlen);
-		if ((r = Layer2::sniffpack(tmp, xlen)) == 0 &&
-		    Layer2::timeout()) {
-			delete [] tmp;
-			return 0;	// timeout
-		} else if (r < 0) {
-			delete [] tmp;
-			return -1;
-		}
-#ifdef USI_REASSEMBLE
-		i = (struct usipp::iphdr*)reassemble(tmp, len, &r);
-#else
-		i = (struct usipp::iphdr*)tmp;
-#endif
-	}
+	struct usipp::iphdr *i = reinterpret_cast<usipp::iphdr *>(reinterpret_cast<char *>(buf) + off);
 
-#ifdef USI_DEBUG
-	cerr<<"IP::r="<<r<<endl;
-	cerr<<"IP::ihlen="<<(i->ihl<<2)<<endl;
-#endif
+	// Copy header without options
+	memcpy(&iph, reinterpret_cast<char *>(buf) + off, sizeof(usipp::iphdr));
 
 	unsigned int iplen = i->ihl<<2;
-	// Copy header without options
-	memcpy(&iph, (char *)i, sizeof(iph));
-	r -= sizeof(iph);
-
-	if (r < 0) {
-		delete [] tmp;
-		return -1;
-	} else if (r == 0) {
-		delete [] tmp;
-		return 0;
+	if (iplen < sizeof(iph)) {
+		off += iplen;
+		return r;
+	}
+	if (iplen > sizeof(iph) + sizeof(ipOptions)) {
+		off += sizeof(iph) + sizeof(ipOptions);
+		return r;
 	}
 
 	// Copy ip-options if any
-	if (r >= (int)iplen && iplen > (int)sizeof(iph)) {
-		memcpy(ipOptions, (char *)i + sizeof(iph), iplen - sizeof(iph));
-		r -= (iplen - sizeof(iph));
-	}
+	if (iplen > (int)sizeof(iph) && off + (int)iplen <= r)
+		memcpy(ipOptions, reinterpret_cast<char *>(buf) + off + sizeof(iph), iplen - sizeof(iph));
+	else if (iplen != sizeof(iph))
+		memset(ipOptions, 0, sizeof(ipOptions));
 
-	if (r < 0) {
-		delete [] tmp;
-		return -1;
-	} else if (r == 0) {
-		delete [] tmp;
-		return 0;
-	}
+	off += iplen;
 
-	if (buf)
-		memcpy(buf, (char*)i + iplen, r < (int)len ? r : len);
-
-	delete [] tmp;
-	return r < (int)len ? r : len;
+	return r;
 }
 
 
@@ -590,124 +572,6 @@ int IP::init_device(const string &dev, int promisc, size_t snaplen)
 		return r;
 	r = Layer2::setfilter("ip");
 	return r;
-}
-
-
-/*! re-assembles IP-fragments
- */
-char *IP::reassemble(char *packet, int len, int *resultLen)
-{
-	static vector<fragments*> pending;
-	fragments *f = NULL;
-	int ihl = 0, xlen = 0, offset = 0;
-	unsigned int i = 0;
-
-	struct usipp::iphdr *ip = (struct usipp::iphdr*)(packet);
-	ihl = ip->ihl<<2;
-
-	/* can't be > 60 */
-	if (ihl > 60)
-		ihl = 60;
-
-	/* if fragment-offset and DF-bit not set */
-	if (ntohs(ip->frag_off) != 0 &&
-	   (ntohs(ip->frag_off) & numbers::ip_df) != numbers::ip_df) {
-
-		/* for all pending fragments */
-		for (i = 0; i < pending.size(); i++) {
-			if (pending[i] == NULL)
-				continue;
-
-			/* if we already have something that belongs to
-			 * _this_ fragment
-			 */
-			if (ntohs(ip->id) == pending[i]->id) {
-				f = pending[i];
-				break;
-			}
-		}
-
-		/* otherwise its the first one */
-		if (f == NULL) {
-			f = new fragments;
-			f->id = ntohs(ip->id);
-			f->data = new char[len + ihl];
-			f->len = 0;			// # of bytes that are captured yet
-			f->origLen = 0xffff;		// # of bytes IP-packet once contained
-			f->userLen = 0;			// # of bytes saved
-			memset(f->data, 0, len + ihl);
-			memcpy(f->data, packet, ihl);
-			pending.push_back(f);
-		}
-
-		offset = 8*(ntohs(ip->frag_off) & numbers::ip_offmask);
-
-		if (offset + ntohs(ip->tot_len) - ihl <= len)
-			xlen = ntohs(ip->tot_len) - ihl;
-		else
-			xlen = len - offset;
-
-		/* Copy IP-data to the right offset.
-		 * It may happen, that offset points out of our data-area.
-		 * In this case is xlen < 0 and we ignore it.
-		 */
-		if (xlen > 0) {
-			memcpy(f->data + offset + ihl,
-			       packet + ihl,
-			       xlen
-			      );
-			/* This is for the caller; how much was
-			 * fetched AND COPIED for her.
-			 */
-			f->userLen += xlen;
-		}
-		/* We even count the not copied data! */
-		f->len += ntohs(ip->tot_len) - ihl;
-
-
-		/* OK, we received the last fragment with this id, so calculate
-		 * how the original size of this packet was
-		 */
-		if ((ntohs(ip->frag_off) != 0 &&
-		    (ntohs(ip->frag_off) & numbers::ip_mf) == 0)) {
-			f->origLen = ntohs(ip->tot_len) + offset - ihl;
-		}
-
-		/* In case we reached the original len -> all fragments
-		 * are received and assembled.
-		 * NOTE that f->len counts the # of bytes _received_, not saved!
-		 * The # of saved bytes is in f->userLen.
-		 */
-		if (f->len == f->origLen) {
-			/* should not be necessary, but */
-			if (i < pending.size())
-				pending[i] = NULL;
-			struct usipp::iphdr *ih = (struct usipp::iphdr*)(f->data);
-			ih->frag_off = 0;
-
-			ih->tot_len = htons(ihl + f->len);
-			*resultLen = ihl + f->userLen;
-
-			/* packet must at least be 'len+ihl' bytes big,
-			 * where 'ihl' is max. 60.
-			 */
-			memset(packet, 0, len+ihl);
-			memcpy(packet, f->data, len+ihl);
-
-			delete [] f->data;
-			delete f;
-			return packet;
-		} else  {
-			*resultLen = 0;
-			return NULL;
-		}
-
-	/* else, packet is not fragmented  */
-	} else {
-		*resultLen = ntohs(ip->tot_len);
-		/* return IP-packet, hw-frame skipped */
-		return packet;
-	}
 }
 
 

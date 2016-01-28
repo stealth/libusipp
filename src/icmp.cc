@@ -209,61 +209,49 @@ int ICMP::sendpack(const string &payload)
 /*! sniff a ICMP packet */
 string &ICMP::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
 
-/* handle packets, that are NOT actually for the
- *  local adress!
+/* handle packet
  */
 int ICMP::sniffpack(void *s, size_t len)
 {
-	if (len > max_buffer_len)
-		return die("ICMP::sniffpack: Insane large buffer len", STDERR, -1);
-
-	size_t plen = len + sizeof(struct icmphdr);
-	int r = 0;
-	char *tmp = new (nothrow) char[plen];
-
-	if (!tmp)
-		return die("ICMP::sniffpack: OOM", STDERR, -1);
-
-	memset(tmp, 0, plen);
-	memset(&icmphdr, 0, sizeof(icmphdr));
-
-	r = IP::sniffpack(tmp, plen);
-
-	if (r == 0 && Layer2::timeout()) {
-		delete [] tmp;
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
 		return 0;
-	} else if (r < (int)sizeof(icmphdr)) {
-		delete [] tmp;
-		return -1;
-	}
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
 
-#ifdef USI_DEBUG
-	cerr<<"ICMPh:"<<r<<endl;
-#endif
 
-	// point to ICMP header
-	struct icmphdr *icmph = (struct icmphdr*)tmp;
+/* handle packet
+ */
+int ICMP::sniffpack(void *s, size_t len, int &off)
+{
+	off = 0;
+	int r = IP::sniffpack(s, len, off);
 
-	// save ICMP header for public functions
-	memcpy(&icmphdr, icmph, sizeof(struct icmphdr));
+	if (r == 0 && Layer2::timeout())
+		return 0;
+	else if (r < off + (int)sizeof(icmphdr))
+		return die("ICMP::sniffpack: received short packet.", STDERR, -1);
 
-	r -= sizeof(icmphdr);
+	// save ICMP header
+	memcpy(&icmphdr, reinterpret_cast<char *>(s) + off, sizeof(struct icmphdr));
+	off += sizeof(icmphdr);
 
-	// and give user the payload
-	if (s)
-		memcpy(s, ++icmph, r < (int)len ? r : len);
-
-	delete [] tmp;
-	return r < (int)len ? r : len;
+	return r;
 }
 
 

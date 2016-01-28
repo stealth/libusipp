@@ -63,6 +63,9 @@ public:
 	/*! Sniff an EAPOL packet. Returns EAPOL packet body */
 	virtual int sniffpack(void *, size_t);
 
+	/*! Sniff an EAPOL packet. Returns EAPOL packet body */
+	virtual int sniffpack(void *, size_t, int &);
+
 	/*! Send an EAPOL packet. You must provide EAPOL packet body.
 	 */
 	virtual int sendpack(const void *, size_t);

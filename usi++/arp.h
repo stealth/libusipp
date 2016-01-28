@@ -96,6 +96,10 @@ public:
 	 */
 	virtual int sniffpack(void *, size_t);
 
+	/*! Sniff for an ARP-request/reply ...
+	 */
+	virtual int sniffpack(void *, size_t, int &);
+
 	/*! Sniff for an ARP-request/reply */
 	virtual std::string &sniffpack(std::string &);
 

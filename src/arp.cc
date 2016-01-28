@@ -127,13 +127,12 @@ int ARP::sendpack(const void *buf, size_t blen)
 
 string &ARP::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-
-	int r = 0;
-	if ((r = sniffpack(buf, sizeof(buf))) < 0)
-		return s;
-	s = string(buf, r);
+	int r = sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
@@ -142,31 +141,40 @@ string &ARP::sniffpack(string &s)
  */
 int ARP::sniffpack(void *s, size_t len)
 {
-	if (len > max_buffer_len)
-		return die("ARP::sniffpack: Insane large buffer len", STDERR, -1);
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
 
-	char *tbuf = new (nothrow) char[sizeof(arphdr) + len];
-	if (!tbuf)
-		return die("ARP::sniffpack: OOM", RETURN, -1);
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
 
-	int r = Layer2::sniffpack(tbuf, sizeof(arphdr) + len);
+
+/* Sniff for an ARP-request/reply ...
+ */
+int ARP::sniffpack(void *s, size_t len, int &off)
+{
+	off = 0;
+	int r = Layer2::sniffpack(s, len, off);
 
 	if (r == 0 && Layer2::timeout()) {
-		delete [] tbuf;
 		return 0;
 	} else if (r >= 0 && r < (int)sizeof(arphdr)) {
-		delete [] tbuf;
 		return die("ARP::sniffpack:: packet too short", RETURN, -1);
-	} else if (r < 0) {
-		delete [] tbuf;
-		return -1;
+	} else if (r < off || r - off < (int)sizeof(arphdr)) {
+		return die("ARP::sniffpack: Invalid packet received", RETURN, -1);
 	}
 
-	memcpy(&arphdr, tbuf, sizeof(arphdr));
-	r -= sizeof(arphdr);
-	memcpy(s, tbuf + sizeof(arphdr), r);
+	memcpy(&arphdr, reinterpret_cast<char *>(s) + off, sizeof(arphdr));
 
-	delete [] tbuf;
+	// dont increase offset. ARP class is special. It copies arp hdr
+	// but still returnes the arp hdr as payload, since there are
+	// no upper layers and returning 0 payload wont make sense
+	//off += sizeof(arphdr);
 	return r;
 }
 

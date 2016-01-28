@@ -72,40 +72,42 @@ int EAPOL::set_l2dst(const string &dst)
 
 string &EAPOL::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
-	char buf[4096];
-
-	int r = 0;
-	if ((r = sniffpack(buf, sizeof(buf))) < 0)
-		return s;
-	s = string(buf, r);
+	char buf[max_packet_size];
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
 
-int EAPOL::sniffpack(void *buf, size_t blen)
+int EAPOL::sniffpack(void *s, size_t len)
 {
-	char *tbuf = new (nothrow) char[sizeof(eapol_hdr) + blen];
-	if (!tbuf)
-		return die("EAPOL::sniffpack: OOM", RETURN, -1);
-
-	int r = Layer2::sniffpack(tbuf, sizeof(eapol_hdr) + blen);
-	if (r == 0 && Layer2::timeout()) {
-		delete [] tbuf;
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
 		return 0;
-	} else if (r >= 0 && r <= (int)sizeof(eapol_hdr)) {
-		delete [] tbuf;
-		return die("EAPOL::sniffpack: packet too short", RETURN, -1);
-	} else if (r < 0) {
-		delete [] tbuf;
-		return -1;
-	}
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
 
-	memcpy(&eapol_hdr, tbuf, sizeof(eapol_hdr));
-	r -= sizeof(eapol_hdr);
-	memcpy(buf, tbuf + sizeof(eapol_hdr), r);
+}
 
-	delete [] tbuf;
+
+int EAPOL::sniffpack(void *buf, size_t blen, int &off)
+{
+	off = 0;
+	int r = Layer2::sniffpack(buf, blen, off);
+	if (r == 0 && Layer2::timeout())
+		return 0;
+	else if (r < off + (int)sizeof(eapol_hdr))
+		return die("EAPOL::sniffpack: short packet", STDERR, -1);
+
+	memcpy(&eapol_hdr, reinterpret_cast<char *>(buf) + off, sizeof(eapol_hdr));
+	off += sizeof(eapol_hdr);
 	return r;
 }
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -43,9 +43,6 @@ protected:
 	usipp::iphdr iph;
 	char ipOptions[40];
 	bool calc_csum;
-
-	/*! */
-	char *reassemble(char *, int, int *);
 
 	/*! pseudo header for derived classes like UDP or TCP.
 	 *  needs to be here so that derived classes can be templates as
@@ -224,14 +221,19 @@ public:
 	virtual int sendpack(const std::string &);
 
 
-	/*! Capture an packet from the NIC.
+	/*! Capture an packet from the net.
 	*/
 	virtual std::string &sniffpack(std::string &);
 
 
-	/*! Capture an packet from the NIC.
+	/*! Capture an packet from the net.
 	*/
 	virtual int sniffpack(void *buf, size_t len);
+
+	/*! Capture an packet from the net. offset version w/o copy
+	*/
+	virtual int sniffpack(void *buf, size_t len, int &);
+
 
 	/*! Initial setup for device, enable promisc (p), max capture len (l) */
 	virtual int init_device(const std::string &, int p, size_t l);

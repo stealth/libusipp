@@ -103,6 +103,10 @@ public:
 	*/
 	virtual int sniffpack(void *, size_t);
 
+	/*! read a packet from fd
+	*/
+	virtual int sniffpack(void *, size_t, int &);
+
 	/*! Set a timeout. Implements RX::timeout() = 0. */
 	virtual int timeout(const struct timeval &);
 

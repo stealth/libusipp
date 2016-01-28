@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	ARP *req = new ARP, req2;
 	ARP *rep = new ARP;
 
-	if (req->init_device(dev, 1, 500) < 0 || rep->init_device(dev, 1, 500) < 0)
+	if (req->init_device(dev, 1, 1500) < 0 || rep->init_device(dev, 1, 1500) < 0)
 		return -1;
 
 	// set src address of underlying TX

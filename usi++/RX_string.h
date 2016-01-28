@@ -84,9 +84,13 @@ public:
 	/*! read a packet from string */
 	virtual std::string &sniffpack(std::string &);
 
-	/*! read a packet from fd
+	/*! read a packet from s string
 	*/
 	virtual int sniffpack(void *, size_t);
+
+	/*! read a packet from a string
+	*/
+	virtual int sniffpack(void *, size_t, int &);
 
 	/*! Set a timeout. Implements RX::timeout() = 0. */
 	virtual int timeout(const struct timeval &);

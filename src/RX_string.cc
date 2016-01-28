@@ -94,6 +94,13 @@ string &RX_string::sniffpack(string &s)
 }
 
 
+int RX_string::sniffpack(void *buf, size_t len, int &off)
+{
+	off = 0;
+	return sniffpack(buf, len);
+}
+
+
 int RX_string::sniffpack(void *buf, size_t len)
 {
 	string s = "";

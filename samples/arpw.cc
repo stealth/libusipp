@@ -11,49 +11,45 @@ using namespace usipp;
 using namespace std;
 
 
-char *print_mac(unsigned char *mac)
-{
-	static char m[100];	// uhhh.... :)
-
-	memset(m, 0, sizeof(m));
-	snprintf(m, sizeof(m), "%02x:%02x:%02x:%02x:%02x:%02x", *mac, mac[1], mac[2], mac[3], mac[4], mac[5]);
-	return m;
-}
-
-
 int main(int argc, char **argv)
 {
-	usipp::ether_arp ea;
+	usipp::ether_arp *ea = NULL;
 
-	string dev = "eth0";
+	string dev = "eth0", l2 = "";
 	if (argc > 1)
 		dev = argv[1];
 
 	ARP *a = new ARP;
 
-	if (a->init_device(dev, 1, 100) < 0) {
+	if (a->init_device(dev, 1, 1500) < 0) {
 		cerr<<a->why()<<endl;
 		return 1;
 	}
 
-	char sip[100], dip[100];
+	char sip[100], dip[100], buf[1500];
+
+	ea = reinterpret_cast<ether_arp *>(buf);
 
 	while (1) {
 		// The ARP header is already in the ARP object,
 		// we only receive the payload
-		a->sniffpack((char *)&ea + sizeof(ea.ea_hdr),
-		             sizeof(ea) - sizeof(ea.ea_hdr));
+		if (a->sniffpack(buf, sizeof(buf)) <= 0)
+			cerr<<"Error sniffing packet:"<<a->why();
 		if (a->get_op() == numbers::arpop_request) {
-			in_addr in1; memcpy(&in1.s_addr, ea.arp_tpa, 4);
-			in_addr in2; memcpy(&in2.s_addr, ea.arp_spa, 4);
-			cout<<"arp who has "<<inet_ntop(AF_INET, &in1, dip, sizeof(dip))
+			in_addr in1; memcpy(&in1.s_addr, ea->arp_tpa, 4);
+			in_addr in2; memcpy(&in2.s_addr, ea->arp_spa, 4);
+			cout<<"["<<bin2mac(a->raw_rx()->get_l2src(l2))<<"] -> ["
+			    <<bin2mac(a->raw_rx()->get_l2dst(l2))<<"] arp who has "<<inet_ntop(AF_INET, &in1, dip, sizeof(dip))
 			    <<" tell "<<inet_ntop(AF_INET, &in2, sip, sizeof(sip))<<endl;
 		}
 		if (a->get_op() == numbers::arpop_reply) {
-			in_addr in; memcpy(&in.s_addr, ea.arp_spa, 4);
-			cout<<inet_ntop(AF_INET, &in, sip, sizeof(sip))<<" is at "
-			    <<print_mac(ea.arp_sha)<<endl;
+			in_addr in; memcpy(&in.s_addr, ea->arp_spa, 4);
+			cout<<"["<<bin2mac(a->raw_rx()->get_l2src(l2))<<"] -> ["
+			    <<bin2mac(a->raw_rx()->get_l2dst(l2))<<"] "
+			    <<inet_ntop(AF_INET, &in, sip, sizeof(sip))<<" is at "
+			    <<bin2mac(string(reinterpret_cast<char *>(&ea->arp_sha), sizeof(ea->arp_sha)))<<endl;
 		}
 	}
 	return 0;
 }
+

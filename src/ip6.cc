@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -304,47 +304,46 @@ int IP6::next_header(const string &s)
 /*! sniff a IP6 packet */
 string &IP6::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
 
-int IP6::sniffpack(void *buf, size_t blen)
+int IP6::sniffpack(void *s, size_t len)
 {
-	int r = 0;
-	int xlen = max_packet_size;
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
+		return 0;
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
 
-	char *tmp = new (nothrow) char[xlen];
 
-	if (!tmp)
-		return die("IP6::sniffpack: OOM", STDERR, -1);
+int IP6::sniffpack(void *buf, size_t blen, int &off)
+{
+	off = 0;
+	int r = Layer2::sniffpack(buf, blen);
 
-	memset(tmp, 0, xlen);
-
-   	if ((r = Layer2::sniffpack(tmp, xlen)) == 0 &&
-	    Layer2::timeout()) {
-		delete [] tmp;
+   	if (r == 0 && Layer2::timeout())
 		return 0;	// timeout
-	} else if (r < (int)sizeof(iph)) {
-		delete [] tmp;
-		return -1;
-	}
+	else if (r < off + (int)sizeof(iph))
+		return die("IP6::sniffpack: short packet", STDERR, -1);
 
-	memcpy(&iph, tmp, sizeof(iph));
-	r -= sizeof(iph);
+	memcpy(&iph, reinterpret_cast<char *>(buf) + off, sizeof(iph));
+	off += sizeof(iph);
 
 	int32_t totlen = (int32_t)get_payloadlen();
-	if (r < 0) {
-		delete [] tmp;
-		return -1;
-	} else if (r == 0 || r < totlen || totlen < 0) {//TODO: handle fragments
-		delete [] tmp;
-		return 0;
-	}
+	if (r < off + totlen || totlen < 0 || totlen > max_packet_size)
+		return r;
 
 	e_hdrs.clear();
 	e_hdrs_len = 0;
@@ -359,6 +358,7 @@ int IP6::sniffpack(void *buf, size_t blen)
 			totlen -= (8*op->ip6o_len + 8);
 			if (totlen < 0)
 				break;
+			// cant wrap, since totlen is really 16bit
 			offset += (8*op->ip6o_len + 8);
 			e_hdrs.push_back(string((char *)op, 8*op->ip6o_len + 8));
 			op = (ip6_opt *)((char *)op + 8*op->ip6o_len + 8);
@@ -368,18 +368,9 @@ int IP6::sniffpack(void *buf, size_t blen)
 	}
 
 	e_hdrs_len = offset;
-	r -= offset;
+	off += offset;
 
-	if (r < 0) {
-		delete [] tmp;
-		return -1;
-	}
-
-	if (buf)
-		memcpy(buf, tmp + sizeof(iph) + offset, r < (int)blen ? r : blen);
-
-	delete [] tmp;
-	return r < (int)blen ? r : blen;
+	return r;
 }
 
 

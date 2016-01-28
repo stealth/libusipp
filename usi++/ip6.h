@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -40,6 +40,16 @@ namespace usipp {
  *  \example icmp6_sniff.cc
  */
 class IP6 : public Layer2 {
+
+	struct ip6_hdr iph;
+	uint8_t d_proto;
+	std::vector<std::string> e_hdrs;
+	uint16_t e_hdrs_len;
+	TX *d_tx;
+
+protected:
+	struct pseudohdr6 d_pseudo;
+
 
 public:
 	/*! New IP6 packet with destination address and next-header proto.
@@ -143,15 +153,8 @@ public:
 	/*! Sniff a IP6 packet and set up internal fields. */
 	virtual int sniffpack(void *, size_t);
 
-private:
-	struct ip6_hdr iph;
-	uint8_t d_proto;
-	std::vector<std::string> e_hdrs;
-	uint16_t e_hdrs_len;
-	TX *d_tx;
-
-protected:
-	struct pseudohdr6 d_pseudo;
+	/*! Sniff a IP6 packet and set up internal fields. */
+	virtual int sniffpack(void *, size_t, int &);
 
 };
 
