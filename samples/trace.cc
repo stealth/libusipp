@@ -29,14 +29,14 @@ int ip_trace(const string &dst, const string &src, const string &dev, int type)
 
 	ip.set_src(src);
 
-	sn.init_device(dev, 0, 500);
+	sn.init_device(dev, 0, 1500);
 	sn.setfilter("icmp and (icmp[0] == 11 or icmp[0] == 0 or icmp[0] == 3)");
 
-	string h1, h2;
+	string h1 = "", h2 = "", pkt = "";
 	for (int i = 1; i < 64; i++) {
 		ip.set_ttl(i);
 		ip.sendpack("");
-		sn.sniffpack(NULL, 0);
+		sn.sniffpack(pkt);
 
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3 || sn.get_type() == 0)
@@ -53,14 +53,14 @@ int icmp_trace(const string &dst, const string &src, const string &dev, int type
 	icmp.set_src(src);
 	icmp.set_type(type);
 
-	sn.init_device(dev, 0, 500);
+	sn.init_device(dev, 0, 1500);
 	sn.setfilter("icmp and (icmp[0] == 11 or icmp[0] == 0 or icmp[0] == 3)");
 
-	string h1, h2;
+	string h1 = "", h2 = "", pkt = "";
 	for (int i = 1; i < 64; i++) {
 		icmp.set_ttl(i);
 		icmp.sendpack("");
-		sn.sniffpack(NULL, 0);
+		sn.sniffpack(pkt);
 
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3 || sn.get_type() == 0)
@@ -80,14 +80,14 @@ int udp_trace(const string &dst, const string &src, const string &dev, int port)
 	udp.set_dstport(port);
 	udp.set_srcport(53);
 
-	sn.init_device(dev, 0, 500);
+	sn.init_device(dev, 0, 1500);
 	sn.setfilter("icmp and (icmp[0] == 11 or icmp[0] == 3)");
 
-	string h1, h2;
+	string h1 = "", h2 = "", pkt = "";
 	for (int i = 1; i < 64; i++) {
 		udp.set_ttl(i);
 		udp.sendpack("");
-		sn.sniffpack(NULL, 0);
+		sn.sniffpack(pkt);
 
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_type() == 3)
@@ -109,14 +109,14 @@ int tcp_trace(const string &dst, const string &src, const string &dev, int port)
 
 	tcp.set_flags(numbers::th_syn);
 
-	sn.init_device(dev, 0, 500);
+	sn.init_device(dev, 0, 1500);
 	sn.setfilter("(icmp and icmp[0] == 11) or (tcp and dst port 1234)");
 
-	string h1, h2;
+	string h1 = "", h2 = "", pkt = "";
 	for (int i = 1; i < 64; i++) {
 		tcp.set_ttl(i);
 		tcp.sendpack("");
-		sn.sniffpack(NULL, 0);
+		sn.sniffpack(pkt);
 		cout<<"  "<<i<<"  "<<sn.get_src(h1)<<" ("<<sn.get_src(h2)<<")\n";
 		if (sn.get_proto() == numbers::ipproto_tcp)
 			break;
