@@ -539,13 +539,11 @@ int IP::sniffpack(void *buf, size_t len, int &off)
 
 	unsigned int iplen = i->ihl<<2;
 	if (iplen < sizeof(iph)) {
-		off += iplen;
+		off += sizeof(iph);
 		return r;
 	}
-	if (iplen > sizeof(iph) + sizeof(ipOptions)) {
-		off += sizeof(iph) + sizeof(ipOptions);
-		return r;
-	}
+	// cant happen: only 4bit IHL, -> max of 40byte options == sizeof(ipOptions)
+	//if (iplen > sizeof(iph) + sizeof(ipOptions)) 
 
 	// Copy ip-options if any
 	if (iplen > (int)sizeof(iph) && off + (int)iplen <= r)
@@ -554,7 +552,6 @@ int IP::sniffpack(void *buf, size_t len, int &off)
 		memset(ipOptions, 0, sizeof(ipOptions));
 
 	off += iplen;
-
 	return r;
 }
 

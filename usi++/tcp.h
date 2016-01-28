@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -148,13 +148,17 @@ public:
 	 */
 
 
-	/*! Capture an packet from the NIC.
+	/*! Capture an packet from the net.
 	*/
 	virtual std::string &sniffpack(std::string &);
 
-	/*! Capture a packet from the NIC.
+	/*! Capture a packet from the net.
 	 */
 	virtual int sniffpack(void *buf, size_t buflen);
+
+	/*! Capture a packet from the net.
+	 */
+	virtual int sniffpack(void *buf, size_t buflen, int &);
 
 	/*! Send a packet.
 	 */

@@ -313,11 +313,12 @@ int TCP<T>::sendpack(const string &s)
 template<typename T>
 string &TCP<T>::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
@@ -325,53 +326,53 @@ string &TCP<T>::sniffpack(string &s)
 /*! sniff a TCP-packet.
  */
 template<typename T>
-int TCP<T>::sniffpack(void *buf, size_t len)
+int TCP<T>::sniffpack(void *s, size_t len)
 {
-	if (len > max_buffer_len)
-		return T::die("TCP::sniffpack: Insane large buffer len", STDERR, -1);
-
-	size_t xlen = len + sizeof(tcph) + sizeof(tcpOptions);
-
-	int r = 0;
-	char *tmp = new (nothrow) char[xlen];
-	if (!tmp)
-		return T::die("TCP::sniffpack: OOM", STDERR, -1);
-
-	memset(tmp, 0, xlen);
-	memset(&tcph, 0, sizeof(tcph));
-
-	r = T::sniffpack(tmp, xlen);
-
-	if (r == 0 && Layer2::timeout()) {
-		delete [] tmp;
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
 		return 0;
-	} else if (r < (int)sizeof(tcph)) {
-		delete [] tmp;
-		return -1;
-	}
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
+
+
+/*! sniff a TCP-packet.
+ */
+template<typename T>
+int TCP<T>::sniffpack(void *buf, size_t len, int &off)
+{
+	off = 0;
+	int r = T::sniffpack(buf, len, off);
+
+	if (r == 0 && Layer2::timeout())
+		return 0;
+	else if (r < off + (int)sizeof(tcph))
+		return T::die("TCP::sniffpack: short packet", STDERR, -1);
 
 	// Copy TCP-header without options
-	memcpy(&tcph, tmp, sizeof(tcph));
-	r -= sizeof(tcph);
+	memcpy(&tcph, reinterpret_cast<char *>(buf) + off, sizeof(tcph));
 
 	unsigned int tcplen = tcph.th_off<<2;
-
-	if (r < (int)(tcplen - sizeof(tcph))) {
-		delete [] tmp;
-		return -1;
+	if (tcplen < (int)sizeof(tcph)) {
+		off += sizeof(tcph);
+		return r;
 	}
 
-	// copy options itself
-	if (tcplen > sizeof(tcph)) {
-		memcpy(tcpOptions, tmp + sizeof(tcph), tcplen - sizeof(tcph));
-		r -= (tcplen - sizeof(tcph));
-	}
+	// cant happen: only 4bit tcp offset, -> max of 40byte options == sizeof(tcpOptions)
+	//if (tcplen > sizeof(tcph) + sizeof(tcpOptions))
 
-	if (buf)
-		memcpy(buf, tmp + tcplen, r < (int)len ? r : len);
+	// copy TCP options itself
+	if (tcplen > (int)sizeof(tcph) && off + (int)tcplen <= r) {
+		memcpy(tcpOptions, reinterpret_cast<char *>(buf) + off + sizeof(tcph), tcplen - sizeof(tcph));
+	} else if (tcplen != sizeof(tcph))
+		memset(tcpOptions, 0, sizeof(tcpOptions));
 
-	delete [] tmp;
-       	return r < (int)len ? r : len;
+	off += tcplen;
+       	return r;
 }
 
 

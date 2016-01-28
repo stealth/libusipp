@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -221,11 +221,12 @@ int UDP<T>::sendpack(const string &s)
 template <typename T>
 string &UDP<T>::sniffpack(string &s)
 {
+	int off = 0;
 	s = "";
 	char buf[max_packet_size];
-	int r = this->sniffpack(buf, sizeof(buf));
-	if (r > 0)
-		s = string(buf, r);
+	int r = this->sniffpack(buf, sizeof(buf), off);
+	if (r > off)
+		s = string(buf + off, r - off);
 	return s;
 }
 
@@ -233,40 +234,41 @@ string &UDP<T>::sniffpack(string &s)
 /* Capture packets that are not for our host.
  */
 template <typename T>
-int UDP<T>::sniffpack(void *buf, size_t len)
+int UDP<T>::sniffpack(void *s, size_t len)
 {
-	if (len > max_buffer_len)
-		return T::die("UDP::sniffpack: Insane large buffer len", STDERR, -1);
-
-	int r = 0;
-	char *tmp = new (nothrow) char[len + sizeof(d_udph)];
-	if (!tmp)
-		return T::die("UDP::sniffpack: OOM", STDERR, -1);
-
-	memset(tmp, 0, len + sizeof(d_udph));
-	memset(&d_udph, 0, sizeof(d_udph));
-
-	r = T::sniffpack(tmp, len + sizeof(d_udph));
-
-	if (r == 0 && Layer2::timeout()) {
-		delete [] tmp;
+	int off = 0;
+	int r = sniffpack(s, len, off);
+	if (r <= 0)
+		return r;
+	if (r <= off)
 		return 0;
-	} else if (r < (int)sizeof(d_udph)) {
-		delete [] tmp;
-		return -1;
-	}
+	if (off > 0)
+		memmove(s, reinterpret_cast<char *>(s) + off, r - off);
+	return r - off;
+}
+
+
+/* Capture packets that are not for our host.
+ */
+template <typename T>
+int UDP<T>::sniffpack(void *buf, size_t len, int &off)
+{
+	off = 0;
+	int r = T::sniffpack(buf, len, off);
+
+	if (r == 0 && Layer2::timeout())
+		return 0;
+	else if (r < off + (int)sizeof(d_udph))
+		return T::die("UDP::sniffpack: short packet", STDERR, -1);
 
 #ifdef USI_DEBUG
 	cerr<<"UDP size:"<<r<<endl;
 #endif
-	memcpy(&d_udph, tmp, sizeof(d_udph));
-	r -= sizeof(d_udph);
 
-	if (buf)
-		memcpy(buf, tmp + sizeof(d_udph), r < (int)len ? r : len);
+	memcpy(&d_udph, reinterpret_cast<char *>(buf) + off, sizeof(d_udph));
+	off += sizeof(d_udph);
 
-	delete [] tmp;
-	return r < (int)len ? r : len;
+	return r;
 }
 
 
