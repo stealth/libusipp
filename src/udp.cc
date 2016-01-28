@@ -222,7 +222,7 @@ template <typename T>
 string &UDP<T>::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 	int r = this->sniffpack(buf, sizeof(buf));
 	if (r > 0)
 		s = string(buf, r);

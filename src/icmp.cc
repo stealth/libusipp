@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -210,7 +210,7 @@ int ICMP::sendpack(const string &payload)
 string &ICMP::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 	int r = this->sniffpack(buf, sizeof(buf));
 	if (r > 0)
 		s = string(buf, r);

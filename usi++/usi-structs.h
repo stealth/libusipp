@@ -37,6 +37,7 @@ namespace numbers {
 
 enum  {
 	max_buffer_len		= 0x1000000,
+	max_packet_size		= 66000,
 	maxhostlen		= 1000,
 	eth_alen		= 6
 };

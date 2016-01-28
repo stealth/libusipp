@@ -305,7 +305,7 @@ int IP6::next_header(const string &s)
 string &IP6::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 	int r = this->sniffpack(buf, sizeof(buf));
 	if (r > 0)
 		s = string(buf, r);
@@ -316,7 +316,7 @@ string &IP6::sniffpack(string &s)
 int IP6::sniffpack(void *buf, size_t blen)
 {
 	int r = 0;
-	int xlen = 66000;
+	int xlen = max_packet_size;
 
 	char *tmp = new (nothrow) char[xlen];
 

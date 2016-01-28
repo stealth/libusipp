@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2016 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -128,7 +128,7 @@ int ARP::sendpack(const void *buf, size_t blen)
 string &ARP::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 
 	int r = 0;
 	if ((r = sniffpack(buf, sizeof(buf))) < 0)
@@ -142,6 +142,9 @@ string &ARP::sniffpack(string &s)
  */
 int ARP::sniffpack(void *s, size_t len)
 {
+	if (len > max_buffer_len)
+		return die("ARP::sniffpack: Insane large buffer len", STDERR, -1);
+
 	char *tbuf = new (nothrow) char[sizeof(arphdr) + len];
 	if (!tbuf)
 		return die("ARP::sniffpack: OOM", RETURN, -1);

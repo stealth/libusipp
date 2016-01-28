@@ -164,7 +164,7 @@ int RX_fd::setfilter(const string &s)
 string &RX_fd::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 	int r = sniffpack(buf, sizeof(buf));
 	if (r > 0)
 		s = string(buf, r);
@@ -217,7 +217,7 @@ int RX_fd::sniffpack(void *s, size_t len)
 			memcpy(&d_ether, reinterpret_cast<char *>(s) + d_offset, sizeof(d_ether));
 		// The IP packet
 		memmove(s, reinterpret_cast<char *>(s) + idx, r - idx);
-	
+
 	}
 	return r - idx;
 }

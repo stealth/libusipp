@@ -376,7 +376,7 @@ int pcap::setfilter(const string &s)
 string &pcap::sniffpack(string &s)
 {
 	s = "";
-	char buf[4096];
+	char buf[max_packet_size];
 	int r = this->sniffpack(buf, sizeof(buf));
 	if (r > 0)
 		s = string(buf, r);
@@ -407,7 +407,7 @@ int pcap::sniffpack(void *s, size_t len)
 		while (1) {
 			fd_set rset;
 			FD_ZERO(&rset);
-			int fd = pcap_fileno(d_pd);
+			int fd = pcap_get_selectable_fd(d_pd);
 			FD_SET(fd, &rset);
 			timeval tmp = d_tv;
 
@@ -459,7 +459,7 @@ int pcap::sniffpack(void *s, size_t len)
 			idx += 6;
 		}
 		if (d_80211.fc.bits.type == 2 && idx + 8 <= d_phdr.caplen) {			// Data ...
-			if (d_80211.fc.bits.subtype == 8 && idx + 10 <= d_phdr.caplen) {	// ... with QoS
+			if (d_80211.fc.bits.subtype >= 8 && idx + 10 <= d_phdr.caplen) {	// ... with QoS
 				d_qos = string(d_packet + idx, 2);
 				idx += 2;
 			}
