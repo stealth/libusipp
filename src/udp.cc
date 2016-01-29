@@ -28,11 +28,6 @@
 #include <string>
 #include <errno.h>
 #include <stdint.h>
-
-#ifdef USI_DEBUG
-#include <iostream>
-#endif
-
 #include <arpa/inet.h>
 
 
@@ -258,12 +253,10 @@ int UDP<T>::sniffpack(void *buf, size_t len, int &off)
 
 	if (r == 0 && Layer2::timeout())
 		return 0;
+	else if (r < 0)
+		return -1;
 	else if (r < off + (int)sizeof(d_udph))
 		return T::die("UDP::sniffpack: short packet", STDERR, -1);
-
-#ifdef USI_DEBUG
-	cerr<<"UDP size:"<<r<<endl;
-#endif
 
 	memcpy(&d_udph, reinterpret_cast<char *>(buf) + off, sizeof(d_udph));
 	off += sizeof(d_udph);

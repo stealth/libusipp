@@ -33,9 +33,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#ifdef USI_DEBUG
-#include <iostream>
-#endif
 
 namespace usipp {
 
@@ -546,12 +543,19 @@ int IP::sniffpack(void *buf, size_t len, int &off)
 	//if (iplen > sizeof(iph) + sizeof(ipOptions)) 
 
 	// Copy ip-options if any
-	if (iplen > (int)sizeof(iph) && off + (int)iplen <= r)
+	if (iplen > (int)sizeof(iph) && off + (int)iplen <= r) {
 		memcpy(ipOptions, reinterpret_cast<char *>(buf) + off + sizeof(iph), iplen - sizeof(iph));
-	else if (iplen != sizeof(iph))
-		memset(ipOptions, 0, sizeof(ipOptions));
+		off += iplen;
+		return r;
+	}
 
-	off += iplen;
+	// must be short packet
+	if (iplen != sizeof(iph)) {
+		memset(ipOptions, 0, sizeof(ipOptions));
+		return 0;
+	}
+
+	off += sizeof(iph);
 	return r;
 }
 

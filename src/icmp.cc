@@ -28,9 +28,6 @@
 #include <iostream>
 #include <arpa/inet.h>
 
-#ifdef USI_DEBUG
-#include <iostream>
-#endif
 
 namespace usipp {
 
@@ -244,6 +241,8 @@ int ICMP::sniffpack(void *s, size_t len, int &off)
 
 	if (r == 0 && Layer2::timeout())
 		return 0;
+	else if (r < 0)
+		return -1;
 	else if (r < off + (int)sizeof(icmphdr))
 		return die("ICMP::sniffpack: received short packet.", STDERR, -1);
 

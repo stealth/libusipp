@@ -97,9 +97,23 @@ int Layer2::sendpack(const string &payload)
 }
 
 
+// So upper layer can potentially check for messed up short
+// IP packets, wrong header length's etc.
+int Layer2::bytes_received()
+{
+	return bytes_rcvd;
+}
+
+
 string &Layer2::sniffpack(string &s)
 {
-	return d_rx->sniffpack(s);
+	int off = 0;
+	s = "";
+	char buf[max_packet_size];
+	bytes_rcvd = this->sniffpack(buf, sizeof(buf), off);
+	if (bytes_rcvd > off)
+		s = string(buf + off, bytes_rcvd - off);
+	return s;
 }
 
 
@@ -109,10 +123,10 @@ int Layer2::sniffpack(void *buf, size_t len, int &off)
 	if (len > max_buffer_len || len < min_packet_size)
 		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
 
-	int r = d_rx->sniffpack(buf, len, off);
-	if (r < 0)
+	bytes_rcvd = d_rx->sniffpack(buf, len, off);
+	if (bytes_rcvd < 0)
 		return die(d_rx->why(), STDERR, d_rx->error());
-	return r;
+	return bytes_rcvd;
 }
 
 
@@ -122,10 +136,10 @@ int Layer2::sniffpack(void *buf, size_t len)
 	if (len > max_buffer_len || len < min_packet_size)
 		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
 
-	int r = d_rx->sniffpack(buf, len);
-	if (r < 0)
+	bytes_rcvd = d_rx->sniffpack(buf, len);
+	if (bytes_rcvd < 0)
 		return die(d_rx->why(), STDERR, d_rx->error());
-	return r;
+	return bytes_rcvd;
 }
 
 

@@ -45,6 +45,9 @@ class Layer2 : public Object {
 private:
 	ref_count<RX> d_rx;		// for receiving
 	ref_count<TX> d_tx;		// for transmitting data
+
+	int bytes_rcvd;
+
 public:
 	/*! Give us a Layer 2! Default to Raw IP sockets and
 	 * pcap packet capturing. This may be different. You could also
@@ -98,6 +101,9 @@ public:
 
 	/*! return was timeout? */
 	bool timeout();
+
+	/*! how many bytes were received in last capture */
+	int bytes_received();
 
 	/*! Register a new transmitter and return the argument.
 	 *  Layer2{} is taking ownership (ref counting), so you must

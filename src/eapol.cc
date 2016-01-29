@@ -103,6 +103,8 @@ int EAPOL::sniffpack(void *buf, size_t blen, int &off)
 	int r = Layer2::sniffpack(buf, blen, off);
 	if (r == 0 && Layer2::timeout())
 		return 0;
+	else if (r < 0)
+		return -1;
 	else if (r < off + (int)sizeof(eapol_hdr))
 		return die("EAPOL::sniffpack: short packet", STDERR, -1);
 

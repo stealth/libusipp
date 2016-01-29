@@ -161,13 +161,12 @@ int ARP::sniffpack(void *s, size_t len, int &off)
 	off = 0;
 	int r = Layer2::sniffpack(s, len, off);
 
-	if (r == 0 && Layer2::timeout()) {
+	if (r == 0 && Layer2::timeout())
 		return 0;
-	} else if (r >= 0 && r < (int)sizeof(arphdr)) {
-		return die("ARP::sniffpack:: packet too short", RETURN, -1);
-	} else if (r < off || r - off < (int)sizeof(arphdr)) {
-		return die("ARP::sniffpack: Invalid packet received", RETURN, -1);
-	}
+	else if (r < 0)
+		return -1;
+	else if (r < off + (int)sizeof(arphdr))
+		return die("ARP::sniffpack:: short packet", RETURN, -1);
 
 	memcpy(&arphdr, reinterpret_cast<char *>(s) + off, sizeof(arphdr));
 

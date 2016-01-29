@@ -335,6 +335,8 @@ int IP6::sniffpack(void *buf, size_t blen, int &off)
 
    	if (r == 0 && Layer2::timeout())
 		return 0;	// timeout
+	else if (r < 0)
+		return -1;
 	else if (r < off + (int)sizeof(iph))
 		return die("IP6::sniffpack: short packet", STDERR, -1);
 
@@ -342,7 +344,8 @@ int IP6::sniffpack(void *buf, size_t blen, int &off)
 	off += sizeof(iph);
 
 	int32_t totlen = (int32_t)get_payloadlen();
-	if (r < off + totlen || totlen < 0 || totlen > max_packet_size)
+	totlen &= 0xffff;
+	if (r < off + totlen || totlen > max_packet_size)
 		return r;
 
 	e_hdrs.clear();
