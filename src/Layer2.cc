@@ -121,7 +121,7 @@ string &Layer2::sniffpack(string &s)
 int Layer2::sniffpack(void *buf, size_t len, int &off)
 {
 	if (len > max_buffer_len || len < min_packet_size)
-		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1522?", STDERR, -1);
 
 	bytes_rcvd = d_rx->sniffpack(buf, len, off);
 	if (bytes_rcvd < 0)
@@ -134,7 +134,7 @@ int Layer2::sniffpack(void *buf, size_t len, int &off)
 int Layer2::sniffpack(void *buf, size_t len)
 {
 	if (len > max_buffer_len || len < min_packet_size)
-		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1522?", STDERR, -1);
 
 	bytes_rcvd = d_rx->sniffpack(buf, len);
 	if (bytes_rcvd < 0)

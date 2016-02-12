@@ -43,6 +43,7 @@ class TCP : public T {
 private:
 	usipp::tcphdr tcph;
 	char tcpOptions[40];
+	bool calc_tsum;
 public:
 
 	/*! Construct a TCP object destinated to a hostname (FQDN or or IP-address string).
@@ -99,6 +100,9 @@ public:
 
 	/*! Get the TCP checksum */
 	uint16_t get_tcpsum();
+
+	/*! whether or not to calculate TCP checksum */
+	void tchecksum(bool);
 
 	/*! Get TCP urgent pointer for OOB data.
 	 */

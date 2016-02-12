@@ -49,6 +49,8 @@ TCP<T>::TCP(const string &host, RX *rx, TX *tx)
 
 	tcph.th_off = 5;
 	tcph.th_seq = rand();
+
+	calc_tsum = 1;
 }
 
 /*! get the sourceport in human-readable form
@@ -74,6 +76,7 @@ TCP<T>::TCP(const TCP &rhs)
 		return;
 	tcph = rhs.tcph;
 	memcpy(tcpOptions, rhs.tcpOptions, sizeof(tcpOptions));
+	calc_tsum = rhs.calc_tsum;
 }
 
 
@@ -85,6 +88,7 @@ TCP<T> &TCP<T>::operator=(const TCP<T> &rhs)
 	T::operator=(rhs);
 	tcph = rhs.tcph;
 	memcpy(tcpOptions, rhs.tcpOptions, sizeof(tcpOptions));
+	calc_tsum = rhs.calc_tsum;
 	return *this;
 }
 
@@ -234,9 +238,16 @@ template<typename T>
 uint16_t TCP<T>::set_tcpsum(uint16_t s)
 {
 	tcph.th_sum = s;
+	calc_tsum = 0;
 	return s;
 }
 
+
+template<typename T>
+void TCP<T>::tchecksum(bool cs)
+{
+	calc_tsum = cs;
+}
 
 /*! set TCP urgent pointer for OOB data */
 template<typename T>
@@ -265,7 +276,7 @@ int TCP<T>::sendpack(const void *buf, size_t paylen)
 	char *tmp = new char[len + 1 + 20];	// +1 for padding if necessary
 	memset(tmp, 0, len + 1);
 
-   	// build a pseudoheader for IP-checksum
+	// build a pseudoheader for IP-checksum
 	T::d_pseudo.saddr = T::get_src();	// sourceaddress
 	T::d_pseudo.daddr = T::get_dst();	// destinationaddress
 
@@ -292,8 +303,10 @@ int TCP<T>::sendpack(const void *buf, size_t paylen)
 	// calc checksum over i
 	struct tcphdr *t = (struct tcphdr*)(tmp + sizeof(T::d_pseudo));
 
-	if (tcph.th_sum == 0)
+	if (calc_tsum) {
+		t->th_sum = 0;
 		t->th_sum = in_cksum((unsigned short*)tmp, len, 1);
+	}
 
 	r = T::sendpack(tmp + sizeof(T::d_pseudo), len - sizeof(T::d_pseudo));
 

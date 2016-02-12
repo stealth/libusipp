@@ -411,7 +411,7 @@ int pcap::sniffpack(void *s, size_t len)
 int pcap::sniffpack(void *s, size_t len, int &off)
 {
 	if (len > max_buffer_len || len < min_packet_size)
-		return die("pcap::sniffpack: Insane buffer len. Minimum of 1500?", STDERR, -1);
+		return die("pcap::sniffpack: Insane buffer len. Minimum of 1522?", STDERR, -1);
 
 	d_packet = NULL;
 

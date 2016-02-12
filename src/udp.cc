@@ -41,38 +41,41 @@ UDP<T>::UDP(const string &host, RX *rx, TX *tx)
       : T(host, numbers::ipproto_udp, rx, tx)
 {
 	memset(&d_udph, 0, sizeof(d_udph));
+	calc_usum = 1;
 }
 
 
-template <typename T>
+template<typename T>
 UDP<T>::~UDP()
 {
 }
 
 
-template <typename T>
+template<typename T>
 UDP<T>::UDP(const UDP<T> &rhs)
 	: T(rhs)
 {
 	if (this == &rhs)
 		return;
 	d_udph = rhs.d_udph;
+	calc_usum = rhs.calc_usum;
 }
 
-template <typename T>
+template<typename T>
 UDP<T> &UDP<T>::operator=(const UDP<T> &rhs)
 {
 	if (this == &rhs)
 		return *this;
 	T::operator=(rhs);
 	d_udph = rhs.d_udph;
+	calc_usum = rhs.calc_usum;
 	return *this;
 }
 
 
 /*! Get the sourceport of UDP-datagram.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::get_srcport()
 {
 	return ntohs(d_udph.source);
@@ -81,7 +84,7 @@ uint16_t UDP<T>::get_srcport()
 
 /*! Get the destinationport of the UDP-datagram
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::get_dstport()
 {
 	return ntohs(d_udph.dest);
@@ -90,7 +93,7 @@ uint16_t UDP<T>::get_dstport()
 
 /*! Return length of template UDP-header plus contained data.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::get_len()
 {
 	return ntohs(d_udph.len);
@@ -99,7 +102,7 @@ uint16_t UDP<T>::get_len()
 
 /* Return the checksum of UDP-datagram.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::get_udpsum()
 {
 	return d_udph.check;
@@ -108,7 +111,7 @@ uint16_t UDP<T>::get_udpsum()
 
 /*! Set the sourceport in the UDP-header.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::set_srcport(uint16_t sp)
 {
 	d_udph.source = htons(sp);
@@ -118,7 +121,7 @@ uint16_t UDP<T>::set_srcport(uint16_t sp)
 
 /*! Set the destinationport in the UDP-header.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::set_dstport(uint16_t dp)
 {
 	d_udph.dest = htons(dp);
@@ -128,7 +131,7 @@ uint16_t UDP<T>::set_dstport(uint16_t dp)
 
 /*! Set the length of the UDP-datagramm.
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::set_len(uint16_t l)
 {
 	d_udph.len = htons(l);
@@ -139,16 +142,24 @@ uint16_t UDP<T>::set_len(uint16_t l)
 /* Set the UDP-checksum. Calling this function with s != 0
  *  will prevent sendpack() from setting the checksum!!!
  */
-template <typename T>
+template<typename T>
 uint16_t UDP<T>::set_udpsum(uint16_t s)
 {
 	d_udph.check = s;
+	calc_usum = 0;
 	return s;
 }
 
 
+template<typename T>
+void UDP<T>::uchecksum(bool cs)
+{
+	calc_usum = cs;
+}
+
+
 /*! Get the raw UDP header. */
-template <typename T>
+template<typename T>
 udphdr &UDP<T>::get_udphdr()
 {
 	return d_udph;
@@ -157,7 +168,7 @@ udphdr &UDP<T>::get_udphdr()
 
 /*! Send an UDP-datagramm, containing 'paylen' bytes of data.
  */
-template <typename T>
+template<typename T>
 int UDP<T>::sendpack(const void *buf, size_t paylen)
 {
 	size_t len = paylen + sizeof(d_udph) + sizeof(T::d_pseudo);
@@ -193,8 +204,10 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 	// calc checksum over it
 	struct udphdr *u = (struct udphdr*)(tmp + sizeof(T::d_pseudo));
 
-	if (d_udph.check == 0)
+	if (calc_usum) {
+		u->check = 0;
 		u->check = in_cksum((unsigned short*)tmp, len, 1);
+	}
 
 	r = T::sendpack(tmp + sizeof(T::d_pseudo), len - sizeof(T::d_pseudo));
 
@@ -205,7 +218,7 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 }
 
 
-template <typename T>
+template<typename T>
 int UDP<T>::sendpack(const string &s)
 {
 	return sendpack(s.c_str(), s.length());
@@ -213,7 +226,7 @@ int UDP<T>::sendpack(const string &s)
 
 
 /*! sniff a UDP packet */
-template <typename T>
+template<typename T>
 string &UDP<T>::sniffpack(string &s)
 {
 	int off = 0;
@@ -228,7 +241,7 @@ string &UDP<T>::sniffpack(string &s)
 
 /* Capture packets that are not for our host.
  */
-template <typename T>
+template<typename T>
 int UDP<T>::sniffpack(void *s, size_t len)
 {
 	int off = 0;
@@ -245,7 +258,7 @@ int UDP<T>::sniffpack(void *s, size_t len)
 
 /* Capture packets that are not for our host.
  */
-template <typename T>
+template<typename T>
 int UDP<T>::sniffpack(void *buf, size_t len, int &off)
 {
 	off = 0;
@@ -270,7 +283,7 @@ int UDP<T>::sniffpack(void *buf, size_t len, int &off)
  *  Set 'promisc' to 1 if you want the device running in promiscous mode.
  *  Fetch at most 'snaplen' bytes per call.
  */
-template <typename T>
+template<typename T>
 int UDP<T>::init_device(const string &dev, int promisc, size_t snaplen)
 {
 	int r = Layer2::init_device(dev, promisc, snaplen);

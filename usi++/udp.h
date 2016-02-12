@@ -44,6 +44,7 @@ template<typename T>
 class UDP : public T {
 private:
 	usipp::udphdr d_udph;
+	bool calc_usum;
 public:
 
 	/*! Construct an UDP object, destinated to a host (FQDN or IP string).
@@ -78,6 +79,9 @@ public:
 	/*! Return the checksum of UDP datagram.
 	 */
 	uint16_t get_udpsum();
+
+	/*! whether or not to calculate UDP checksum */
+	void uchecksum(bool);
 
 	/*! Set the sourceport in the UDP header.
 	*/
