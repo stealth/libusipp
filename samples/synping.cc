@@ -15,7 +15,7 @@ using namespace usipp;
 
 int main(int argc, char **argv)
 {
-	char buf[100];
+	char buf[min_packet_size];
 
 	if (argc != 5) {
 		cout<<"Usage: "<<argv[0]<<" <dst> <dport> <src> <device>\n";
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	// TX objects, as they are ref-counted
 #endif
 
-	tcp.init_device(argv[4], 1, 100);
+	tcp.init_device(argv[4], 1, min_packet_size);
 	tcp.setfilter("tcp and dst port 8000");
 
 	tcp.set_flags(numbers::th_syn|numbers::th_cwr);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	if (tcp.sendpack("") < 0)
 		cerr<<tcp.why()<<endl;
 
-	tcp.sniffpack(buf, 100);
+	tcp.sniffpack(buf, sizeof(buf));
 
 	cout<<"TCP ack was: "<<tcp.get_ack()<<endl;
 

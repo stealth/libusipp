@@ -165,32 +165,30 @@ uint16_t ICMP::get_seq()
 int ICMP::sendpack(const void *payload, size_t paylen)
 {
 	size_t len = sizeof(struct icmphdr) + paylen;	// the packetlenght
+	if (paylen  > max_packet_size || len > max_packet_size)
+		return die("ICMP::sendpack: Packet payload too large.", STDERR, -1);
 
 	struct icmphdr *i;
 
 	// s will be our packet
-	char *s = new (nothrow) char[len];
-	if (!s)
-		return die("ICMP::sendpack: OOM", STDERR, -1);
-
-	memset(s, 0, len);
+	char s[max_packet_size];
+	memset(s, 0, sizeof(s));
 
 	// copy ICMP header to packet
-	memcpy((char*)s, (struct icmphdr*)&this->icmphdr, sizeof(icmphdr));
+	memcpy(s, reinterpret_cast<struct icmphdr*>(&this->icmphdr), sizeof(icmphdr));
 
 	if (payload)
-		memcpy(s+sizeof(icmphdr), payload, paylen);
+		memcpy(s + sizeof(icmphdr), payload, paylen);
 
-	i = (struct icmphdr*)s;
+	i = reinterpret_cast<struct icmphdr *>(s);
 
 	// calc checksum over packet
 	//i->sum = 0;
 
 	if (i->sum == 0)
-		i->sum = in_cksum((unsigned short*)s, len, 0);
+		i->sum = in_cksum(reinterpret_cast<unsigned short *>(s), len, 0);
 
 	int r = IP::sendpack(s, len);
-    	delete [] s;
 	return r;
 }
 

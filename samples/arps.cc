@@ -1,5 +1,6 @@
 // c++ arps.cc  -lusi++ -ldnet -lpcap
 
+#include <iostream>
 #include <usi++/usi++.h>
 #include <string>
 #include <cstring>
@@ -27,8 +28,10 @@ int main(int argc, char **argv)
 	ARP *req = new ARP, req2;
 	ARP *rep = new ARP;
 
-	if (req->init_device(dev, 1, 1500) < 0 || rep->init_device(dev, 1, 1500) < 0)
+	if (req->init_device(dev, 1, min_packet_size) < 0 || rep->init_device(dev, 1, min_packet_size) < 0) {
+		cerr<<"Error:"<<req->why()<<endl;
 		return -1;
+	}
 
 	// set src address of underlying TX
 	req->set_l2src("77:88:99:aa:bb:cc");
@@ -50,7 +53,8 @@ int main(int argc, char **argv)
 	rep->set_l2src("77:88:99:aa:bb:cc");
 
 	rep->set_op(numbers::arpop_reply);
-	rep->sendpack(&blob, sizeof(blob));
+	if (rep->sendpack(&blob, sizeof(blob)) < 0)
+		cerr<<"Error:"<<rep->why()<<endl;
 
 	delete rep;
 

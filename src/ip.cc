@@ -425,11 +425,11 @@ void IP::checksum(bool cs)
  */
 int IP::sendpack(const void *payload, size_t paylen)
 {
-	// get mem for packet
-	char *s = new char[paylen + (iph.ihl<<2) + 1];
-	int r = 0;
+	if (paylen > max_packet_size || paylen + sizeof(iph) + sizeof(ipOptions) > max_packet_size)
+		return die("IP::sendpack: Packet payload too large.", STDERR, -1);
 
-	memset(s, 0, paylen + (iph.ihl<<2) + 1);
+	char s[max_packet_size];
+	memset(s, 0, sizeof(s));
 
 	iphdr orig_iph = iph;
 
@@ -456,9 +456,9 @@ int IP::sendpack(const void *payload, size_t paylen)
 
 
 	if (calc_csum) {
-		iphdr *iph_ptr = (iphdr *)s;
+		iphdr *iph_ptr = reinterpret_cast<iphdr *>(s);
 		iph_ptr->check = 0;
-		iph_ptr->check = in_cksum((unsigned short *)s, iph.ihl<<2, 0);
+		iph_ptr->check = in_cksum(reinterpret_cast<unsigned short *>(s), iph.ihl<<2, 0);
 	}
 
 	memcpy(s + (iph.ihl<<2), payload, paylen);
@@ -468,13 +468,12 @@ int IP::sendpack(const void *payload, size_t paylen)
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = iph.daddr;
 
-	r = Layer2::sendpack(s, paylen + (iph.ihl<<2), (struct sockaddr *)&saddr);
+	int r = Layer2::sendpack(s, paylen + (iph.ihl<<2), reinterpret_cast<struct sockaddr *>(&saddr));
 
 
 	// restore original totlen etc
 	iph = orig_iph;
 
-	delete [] s;
 	return r;
 }
 

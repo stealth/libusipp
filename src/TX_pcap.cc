@@ -52,22 +52,20 @@ int TX_pcap::sendpack(const string &payload)
 
 int TX_pcap::sendpack(const void *buf, size_t len, struct sockaddr *s)
 {
-
 	if (!d_pcap->handle())
 		return die("TX_pcap::sendpack: No eth interface opened!", STDERR, -1);
 
-	char *tbuf = new (nothrow) char[len + d_cooked.size() + d_frame.size()];
+	if (len > max_packet_size || len + d_cooked.size() + d_frame.size() > max_packet_size)
+		return die("TX_pcap::sendpack: Packet payload too large.", STDERR, -1);
 
-	if (!tbuf)
-		return die("TX_pcap::sendpack::new: Out of Memory!", RETURN, -1);
+	char tbuf[max_packet_size];
+	memset(tbuf, 0, sizeof(tbuf));
 
 	memcpy(tbuf, d_cooked.c_str(), d_cooked.size());
 	memcpy(tbuf + d_cooked.size(), d_frame.c_str(), d_frame.size());
 	memcpy(tbuf + d_cooked.size() + d_frame.size(), buf, len);
 
 	int r = pcap_inject(d_pcap->handle(), tbuf, len + d_cooked.size() + d_frame.size());
-
-	delete [] tbuf;
 
 	if (r < 0)
 		return die("TX_pcap::sendpack::pcap_inject:", PERROR, errno);

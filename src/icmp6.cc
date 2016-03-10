@@ -116,20 +116,18 @@ uint32_t ICMP6::set_data(uint32_t d)
 int ICMP6::sendpack(const void *payload, size_t paylen)
 {
 	size_t len = sizeof(icmp6hdr) + paylen;
-	char *s = new (nothrow) char[len];
-	if (!s)
-		return die("ICMP6::sendpack: OOM", STDERR, -1);
+	if (paylen > max_packet_size || len > max_packet_size)
+		return die("ICMP6::sendpack: Packet payload too large.", STDERR, -1);
 
-	memset(s, 0, len);
+	char s[max_packet_size];
+	memset(s, 0, sizeof(s));
 
 	memcpy(s, &icmp6hdr, sizeof(icmp6hdr));
 	memcpy(s + sizeof(icmp6hdr), payload, paylen);
 
 	icmp6_hdr *i = (icmp6_hdr*)s;
 	if (i->icmp6_cksum == 0) {
-		unsigned char *c = new (nothrow) unsigned char[2*sizeof(in6_addr)+3*sizeof(uint32_t)+len], *cptr = c;
-		if (!c)
-			return die("ICMP6::sendpack: OOM", STDERR, -1);
+		unsigned char c[2*sizeof(in6_addr) + 3*sizeof(uint32_t) + max_packet_size], *cptr = c;
 
 		in6_addr i6 = get_src();
 		memcpy(cptr, &i6, sizeof(i6));
@@ -141,13 +139,10 @@ int ICMP6::sendpack(const void *payload, size_t paylen)
 		memcpy(cptr, razia, sizeof(razia));
 		cptr += sizeof(razia);
 		memcpy(cptr, s, len); cptr += len;
-		i->icmp6_cksum = in_cksum((unsigned short*)c, cptr - c, 0);
-		delete [] c;
+		i->icmp6_cksum = in_cksum(reinterpret_cast<unsigned short *>(c), cptr - c, 0);
 	}
 
-
 	int r = IP6::sendpack(s, len);
-	delete [] s;
 	return r;
 }
 

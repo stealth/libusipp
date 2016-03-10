@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	char sip[100], dip[100], buf[1500];
+	char sip[100], dip[100], buf[min_packet_size];
 
 	ea = reinterpret_cast<ether_arp *>(buf);
 

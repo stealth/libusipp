@@ -271,10 +271,13 @@ tcphdr &TCP<T>::get_tcphdr()
 template<typename T>
 int TCP<T>::sendpack(const void *buf, size_t paylen)
 {
+	if (paylen > max_packet_size || paylen + sizeof(T::d_pseudo) + sizeof(tcph) + sizeof(tcpOptions) + 1 > max_packet_size)
+		return T::die("TCP::sendpack: Packet payload too large.", STDERR, -1);
+
 	unsigned int len = paylen + (tcph.th_off<<2) + sizeof(T::d_pseudo);
 	int r = 0;
-	char *tmp = new char[len + 1 + 20];	// +1 for padding if necessary
-	memset(tmp, 0, len + 1);
+	char tmp[max_packet_size];
+	memset(tmp, 0, sizeof(tmp));
 
 	// build a pseudoheader for IP-checksum
 	T::d_pseudo.saddr = T::get_src();	// sourceaddress
@@ -301,16 +304,15 @@ int TCP<T>::sendpack(const void *buf, size_t paylen)
 	memcpy(tmp + sizeof(T::d_pseudo) + (tcph.th_off<<2), buf, paylen);
 
 	// calc checksum over i
-	struct tcphdr *t = (struct tcphdr*)(tmp + sizeof(T::d_pseudo));
+	struct tcphdr *t = reinterpret_cast<struct tcphdr *>(tmp + sizeof(T::d_pseudo));
 
 	if (calc_tsum) {
 		t->th_sum = 0;
-		t->th_sum = in_cksum((unsigned short*)tmp, len, 1);
+		t->th_sum = in_cksum(reinterpret_cast<unsigned short *>(tmp), len, 1);
 	}
 
 	r = T::sendpack(tmp + sizeof(T::d_pseudo), len - sizeof(T::d_pseudo));
 
-	delete [] tmp;
 	return r;
 }
 

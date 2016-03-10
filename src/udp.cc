@@ -171,10 +171,13 @@ udphdr &UDP<T>::get_udphdr()
 template<typename T>
 int UDP<T>::sendpack(const void *buf, size_t paylen)
 {
+	if (paylen > max_packet_size || paylen + sizeof(T::d_pseudo) + sizeof(d_udph)  + 1 > max_packet_size)
+		return T::die("UDP::sendpack: Packet payload too large.", STDERR, -1);
+
 	size_t len = paylen + sizeof(d_udph) + sizeof(T::d_pseudo);
 	int r = 0;
-	char *tmp = new char[len+1];	// for padding, if needed
-	memset(tmp, 0, len + 1);
+	char tmp[max_packet_size];
+	memset(tmp, 0, sizeof(tmp));
 
 	udphdr orig_udph = d_udph;
 
@@ -206,14 +209,13 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 
 	if (calc_usum) {
 		u->check = 0;
-		u->check = in_cksum((unsigned short*)tmp, len, 1);
+		u->check = in_cksum(reinterpret_cast<unsigned short *>(tmp), len, 1);
 	}
 
 	r = T::sendpack(tmp + sizeof(T::d_pseudo), len - sizeof(T::d_pseudo));
 
 	d_udph = orig_udph;
 
-	delete [] tmp;
 	return r;
 }
 

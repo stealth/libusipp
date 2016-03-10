@@ -122,15 +122,16 @@ int EAPOL::sendpack(const string &s)
 
 int EAPOL::sendpack(const void *buf, size_t blen)
 {
-	char *tbuf = new (nothrow) char[blen + sizeof(arphdr)];
-	if (!tbuf)
-		return die("EAPOL::sendpack: OOM", STDERR, -1);
+	if (blen > max_packet_size || blen + sizeof(arphdr) > max_packet_size)
+		return die("EAPOL::sendpack: Packet payload too large.", STDERR, -1);
+
+	char tbuf[max_packet_size];
+	memset(tbuf, 0, sizeof(tbuf));
 
 	eapol_hdr.len = htons((uint16_t)(blen & 0xffff));
 	memcpy(tbuf, &eapol_hdr, sizeof(eapol_hdr));
 	memcpy(tbuf + sizeof(eapol_hdr), buf, blen);
 	int r = Layer2::sendpack(tbuf, blen + sizeof(arphdr));
-	delete [] tbuf;
 	return r;
 }
 

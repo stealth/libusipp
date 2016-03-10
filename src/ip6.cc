@@ -216,14 +216,12 @@ int IP6::sendpack(const string &s)
 
 int IP6::sendpack(const void *payload, size_t paylen)
 {
-	if (paylen > 66000)
-		return -1;
-
 	size_t len = sizeof(iph) + e_hdrs_len + paylen;
-	char *s = new (nothrow) char[len];
+	if (paylen > max_packet_size || len > max_packet_size)
+		return die("IP6::sendpack: Packet payload too large.", STDERR, -1);
 
-	if (!s)
-		return die("IP6::sendpack: OOM", STDERR, -1);
+	char s[max_packet_size];
+	memset(s, 0, sizeof(s));
 
 	iph.payload_len = htons(e_hdrs_len + paylen);
 
@@ -244,10 +242,8 @@ int IP6::sendpack(const void *payload, size_t paylen)
 
 	memcpy(s + offset, payload, paylen);
 	int r = Layer2::sendpack(s, len, (struct sockaddr*)&saddr);
-	delete [] s;
 
 	return r;
-
 }
 
 

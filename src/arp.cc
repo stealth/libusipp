@@ -112,15 +112,17 @@ int ARP::sendpack(const string &payload)
 
 int ARP::sendpack(const void *buf, size_t blen)
 {
-	char *tbuf = new (nothrow) char[blen + sizeof(arphdr)];
-	if (!tbuf)
-		return die("ARP::sendpack: OOM", STDERR, -1);
+	if (blen > max_packet_size || blen + sizeof(arphdr) > max_packet_size)
+		return die("ARP::sendpack: Packet payload too large.", STDERR, -1);
+
+	char tbuf[max_packet_size];
+	memset(tbuf, 0, sizeof(tbuf));
+
 	memcpy(tbuf, &arphdr, sizeof(arphdr));
 	memcpy(tbuf + sizeof(arphdr), buf, blen);
 
 	int r = Layer2::sendpack(tbuf, blen + sizeof(arphdr));
 
-	delete [] tbuf;
 	return r;
 }
 
