@@ -51,6 +51,7 @@ pcap::pcap()
 	d_frame2 = "";
 	d_llc = "";
 	d_qos = "";
+	d_snap = "";
 	d_dev = "";
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
@@ -75,6 +76,7 @@ pcap::pcap(const string &filterStr)
 	d_frame2 = "";
 	d_llc = "";
 	d_qos = "";
+	d_snap = "";
 	d_dev = "";
 	d_pd = NULL;
 	memset(&d_tv, 0, sizeof(d_tv));
@@ -107,6 +109,7 @@ pcap::pcap(const pcap &rhs)
 	d_frame2 = rhs.d_frame2;
 	d_llc = rhs.d_llc;
 	d_qos = rhs.d_qos;
+	d_snap = rhs.d_snap;
 
 	d_filter_string = rhs.d_filter_string;
 	d_dev = rhs.d_dev;
@@ -142,6 +145,7 @@ pcap &pcap::operator=(const pcap &rhs)
 	d_frame2 = rhs.d_frame2;
 	d_llc = rhs.d_llc;
 	d_qos = rhs.d_qos;
+	d_snap = rhs.d_snap;
 
 	d_filter_string = rhs.d_filter_string;
 	d_dev = rhs.d_dev;
@@ -191,7 +195,6 @@ string &pcap::get_cooked(string &hdr)
 
 /*  Fill buffer with src-hardware-adress of actuall packet,
  *  use 'd_datalink' to determine what HW the device is.
- *  Now only ethernet s supportet, but it's extensinable.
  */
 string &pcap::get_l2src(string &hwaddr)
 {
@@ -208,7 +211,6 @@ string &pcap::get_l2src(string &hwaddr)
 
 /*  Fill buffer with dst-hardware-adress of actuall packet,
  *  use 'd_datalink' to determine what HW the device is.
- *  Now only ethernet s supportet.
  */
 string &pcap::get_l2dst(string &hwaddr)
 {
@@ -462,10 +464,21 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 	d_frame2 = "";
 	d_llc = "";
 	d_qos = "";
+	d_snap = "";
 
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		memcpy(&d_ether, d_packet, d_framelen);
+
+		// 802.1q VLAN  tagged?
+		if (d_ether.ether_type == htons(eth_p_vlan) && (idx + 4 <= d_phdr.caplen)) {
+			d_frame2 = string(d_packet + sizeof(d_ether), 4);
+			idx += 4;
+		// 802.3 encapsulation (SNAP header present)?
+		} else if (ntohs(d_ether.ether_type) <= 1500 && (idx + 8 <= d_phdr.caplen)) {
+			d_snap = string(d_packet + sizeof(d_ether), 8);
+			idx += 8;
+		}
 		break;
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
@@ -537,7 +550,11 @@ string &pcap::get_frame(string &frame)
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		memcpy(buf, &d_ether, sizeof(d_ether));
-		frame = string(buf, sizeof(d_ether));
+		if (d_frame2.size() > 0 && d_frame2.size() < sizeof(buf) - sizeof(d_ether)) {
+			memcpy(buf + sizeof(d_ether), d_frame2.c_str(), d_frame2.size());
+			blen += d_frame2.size();
+		}
+		frame = string(buf, blen);
 		break;
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:

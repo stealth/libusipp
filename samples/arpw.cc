@@ -1,4 +1,4 @@
-// c++ arpw.cc -lusi++ -ldnet -lpcap
+// c++ arpw.cc -lusi++ -ldnet -lpcap -std=c++11
 
 /* Output looks similar to tcpdump -p arp
  */

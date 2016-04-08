@@ -173,7 +173,7 @@ int ARP::sniffpack(void *s, size_t len, int &off)
 	memcpy(&arphdr, reinterpret_cast<char *>(s) + off, sizeof(arphdr));
 
 	// dont increase offset. ARP class is special. It copies arp hdr
-	// but still returnes the arp hdr as payload, since there are
+	// but still returns the arp hdr as payload, since there are
 	// no upper layers and returning 0 payload wont make sense
 	//off += sizeof(arphdr);
 	return r;

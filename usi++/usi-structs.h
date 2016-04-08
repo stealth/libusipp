@@ -87,6 +87,7 @@ enum {
 	eth_p_eapol		= 0x888e,	// 802.1x eap over lan
 	eth_p_pae		= eth_p_eapol,	// port access entry
 	eth_p_pre_auth		= 0x88c7,	// wpa2 pre auth
+	eth_p_vlan		= 0x8100,	// 802.1q VLAN tag present
 
 	// Non DIX types. Won't clash for 1500 types
 

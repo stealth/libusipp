@@ -86,8 +86,8 @@ protected:
 
 	std::string d_frame2;	// remaining part of the frame, if any. For example
 				// 802.11 From-DS=1 and To-DS=1 frames have the 4th
-				// address field available
-	std::string d_cooked, d_llc, d_qos;
+				// address field available or 802.1Q VLAN tags
+	std::string d_cooked, d_llc, d_qos, d_snap;
 	std::string d_filter_string;
 
 public:
@@ -118,13 +118,11 @@ public:
 
 	/*! Fill buffer with src-hardware-adress of actuall packet,
 	 *  use get_datalink() to determine what HW the device is.
-	 *  Only ethernet is supportet yet, but it's extensible.
 	 */
 	virtual std::string &get_l2src(std::string &);
 
 	/*! Fill buffer with dst-hardware-adress of actuall packet,
  	 *  use get_datalink() to determine what HW the device is.
-	 *  Only ethernet is supportet yet, but it's extensible.
 	 */
 	virtual std::string &get_l2dst(std::string &);
 
