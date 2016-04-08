@@ -227,16 +227,20 @@ struct element_cf_ps {
 } __packed;
 
 
-struct element_rsn {
+// 802.11-2012 Section 8.4.2.27: RSNE for lists with len=1
+struct element_rsn_1 {
 	uint8_t etype;
 	uint8_t len;
 	uint16_t version;
 	uint32_t gcs;		// group cipher suite
-	uint16_t gcs_count;
+	uint16_t gcs_count;	// 1
 	uint32_t pcsl;		// pairwise cipher suite list
-	uint16_t akms_count;	// akm suite count
+	uint16_t akms_count;	// akm suite count (1)
 	uint32_t akml;		// auth key management list
 	uint16_t rsn_caps;	// RSN capabilities
+	uint16_t pkmid_count;	// 1
+	uint8_t pkmidl[16];
+	uint32_t gmcs;		// group mgmt cipher suite
 } __packed;
 
 
@@ -564,7 +568,6 @@ struct element_meas_ch_load {
 	uint8_t ch_nr;
 	uint16_t rand_intv;
 	uint16_t dur;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_noise {
@@ -572,7 +575,6 @@ struct element_meas_noise {
 	uint8_t ch_nr;
 	uint16_t rand_intv;
 	uint16_t dur;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_beacon {
@@ -582,7 +584,6 @@ struct element_meas_beacon {
 	uint16_t dur;
 	uint8_t mode;
 	uint8_t bssid[6];
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_frame {
@@ -592,7 +593,6 @@ struct element_meas_frame {
 	uint16_t dur;
 	uint8_t frame;
 	uint8_t mac[6];
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_sta {
@@ -600,7 +600,6 @@ struct element_meas_sta {
 	uint16_t rand_intv;
 	uint16_t dur;
 	uint8_t group_id;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_lci {
@@ -608,7 +607,6 @@ struct element_meas_lci {
 	uint8_t latitude_req_res;
 	uint8_t longitude_req_res;
 	uint8_t altitude_req_res;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_trans_str_cat {
@@ -617,14 +615,12 @@ struct element_meas_trans_str_cat {
 	uint8_t peer_sta_addr[6];
 	uint8_t traffic_id;
 	uint8_t bin_0_range;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_mcast_diag {
 	uint16_t rand_intv;
 	uint16_t dur;
 	uint8_t group_mac[6];
-	uint8_t data[1]; // mcast_triggered, sub;
 } __packed;
 
 struct element_meas_loc_civic {
@@ -632,28 +628,42 @@ struct element_meas_loc_civic {
 	uint8_t civic_loc;
 	uint8_t loc_srv_intv_unit;
 	uint16_t loc_srv_intv;
-	uint8_t sub[1];
 } __packed;
+
+// 802.11-2012 section 8.4.2.73.2: Location Indication Parameters subelement
+struct element_meas_loc_ind {
+	uint8_t subtype;
+	uint8_t len;
+	uint8_t group_mac[6];
+	uint8_t report_interval_units;
+	uint16_t report_interval;
+	uint8_t fps;			// frames per chan
+	uint16_t im_report_interval;	// in-motion...
+	uint8_t im_fps;
+	uint8_t burst_interval;
+	uint8_t tracking_dur;
+	uint8_t ess_interval;
+} __packed;
+	
 
 struct element_meas_loc_id {
 	uint8_t loc_subj;
 	uint8_t loc_srv_intv_unit;
 	uint16_t loc_srv_intv;
-	uint8_t sub[1];
 } __packed;
 
 struct element_meas_pause {
 	uint8_t time;
-	uint8_t sub[1];
 } __packed;
 
+
+// 802.11-2012 section 8.4.2.71: Diagnostic Request element 
 struct element_meas_req {
 	uint8_t etype;
 	uint8_t len;
 	uint8_t token;
-	uint8_t req_mode;
 	uint8_t type;
-	uint8_t req[1];
+	uint16_t timeout;
 } __packed;
 
 struct element_meas_rep {
