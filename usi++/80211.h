@@ -644,7 +644,7 @@ struct element_meas_loc_ind {
 	uint8_t tracking_dur;
 	uint8_t ess_interval;
 } __packed;
-	
+
 
 struct element_meas_loc_id {
 	uint8_t loc_subj;
@@ -657,7 +657,7 @@ struct element_meas_pause {
 } __packed;
 
 
-// 802.11-2012 section 8.4.2.71: Diagnostic Request element 
+// 802.11-2012 section 8.4.2.71: Diagnostic Request element
 struct element_meas_req {
 	uint8_t etype;
 	uint8_t len;
