@@ -6,6 +6,8 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <arpa/inet.h>
+
 
 using namespace usipp;
 using namespace std;
