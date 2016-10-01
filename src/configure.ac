@@ -78,7 +78,7 @@ r+=`grep pcap_set_immediate_mode /usr/local/include/pcap/pcap.h 2>/dev/null`
 case "$r" in
 	*pcap_set_immediate*)
 		AC_DEFINE([HAVE_PCAP_SET_IMMEDIATE_MODE], [1], [Define if you have pcap_set_immediate_mode.])
-		echo "Enabling pcap_set_immediate"
+		echo "Enabling pcap_set_immediate_mode"
 		;;
 	*)
 esac
