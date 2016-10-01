@@ -39,7 +39,7 @@ you prefer. In such case, you have to edit the generated `Makefile` to point to 
 as well as setting/unsetting the defines you need in `config.h`.
 
 Having more than one libpcap install is not uncommon, since various functions such
-as `pcap_set_immediate()` or mmapped packet sockets just appeared recently.
+as `pcap_set_immediate_mode()` or mmapped packet sockets just appeared recently.
 
 
 3. Compiling the examples

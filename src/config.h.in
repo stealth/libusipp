@@ -45,8 +45,8 @@
 /* Define to 1 if you have the `pcap_inject' function. */
 #undef HAVE_PCAP_INJECT
 
-/* Define if you have pcap_set_immediate. */
-#undef HAVE_PCAP_SET_IMMEDIATE
+/* Define if you have pcap_set_immediate_mode. */
+#undef HAVE_PCAP_SET_IMMEDIATE_MODE
 
 /* Define if radiotap exists. */
 #undef HAVE_RADIOTAP
