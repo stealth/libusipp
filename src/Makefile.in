@@ -4,7 +4,7 @@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 DEFS=
-CXXFLAGS=-I . -I .. @CXXFLAGS@ -I/usr/include/pcap -Wall -c -pedantic -std=c++11 $(DEFS)
+CXXFLAGS=-I . -I .. @CXXFLAGS@ -Wall -c -pedantic -std=c++11 $(DEFS)
 CXX=@CXX@
 CC=@CC@
 INSTALL=@INSTALL@
@@ -19,7 +19,7 @@ usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
        eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
        TX_pcap_eth.o TX_pcap.o TX_string.o RX_fd.o RX_string.o object.o
 	ar cr libusi++.a $^
-	$(CC) $^ -shared -Wl,$(LDFLAGS) $(LIBS) -lstdc++ -o libusi++.so
+	$(CC) $^ -shared $(LDFLAGS) $(LIBS) -lstdc++ -o libusi++.so
 	$(RANLIB) libusi++.a
 
 object.o: object.cc

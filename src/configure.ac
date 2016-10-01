@@ -13,7 +13,7 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 
-LDFLAGS="$LDFLAGS -L/usr/local/lib"
+LDFLAGS="$LDFLAGS -L/usr/local/lib64 -L/usr/local/lib"
 CXXFLAGS="$CXXFLAGS -fPIC -I/usr/local/include"
 
 # Checks for libraries.
@@ -69,6 +69,16 @@ case "$r" in
 	*DLT_IEEE802_11_RADIO*)
 		AC_DEFINE([HAVE_RADIOTAP], [1], [Define if radiotap exists.])
 		echo "Enabling 80211 radiotap"
+		;;
+	*)
+esac
+
+r=`grep pcap_set_immediate /usr/include/pcap/pcap.h 2>/dev/null`
+r+=`grep pcap_set_immediate /usr/local/include/pcap/pcap.h 2>/dev/null`
+case "$r" in
+	*pcap_set_immediate*)
+		AC_DEFINE([HAVE_PCAP_SET_IMMEDIATE], [1], [Define if you have pcap_set_immediate.])
+		echo "Enabling pcap_set_immediate"
 		;;
 	*)
 esac

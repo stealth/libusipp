@@ -18,6 +18,9 @@
 /* Define to 1 if you have the `dnet' library (-ldnet). */
 #undef HAVE_LIBDNET
 
+/* Define to 1 if you have the `dumbnet' library (-ldumbnet). */
+#undef HAVE_LIBDUMBNET
+
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
@@ -41,6 +44,9 @@
 
 /* Define to 1 if you have the `pcap_inject' function. */
 #undef HAVE_PCAP_INJECT
+
+/* Define if you have pcap_set_immediate. */
+#undef HAVE_PCAP_SET_IMMEDIATE
 
 /* Define if radiotap exists. */
 #undef HAVE_RADIOTAP

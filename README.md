@@ -27,10 +27,19 @@ Since USI++ is GPL there is ABSOLUTELY NO WARRANTY. YOU USE IT AT YOUR OWN RISK.
 ----------
 
 
+    $ cd src
     $ autoconf
     $ ./configure
     $ make
     # make install
+
+Please note, if you have multiple `libpcap` installs for testing, the generated `Makefile` is
+just a proposal. The configure script actually cannot know which include or lib path
+you prefer. In such case, you have to edit the generated `Makefile` to point to it exactly,
+as well as setting/unsetting the defines you need in `config.h`.
+
+Having more than one libpcap install is not uncommon, since various functions such
+as `pcap_set_immediate()` or mmapped packet sockets just appeared recently.
 
 
 3. Compiling the examples

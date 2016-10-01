@@ -263,8 +263,10 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 			e += ebuf;
 			return die(e, STDERR, -1);
 		}
+#ifdef HAVE_PCAP_SET_IMMEDIATE
 		if (pcap_set_immediate_mode(d_pd, 1) < 0)
 			return die("pcap::init_device: Unable to set immediate mode.", STDERR, -1);
+#endif
 
 		pcap_set_promisc(d_pd, 1);
 		pcap_set_timeout(d_pd, 0);

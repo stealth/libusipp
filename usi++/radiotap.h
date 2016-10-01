@@ -4,6 +4,7 @@
 #define usipp_radiotap_h
 
 #include <stdint.h>
+#include <cstring>
 #include "80211.h"
 
 namespace usipp {
@@ -202,9 +203,9 @@ struct radiotap_hdr {
 		uint32_t txflags:1;
 		uint32_t rtsretries:1;
 		uint32_t dataretries:1;
-		uint32_t channelpus:1;
-		uint32_t htinfo:1;
+		uint32_t channelplus:1;
 		uint32_t mcs:1;
+		uint32_t ampdu:1;
 		uint32_t unused:8;
 		uint32_t rtnsnext:1;	// radiotap NS next
 		uint32_t vnsnext:1;	// vendor NS next
@@ -233,17 +234,19 @@ struct radiotap_hdr {
 	uint8_t asignal;
 	uint8_t anoise;
 	uint8_t antenna;
-
+	uint16_t txflags;
+	uint8_t pad[1];
 
 	// construct a sane default
-	radiotap_hdr() : version(0), hlen(0x19),
+	radiotap_hdr() : version(0), hlen(28),
 	                 timestamp{0,0,0,0,0,0,0,0},
 	                 rate(2),		// 1MBit/s
 	                 ch_freq(channel7),	// 2442 Mhz
 	                 ch_type(0x00a0),	// 802.11b
 	                 asignal(0xde),
 	                 anoise(0),
-	                 antenna(0)
+	                 antenna(0),
+	                 txflags(0)
 	{
 		pflags.value = 0;
 		pflags.bits.tsft = 1;
@@ -254,12 +257,15 @@ struct radiotap_hdr {
 		pflags.bits.asignal = 1;
 		pflags.bits.anoise = 1;
 		pflags.bits.antenna = 1;
+		pflags.bits.txflags = 0;
 
 		flags.value = 0;
+
+		memset(pad, 0, sizeof(pad));
 	}
 
 	~radiotap_hdr() {}
-};
+} __attribute__((packed));
 
 } // namespace ieee80211
 
