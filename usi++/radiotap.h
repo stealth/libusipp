@@ -240,7 +240,7 @@ struct radiotap_hdr {
 	// construct a sane default
 	radiotap_hdr() : version(0), hlen(28),
 	                 timestamp{0,0,0,0,0,0,0,0},
-	                 rate(2),		// 1MBit/s
+	                 rate(2),		// in units of 0.5Mbit/s
 	                 ch_freq(channel7),	// 2442 Mhz
 	                 ch_type(0x00a0),	// 802.11b
 	                 asignal(0xde),
