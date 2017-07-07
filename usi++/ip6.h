@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP6(const in6_addr &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
+	IP6(const in6_addr &dst, uint8_t proto, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! New IP6 packet with destination address (hostname or IP6 string)
 	 *  and next-header 'proto'.
@@ -65,7 +65,7 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP6(const std::string &dst, uint8_t proto, RX *rx = NULL, TX *tx = NULL);
+	IP6(const std::string &dst, uint8_t proto, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! Copy constructor */
 	IP6(const IP6&);

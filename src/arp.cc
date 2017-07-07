@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ using namespace std;
 
 
 ARP::ARP()
-	: Layer2(NULL, new (nothrow) TX_string)
+	: Layer2(nullptr, new (nothrow) TX_string)
 {
 	memset(&arphdr, 0, sizeof(arphdr));
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -78,17 +78,17 @@ pcap::pcap(const string &filterStr)
 	d_qos = "";
 	d_snap = "";
 	d_dev = "";
-	d_pd = NULL;
+	d_pd = nullptr;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
-	d_packet = NULL;
+	d_packet = nullptr;
 	memset(&d_ether, 0, sizeof(d_ether));
 }
 
 
 pcap::~pcap()
 {
-	if (d_pd != NULL)
+	if (d_pd != nullptr)
 		pcap_close(d_pd);
 }
 
@@ -119,7 +119,7 @@ pcap::pcap(const pcap &rhs)
 	d_localnet = rhs.d_localnet;
 	d_netmask = rhs.d_netmask;
 
-	d_packet = NULL;
+	d_packet = nullptr;
 
 	if (rhs.d_pd)
 		init_device(d_dev, d_has_promisc, d_snaplen);
@@ -155,7 +155,7 @@ pcap &pcap::operator=(const pcap &rhs)
 	d_localnet = rhs.d_localnet;
 	d_netmask = rhs.d_netmask;
 
-	d_packet = NULL;
+	d_packet = nullptr;
 
 	if (rhs.d_pd) {
 		if (d_pd)
@@ -251,14 +251,14 @@ int pcap::init_device(const string &dev, int promisc, size_t snaplen)
 	d_snaplen = snaplen;
 
 	if (is_file) {
-		if ((d_pd = pcap_open_offline(dev.c_str() + 7, ebuf)) == NULL) {
+		if ((d_pd = pcap_open_offline(dev.c_str() + 7, ebuf)) == nullptr) {
 			e = "pcap::init_device::pcap_open_offline:";
 			e += ebuf;
 			return die(e, STDERR, -1);
 		}
 		pcap_set_snaplen(d_pd, snaplen);
 	} else {
-		if ((d_pd = pcap_create(dev.c_str(), ebuf)) == NULL) {
+		if ((d_pd = pcap_create(dev.c_str(), ebuf)) == nullptr) {
 			e = "pcap::init_device::pcap_create:";
 			e += ebuf;
 			return die(e, STDERR, -1);
@@ -417,7 +417,7 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 	if (len > max_buffer_len || len < min_packet_size)
 		return die("pcap::sniffpack: Insane buffer len. Minimum of 1522?", STDERR, -1);
 
-	d_packet = NULL;
+	d_packet = nullptr;
 
 	// Until now, off will always be 0 here, as we need to memcpy
 	// from pcap's internal buffer anyway
@@ -438,7 +438,7 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 
 			// wait for packet
 			int sr;
-			if ((sr = select(fd + 1, &rset, NULL, NULL, &tmp)) < 0) {
+			if ((sr = select(fd + 1, &rset, nullptr, nullptr, &tmp)) < 0) {
 				if (errno == EINTR)
 					continue;
 				else
@@ -453,13 +453,13 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 
 	while (pcap_dispatch(d_pd, 1, one_packet, reinterpret_cast<unsigned char *>(this)) != 1 || d_phdr.caplen < d_framelen);
 
-	if (d_packet == NULL)
-		return die("pcap::sniffpack: Packet returned is NULL.", STDERR, -1);
+	if (!d_packet)
+		return die("pcap::sniffpack: Packet returned is nullptr.", STDERR, -1);
 
 	// The pcap source code reads as pcap_next() requires additional copy
 	// operations, so it might be noticable slower on GBit links.
 	// So use pcap_dispatch() for now.
-	//while ((d_packet = (char*)pcap_next(d_pd, &d_phdr)) == NULL);
+	//while ((d_packet = (char*)pcap_next(d_pd, &d_phdr)) == nullptr);
 
 	string::size_type cooked_hdr = 0, idx = d_framelen;
 

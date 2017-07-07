@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ RX_fd::RX_fd(int fd)
 	d_fd = fd;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
-	d_packet = NULL;
+	d_packet = nullptr;
 	d_offset = 0;
 	d_has_ether = 0;
 
@@ -66,7 +66,7 @@ RX_fd::RX_fd(const RX_fd &rhs)
 	d_offset = rhs.d_offset;
 	d_timeout = rhs.d_timeout;
 	d_tv = rhs.d_tv;
-	d_packet = NULL;
+	d_packet = nullptr;
 	d_has_ether = rhs.d_has_ether;
 	d_ether = rhs.d_ether;
 
@@ -86,7 +86,7 @@ RX_fd &RX_fd::operator=(const RX_fd &rhs)
 	d_offset = rhs.d_offset;
 	d_timeout = rhs.d_timeout;
 	d_tv = rhs.d_tv;
-	d_packet = NULL;
+	d_packet = nullptr;
 	d_has_ether = rhs.d_has_ether;
 	d_ether = rhs.d_ether;
 
@@ -213,7 +213,7 @@ int RX_fd::sniffpack(void *s, size_t len, int &off)
 
 			// wait for packet
 			int sr;
-			if ((sr = select(d_fd + 1, &rset, NULL, NULL, &tmp)) < 0) {
+			if ((sr = select(d_fd + 1, &rset, nullptr, nullptr, &tmp)) < 0) {
 				if (errno == EINTR)
 					continue;
 				else

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -56,14 +56,14 @@ public:
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP(const std::string &dst, uint8_t, RX *rx = NULL, TX *tx = NULL);
+	IP(const std::string &dst, uint8_t, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! Construct an IP object. Requires destination address as
 	 *  32bit network ordered integer and a protocol. Tries to set source
 	 *  address to what it finds out via its own hostname. If that fails,
 	 *  the src address will be 0.
 	 */
-	IP(uint32_t dst, uint8_t, RX *rx = NULL, TX *tx = NULL);
+	IP(uint32_t dst, uint8_t, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! Destructor
 	 */

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -141,11 +141,11 @@ string &IP6::get_dst(string &s)
 
 int IP6::set_src(const string &src)
 {
-	struct hostent *he = NULL;
+	struct hostent *he = nullptr;
 	in6_addr in6;
 
 	if (inet_pton(AF_INET6, src.c_str(), &in6) != 1) {
-		if ((he = gethostbyname2(src.c_str(), AF_INET6)) == NULL)
+		if ((he = gethostbyname2(src.c_str(), AF_INET6)) == nullptr)
 			return die("IP6::set_src::gethostbyname2", RETURN, -h_errno);
 		memcpy(&iph.saddr, he->h_addr, 16);
 	} else
@@ -156,11 +156,11 @@ int IP6::set_src(const string &src)
 
 int IP6::set_dst(const string &dst)
 {
-	struct hostent *he = NULL;
+	struct hostent *he = nullptr;
 	in6_addr in6;
 
 	if (inet_pton(AF_INET6, dst.c_str(), &in6) != 1) {
-		if ((he = gethostbyname2(dst.c_str(), AF_INET6)) == NULL)
+		if ((he = gethostbyname2(dst.c_str(), AF_INET6)) == nullptr)
 			return die("IP6::set_src::gethostbyname2", RETURN, -h_errno);
 		memcpy(&iph.daddr, he->h_addr, 16);
 	} else {

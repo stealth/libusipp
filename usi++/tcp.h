@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ public:
 
 	/*! Construct a TCP object destinated to a hostname (FQDN or or IP-address string).
 	 */
-	TCP(const std::string &, RX *rx = NULL, TX *tx = NULL);
+	TCP(const std::string &, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! destructor
 	 */

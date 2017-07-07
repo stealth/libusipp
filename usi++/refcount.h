@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ class ref_count {
 public:
 
 	/*! do not use with arrays, only with single objects, expects a POINTER to T */
-	explicit ref_count(T *ptr = NULL)
+	explicit ref_count(T *ptr = nullptr)
 	 : d_ptr(ptr), d_count(new int(1))
 	{
 	}

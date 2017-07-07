@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ template<typename T>
 TCP<T>::TCP(const string &host, RX *rx, TX *tx)
      : T(host, numbers::ipproto_tcp, rx, tx)
 {
-	srand(time(NULL));
+	srand(time(nullptr));
 	memset(&tcph, 0, sizeof(tcph));
 	memset(tcpOptions, 0, sizeof(tcpOptions));
 

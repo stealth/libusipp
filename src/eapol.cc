@@ -1,8 +1,8 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2014 by Sebastian Krahmer,
- *             sebastian [dot] krahmer [at] gmail [dot] com
+ * (C) 2014-2017 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ using namespace std;
 // We cant create a TX_pcap_eth in the Layer2 constructor, since it needs
 // the pcap RX object that is only ready after Layer2() returns.
 EAPOL::EAPOL()
-	: Layer2(NULL, new (nothrow) TX_string)
+	: Layer2(nullptr, new (nothrow) TX_string)
 {
 	memset(&eapol_hdr, 0, sizeof(eapol_hdr));
 	eapol_hdr.version = 1;

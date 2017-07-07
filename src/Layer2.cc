@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2013 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -84,7 +84,7 @@ int Layer2::sendpack(const void *buf, size_t len, struct sockaddr *s)
  */
 int Layer2::sendpack(const void *buf, size_t len)
 {
-	int r = d_tx->sendpack(buf, len, NULL);
+	int r = d_tx->sendpack(buf, len, nullptr);
 	if (r < 0)
 		return die(d_tx->why(), STDERR, d_tx->error());
 	return r;
@@ -120,6 +120,7 @@ string &Layer2::sniffpack(string &s)
 // delegate sniff request to the receiver
 int Layer2::sniffpack(void *buf, size_t len, int &off)
 {
+	off = 0;
 	if (len > max_buffer_len || len < min_packet_size)
 		return die("Layer2::sniffpack: Insane buffer len. Minimum of 1522?", STDERR, -1);
 

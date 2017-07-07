@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -373,7 +373,7 @@ int IP::set_src(const string &host)
 {
 	struct hostent *he;
 
-	if ((he = gethostbyname(host.c_str())) == NULL)
+	if ((he = gethostbyname(host.c_str())) == nullptr)
 		return die("IP::set_src::gethostbyname:", RETURN, h_errno);
 	memcpy(&iph.saddr, he->h_addr, he->h_length);
 	return 0;
@@ -394,7 +394,7 @@ int IP::set_dst(const string &host)
 {
    	struct hostent *he;
 
-	if ((he = gethostbyname(host.c_str())) == NULL)
+	if ((he = gethostbyname(host.c_str())) == nullptr)
 		return die("IP::set_dst::gethostbyname:", RETURN, h_errno);
 	memcpy(&iph.daddr, he->h_addr, he->h_length);
 	return 0;

@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -49,7 +49,7 @@ public:
 
 	/*! Construct an UDP object, destinated to a host (FQDN or IP string).
 	 */
-	UDP(const std::string &, RX *rx = NULL, TX *tx = NULL);
+	UDP(const std::string &, RX *rx = nullptr, TX *tx = nullptr);
 
 	/*! Destructor
 	 */
