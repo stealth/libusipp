@@ -53,10 +53,10 @@ pcap::pcap()
 	d_qos = "";
 	d_snap = "";
 	d_dev = "";
-	d_pd = NULL;
+	d_pd = nullptr;
 	memset(&d_tv, 0, sizeof(d_tv));
 	d_timeout = false;
-	d_packet = NULL;
+	d_packet = nullptr;
 	memset(&d_ether, 0, sizeof(d_ether));
 }
 
@@ -180,7 +180,7 @@ int pcap::get_datalink()
  */
 int pcap::get_framelen()
 {
-	return d_framelen;
+	return d_framelen + d_frame2.size() + d_qos.size() + d_llc.size() + d_snap.size();
 }
 
 
@@ -476,10 +476,22 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 		if (d_ether.ether_type == htons(eth_p_vlan) && (idx + 4 <= d_phdr.caplen)) {
 			d_frame2 = string(d_packet + sizeof(d_ether), 4);
 			idx += 4;
-		// 802.3 encapsulation (SNAP header present)?
+		// 802.3 encapsulation (LLC + SNAP header present)?
 		} else if (ntohs(d_ether.ether_type) <= 1500 && (idx + 8 <= d_phdr.caplen)) {
-			d_snap = string(d_packet + sizeof(d_ether), 8);
-			idx += 8;
+			// LLC Ctrl field consist of 1 or 2 bytes?
+			if ((d_packet[d_framelen + 2] & 0x3) == 0x3) {
+				d_llc = string(d_packet + sizeof(d_ether), 3);
+				idx += 3;
+			} else {
+				d_llc = string(d_packet + sizeof(d_ether), 4);
+				idx += 4;
+			}
+			// SNAP present?
+			if (d_packet[d_framelen] == 0xAA && d_packet[d_framelen + 1] == 0xAA &&
+			    d_packet[d_framelen + 2] == 0x03) {
+				d_snap = string(d_packet + sizeof(d_ether) + 3, 5);
+				idx += 5;
+			}
 		}
 		break;
 #ifdef HAVE_RADIOTAP
@@ -495,6 +507,7 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 			idx += 6;
 		}
 		if (d_80211.fc.bits.type == 2 && idx + 8 <= d_phdr.caplen) {			// Data ...
+			// 802.11 section 8.2.4.1.3 QoS subtype field
 			if (d_80211.fc.bits.subtype >= 8 && idx + 10 <= d_phdr.caplen) {	// ... with QoS
 				d_qos = string(d_packet + idx, 2);
 				idx += 2;
@@ -539,40 +552,35 @@ void *pcap::get_frame(void *hwframe, size_t len)
 		memcpy(hwframe, s.c_str(), s.size());
 		return hwframe;
 	}
-	return NULL;
+	return nullptr;
 }
+
 
 string &pcap::get_frame(string &frame)
 {
 	frame = "";
-
-	char buf[1024];
-	string::size_type blen = 0;
+	char buf[1024] = {0};
 
 	switch (d_datalink) {
 	case DLT_EN10MB:
 		memcpy(buf, &d_ether, sizeof(d_ether));
-		if (d_frame2.size() > 0 && d_frame2.size() < sizeof(buf) - sizeof(d_ether)) {
-			memcpy(buf + sizeof(d_ether), d_frame2.c_str(), d_frame2.size());
-			blen += d_frame2.size();
-		}
-		frame = string(buf, blen);
+		frame = string(buf, sizeof(d_ether));
 		break;
 #ifdef HAVE_RADIOTAP
 	case DLT_IEEE802_11_RADIO:
 		memcpy(buf, &d_80211, sizeof(d_80211));
-		blen = sizeof(d_80211);
-		if (d_frame2.size() > 0 && d_frame2.size() < sizeof(buf) - sizeof(d_80211)) {
-			memcpy(buf + sizeof(d_80211), d_frame2.c_str(), d_frame2.size());
-			blen += d_frame2.size();
-		}
-		frame = string(buf, blen);
+		frame = string(buf, sizeof(d_80211));
 		break;
 #endif
 	default:
 		;
 	}
 
+	// append in this order
+	frame += d_frame2;
+	frame += d_qos;
+	frame += d_llc;
+	frame += d_snap;
 	return frame;
 }
 
