@@ -237,7 +237,7 @@ int RX_fd::sniffpack(void *s, size_t len, int &off)
 
 	}
 
-	// adjust offset, so above functions or string versions can splitt
+	// adjust offset, so above functions or string versions can split
 	// if off right away, without us needing to memmove() it
 	off = idx;
 
