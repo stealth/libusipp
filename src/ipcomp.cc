@@ -158,7 +158,7 @@ int IPComp<T>::init_device(const string &dev, int promisc, size_t snaplen)
 	int r = Layer2::init_device(dev, promisc, snaplen);
 	if (r < 0)
 		return r;
-	r = Layer2::setfilter("ipcomp");
+	r = Layer2::setfilter("ip proto 108");
 	return r;
 }
 
