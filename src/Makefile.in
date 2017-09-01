@@ -15,7 +15,7 @@ all: usi++
 clear:
 	rm -f *.o
 
-usi++: icmp.o datalink.o ip.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
+usi++: icmp.o datalink.o ip.o ipcomp.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
        eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
        TX_pcap_eth.o TX_pcap.o TX_string.o RX_fd.o RX_string.o object.o
 	ar cr libusi++.a $^
@@ -84,6 +84,10 @@ Layer2.o: Layer2.cc
 
 TX_IP.o: TX_IP.cc
 	$(CXX) $(CXXFLAGS) $<
+
+ipcomp.o: ipcomp.cc
+	$(CXX) $(CXXFLAGS) $<
+
 
 install:
 	$(INSTALL) -g bin -o root -m 0755 libusi++.* @prefix@/lib

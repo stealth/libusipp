@@ -69,7 +69,7 @@ TCP<T>::~TCP()
 
 
 template<typename T>
-TCP<T>::TCP(const TCP &rhs)
+TCP<T>::TCP(const TCP<T> &rhs)
 	: T(rhs)
 {
 	if (this == &rhs)

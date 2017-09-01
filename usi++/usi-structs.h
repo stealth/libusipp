@@ -451,6 +451,15 @@ enum {
 // IPv6 extension headers now found in ipproto_ numbers
 
 
+// IPComp Compression Parameter Index (equals IPCOMP Transform Identifiers, rfc3173 + rfc2407)
+enum {
+	ipcomp_reserved			= 0,
+	ipcomp_oui			= 1,
+	ipcomp_deflate			= 2,
+	ipcomp_lzs			= 3
+};
+
+
 }	// namespace numbers
 
 
@@ -753,6 +762,13 @@ struct eapol_p {
 	uint8_t version;
 	uint8_t type;
 	uint16_t len;
+};
+
+
+struct ipcomp_hdr {
+	uint8_t next;
+	uint8_t flags;
+	uint16_t cpi;
 };
 
 

@@ -23,7 +23,7 @@
 #define usipp_usipp_h
 
 enum {
-	usipp_version = 222
+	usipp_version = 223
 };
 
 #include "config.h"
@@ -35,6 +35,7 @@ enum {
 #include "Layer2.h"
 #include "ip.h"
 #include "ip6.h"
+#include "ipcomp.h"
 #include "icmp.h"
 #include "icmp6.h"
 #include "udp.h"
