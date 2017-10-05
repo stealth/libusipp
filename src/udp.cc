@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -139,8 +139,7 @@ uint16_t UDP<T>::set_len(uint16_t l)
 }
 
 
-/* Set the UDP-checksum. Calling this function with s != 0
- *  will prevent sendpack() from setting the checksum!!!
+/* Set the UDP-checksum and prevent sendpack() from setting the checksum.
  */
 template<typename T>
 uint16_t UDP<T>::set_udpsum(uint16_t s)
@@ -182,30 +181,39 @@ int UDP<T>::sendpack(const void *buf, size_t paylen)
 	udphdr orig_udph = d_udph;
 
    	// build a pseudoheader for IPvX-checksum
-	T::d_pseudo.saddr = T::get_src();	// sourceaddress
-	T::d_pseudo.daddr = T::get_dst();	// destinationaddress
-
-	uint32_t zero = 0;
-	memcpy(&this->d_pseudo.zero, &zero, sizeof(this->d_pseudo.zero));
+	T::d_pseudo.saddr = T::get_src();	// source address
+	T::d_pseudo.daddr = T::get_dst();	// destination address
 	T::d_pseudo.proto = numbers::ipproto_udp;
 
 	if (d_udph.len == 0)
 		d_udph.len = htons(paylen + sizeof(d_udph));
 
-	if (sizeof(T::d_pseudo.len) == sizeof(uint16_t))
+	if (T::d_ipversion == 4)
 		T::d_pseudo.len = d_udph.len;
-	else
+	else {
 		T::d_pseudo.len = htonl(ntohs(d_udph.len));
 
+		// For routing extension header, the csum is calculated with the real
+		// destination
+	
+		if (T::get_proto() == numbers::ipproto6_routing) {
+			if (T::e_hdrs_len >= 24 && T::e_hdrs.begin() != T::e_hdrs.end())
+				memcpy(&T::d_pseudo.daddr, T::e_hdrs.begin()->c_str() + T::e_hdrs.begin()->size() - 16, 16);
+		}
 
+		for (auto i = T::e_hdrs.begin(); i != T::e_hdrs.end(); ++i) {
+			if (i->size() >= 24 && (*i)[0] == numbers::ipproto6_routing)
+				memcpy(&T::d_pseudo.daddr, i->c_str() + i->size() - 16, 16);
+		}
+	}
 
-	// copy pseudohdr+header+data to buffer
+	// copy pseudohdr + header + data to buffer
 	memcpy(tmp, &this->d_pseudo, sizeof(T::d_pseudo));
 	memcpy(tmp + sizeof(T::d_pseudo), &d_udph, sizeof(d_udph));
 	memcpy(tmp + sizeof(T::d_pseudo) + sizeof(d_udph), buf, paylen);
 
 	// calc checksum over it
-	struct udphdr *u = (struct udphdr*)(tmp + sizeof(T::d_pseudo));
+	struct udphdr *u = reinterpret_cast<struct udphdr *>(tmp + sizeof(T::d_pseudo));
 
 	if (calc_usum) {
 		u->check = 0;

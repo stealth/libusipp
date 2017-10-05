@@ -43,13 +43,16 @@ class IP6 : public Layer2 {
 
 	struct ip6_hdr iph;
 	uint8_t d_proto;
-	std::vector<std::string> e_hdrs;
-	uint16_t e_hdrs_len;
-	TX *d_tx;
+	TX *d_tx{nullptr};
 
 protected:
+
 	struct pseudohdr6 d_pseudo;
 
+	std::vector<std::string> e_hdrs;
+	uint16_t e_hdrs_len{0};
+
+	static const uint8_t d_ipversion;	
 
 public:
 	/*! New IP6 packet with destination address and next-header proto.

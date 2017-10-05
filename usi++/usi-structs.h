@@ -744,6 +744,7 @@ struct icmp6_ri_opt {
 };
 
 
+// RFC 2460 8.1
 struct pseudohdr6 {
 	in6_addr saddr, daddr;
 	uint32_t len;

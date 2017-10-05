@@ -39,6 +39,9 @@ namespace usipp {
 using namespace std;
 
 
+const uint8_t IP::d_ipversion = 4;
+
+
 /*! Create a IP-packet, with 'dst' for destination-adress.
  *  Set the protocol-field in the IP-header to 'proto'.
  *  This is used by the derived classes (TCP etc.) to set
@@ -50,8 +53,7 @@ IP::IP(const string &dst, uint8_t proto, RX *rx, TX *tx)
    	: Layer2(rx, tx)
 {
 	memset(&iph, 0, sizeof(iph));
-	memset(ipOptions, 0, sizeof(ipOptions));
-	memset(&d_pseudo, 0, sizeof(d_pseudo));
+	d_pseudo.zero = 0;
 
 	iph.ttl = 64;
 	iph.version = 4;
@@ -78,8 +80,7 @@ IP::IP(uint32_t dst, uint8_t proto, RX *rx, TX *tx)
    	: Layer2(rx, tx)
 {
 	memset(&iph, 0, sizeof(iph));
-	memset(ipOptions, 0, sizeof(ipOptions));
-	memset(&d_pseudo, 0, sizeof(d_pseudo));
+	d_pseudo.zero = 0;
 
 
 	iph.ttl = 64;
@@ -109,8 +110,8 @@ IP& IP::operator=(const IP &rhs)
 
 	// and just copy header and such
 	memcpy(&iph, &rhs.iph, sizeof(iph));
-	memcpy(ipOptions, rhs.ipOptions, sizeof(ipOptions));
 	calc_csum = rhs.calc_csum;
+	d_pseudo.zero = 0;
 
 	return *this;
 }
@@ -125,8 +126,8 @@ IP::IP(const IP &rhs)
 		return;
 
 	memcpy(&iph, &rhs.iph, sizeof(iph));
-	memcpy(ipOptions, rhs.ipOptions, sizeof(ipOptions));
 	calc_csum = rhs.calc_csum;
+	d_pseudo.zero = 0;
 }
 
 
@@ -223,11 +224,9 @@ uint16_t IP::set_id(uint16_t id)
 
 string &IP::get_options(string &op)
 {
-	if (iph.ihl<<2 <= (int)sizeof(iph)) {
-		op = "";
-		return op;
-	}
-	op = string(ipOptions, (iph.ihl<<2) - sizeof(iph));
+	op = "";
+	if (e_hdrs_len > 0)
+		op = e_hdrs[0];
 	return op;
 }
 
@@ -235,9 +234,11 @@ string &IP::get_options(string &op)
 int IP::set_options(const string &op)
 {
 	// too large or not aligned?
-	if (op.length() > sizeof(ipOptions) || op.length() % 4)
+	if (op.length() > 40 || op.length() % 4)
 		return -1;
-	memcpy(ipOptions, op.c_str(), op.length());
+	e_hdrs.clear();
+	e_hdrs.push_back(op);
+	e_hdrs_len = op.length();
 
 	iph.ihl = (sizeof(iph) + op.length())>>2;
 	return 0;
@@ -425,12 +426,10 @@ void IP::checksum(bool cs)
  */
 int IP::sendpack(const void *payload, size_t paylen)
 {
-	if (paylen > max_packet_size || paylen + sizeof(iph) + sizeof(ipOptions) > max_packet_size)
+	if (paylen > max_packet_size || paylen + sizeof(iph) + e_hdrs_len > max_packet_size)
 		return die("IP::sendpack: Packet payload too large.", STDERR, -1);
 
-	char s[max_packet_size];
-	memset(s, 0, sizeof(s));
-
+	char s[max_packet_size] = {0};
 	iphdr orig_iph = iph;
 
 	// We give user the chance to set wrong length's
@@ -451,8 +450,8 @@ int IP::sendpack(const void *payload, size_t paylen)
 	memcpy(s, &iph, iph.ihl<<2 > (int)sizeof(iph) ? sizeof(iph) : iph.ihl<<2);
 
 	// copy options if any
-	if (iph.ihl<<2 > (int)sizeof(iph))
-		memcpy(s + sizeof(iph), ipOptions, (iph.ihl<<2)  - sizeof(iph));
+	if (e_hdrs_len > 0)
+		memcpy(s + sizeof(iph), e_hdrs[0].c_str(), e_hdrs_len);
 
 
 	if (calc_csum) {
@@ -532,29 +531,30 @@ int IP::sniffpack(void *buf, size_t len, int &off)
 
 	// Copy header without options
 	memcpy(&iph, reinterpret_cast<char *>(buf) + off, sizeof(usipp::iphdr));
+	off += sizeof(iph);
+
+	e_hdrs.clear();
+	e_hdrs_len = 0;
 
 	unsigned int iplen = i->ihl<<2;
-	if (iplen < sizeof(iph)) {
-		off += sizeof(iph);
+	if (iplen < sizeof(iph))
 		return r;
-	}
+
 	// cant happen: only 4bit IHL, -> max of 40byte options == sizeof(ipOptions)
 	//if (iplen > sizeof(iph) + sizeof(ipOptions)) 
 
 	// Copy ip-options if any
-	if (iplen > (int)sizeof(iph) && off + (int)iplen <= r) {
-		memcpy(ipOptions, reinterpret_cast<char *>(buf) + off + sizeof(iph), iplen - sizeof(iph));
-		off += iplen;
+	if (iplen > (int)sizeof(iph) && off + (int)iplen - (int)sizeof(iph) <= r) {
+		e_hdrs_len = iplen - sizeof(iph);
+		e_hdrs.push_back(string(reinterpret_cast<char *>(buf) + off, e_hdrs_len));
+		off += e_hdrs_len;
 		return r;
 	}
 
 	// must be short packet
-	if (iplen != sizeof(iph)) {
-		memset(ipOptions, 0, sizeof(ipOptions));
-		return 0;
-	}
+	if (iplen != sizeof(iph))
+		return die("IP::sniffpack: short packet", STDERR, -1);
 
-	off += sizeof(iph);
 	return r;
 }
 

@@ -41,6 +41,9 @@ namespace usipp {
 
 using namespace std;
 
+const uint8_t IP6::d_ipversion = 6;
+
+
 IP6::IP6(const in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
 	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
 {
@@ -50,7 +53,6 @@ IP6::IP6(const in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
 	iph.version = 6;
 	iph.nexthdr = proto;
 	d_proto = proto;
-	e_hdrs_len = 0;
 	iph.hop_limit = 64;
 	set_dst(in6);
 }
@@ -64,7 +66,6 @@ IP6::IP6(const string &hostname, uint8_t proto, RX *rx, TX *tx)
 
 	iph.version = 6;
 	iph.nexthdr = proto;
-	e_hdrs_len = 0;
 	d_proto = proto;
 	iph.hop_limit = 64;
 	set_dst(hostname);
@@ -80,6 +81,7 @@ IP6::IP6(const IP6 &rhs)
 	e_hdrs = rhs.e_hdrs;
 	e_hdrs_len = rhs.e_hdrs_len;
 	d_proto = rhs.d_proto;
+	memset(&d_pseudo, 0, sizeof(d_pseudo));
 }
 
 
@@ -92,6 +94,8 @@ IP6 &IP6::operator=(const IP6 &rhs)
 	e_hdrs = rhs.e_hdrs;
 	e_hdrs_len = rhs.e_hdrs_len;
 	d_proto = rhs.d_proto;
+	memset(&d_pseudo, 0, sizeof(d_pseudo));
+
 	return *this;
 }
 

@@ -230,9 +230,8 @@ uint16_t TCP<T>::set_win(uint16_t w)
 }
 
 
-/*! set TCP-checksum
- *  Calling this function with s != 0
- *  will prevent sendpack from calculating the checksum.
+/*! set TCP-checksum and prevent
+ *  sendpack from calculating the checksum.
  */
 template<typename T>
 uint16_t TCP<T>::set_tcpsum(uint16_t s)
@@ -276,23 +275,33 @@ int TCP<T>::sendpack(const void *buf, size_t paylen)
 
 	unsigned int len = paylen + (tcph.th_off<<2) + sizeof(T::d_pseudo);
 	int r = 0;
-	char tmp[max_packet_size];
-	memset(tmp, 0, sizeof(tmp));
+	char tmp[max_packet_size] = {0};
 
 	// build a pseudoheader for IP-checksum
-	T::d_pseudo.saddr = T::get_src();	// sourceaddress
-	T::d_pseudo.daddr = T::get_dst();	// destinationaddress
-
-	uint32_t zero = 0;
-	memcpy(&this->d_pseudo.zero, &zero, sizeof(this->d_pseudo.zero));
+	T::d_pseudo.saddr = T::get_src();	// source address
+	T::d_pseudo.daddr = T::get_dst();	// destination address
 	T::d_pseudo.proto = numbers::ipproto_tcp;
 
-	if (sizeof(T::d_pseudo.len) == sizeof(uint16_t))
+	if (T::d_ipversion == 4)
 		T::d_pseudo.len = htons((tcph.th_off<<2) + paylen);
-	else
+	else {
 		T::d_pseudo.len = htonl((tcph.th_off<<2) + paylen);
 
-	// copy pseudohdr+header+data to buffer
+		// For routing extension header, the csum is calculated with the real
+		// destination
+	
+		if (T::get_proto() == numbers::ipproto6_routing) {
+			if (T::e_hdrs_len >= 24 && T::e_hdrs.begin() != T::e_hdrs.end())
+				memcpy(&T::d_pseudo.daddr, T::e_hdrs.begin()->c_str() + T::e_hdrs.begin()->size() - 16, 16);
+		}
+
+		for (auto i = T::e_hdrs.begin(); i != T::e_hdrs.end(); ++i) {
+			if (i->size() >= 24 && (*i)[0] == numbers::ipproto6_routing)
+				memcpy(&T::d_pseudo.daddr, i->c_str() + i->size() - 16, 16);
+		}
+	}
+
+	// copy pseudohdr + header + data to buffer
 	memcpy(tmp, &this->d_pseudo, sizeof(T::d_pseudo));
 	memcpy(tmp + sizeof(T::d_pseudo), &tcph, sizeof(tcph));
 

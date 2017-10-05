@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2017 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #include "usi++/usi++.h"
 #include "usi++/icmp6.h"
 #include "usi++/TX_IP6.h"
+#include "usi++/usi-structs.h"
 
 #include "config.h"
 #include <string>
@@ -115,34 +116,44 @@ uint32_t ICMP6::set_data(uint32_t d)
 
 int ICMP6::sendpack(const void *payload, size_t paylen)
 {
-	size_t len = sizeof(icmp6hdr) + paylen;
+	pseudohdr6 pseudo;
+	memset(&pseudo, 0, sizeof(pseudo));
+
+	size_t len = sizeof(icmp6hdr) + paylen + sizeof(pseudo);
 	if (paylen > max_packet_size || len > max_packet_size)
 		return die("ICMP6::sendpack: Packet payload too large.", STDERR, -1);
 
-	char s[max_packet_size];
-	memset(s, 0, sizeof(s));
+	char s[max_packet_size] = {0};
 
-	memcpy(s, &icmp6hdr, sizeof(icmp6hdr));
-	memcpy(s + sizeof(icmp6hdr), payload, paylen);
+	memcpy(s + sizeof(pseudo), &icmp6hdr, sizeof(icmp6hdr));
+	memcpy(s + sizeof(pseudo) + sizeof(icmp6hdr), payload, paylen);
 
-	icmp6_hdr *i = (icmp6_hdr*)s;
+	icmp6_hdr *i = reinterpret_cast<icmp6_hdr *>(s + sizeof(pseudo));
+
 	if (i->icmp6_cksum == 0) {
-		unsigned char c[2*sizeof(in6_addr) + 3*sizeof(uint32_t) + max_packet_size], *cptr = c;
+		pseudo.saddr = get_src();
+		pseudo.daddr = get_dst();
+		pseudo.proto = numbers::ipproto_icmpv6;
+		pseudo.len = htonl(sizeof(icmp6_hdr) + paylen);
 
-		in6_addr i6 = get_src();
-		memcpy(cptr, &i6, sizeof(i6));
-		cptr += sizeof(i6);
-		i6 = get_dst();
-		memcpy(cptr, &i6, sizeof(i6));
-		cptr += sizeof(i6);
-		uint32_t razia[2] = {htonl(len), htonl(numbers::ipproto_icmpv6)};
-		memcpy(cptr, razia, sizeof(razia));
-		cptr += sizeof(razia);
-		memcpy(cptr, s, len); cptr += len;
-		i->icmp6_cksum = in_cksum(reinterpret_cast<unsigned short *>(c), cptr - c, 0);
+		// For routing extension header, the csum is calculated with the real
+		// destination
+	
+		if (this->get_proto() == numbers::ipproto6_routing) {
+			if (e_hdrs_len >= 24 && e_hdrs.begin() != e_hdrs.end())
+				memcpy(&pseudo.daddr, e_hdrs.begin()->c_str() + e_hdrs.begin()->size() - 16, 16);
+		}
+
+		for (auto i = e_hdrs.begin(); i != e_hdrs.end(); ++i) {
+			if (i->size() >= 24 && (*i)[0] == numbers::ipproto6_routing)
+				memcpy(&pseudo.daddr, i->c_str() + i->size() - 16, 16);
+		}
+
+		memcpy(s, &pseudo, sizeof(pseudo));
+		i->icmp6_cksum = in_cksum(reinterpret_cast<unsigned short *>(s), len, 1);
 	}
 
-	int r = IP6::sendpack(s, len);
+	int r = IP6::sendpack(s + sizeof(pseudo), len - sizeof(pseudo));
 	return r;
 }
 
@@ -196,6 +207,21 @@ int ICMP6::sniffpack(void *buf, size_t blen, int &off)
 	off += sizeof(icmp6hdr);
 	return r;
 }
+
+/*  Initialize a device ("eth0" for example) for packet-
+ *  capturing. It MUST be called before sniffpack() is launched.
+ *  Set 'promisc' to 1 if you want the device running in promiscous mode.
+ *  Fetch at most 'snaplen' bytes per call.
+ */
+int ICMP6::init_device(const string &dev, int promisc, size_t snaplen)
+{
+	int r = Layer2::init_device(dev, promisc, snaplen);
+	if (r < 0)
+		return r;
+	r = Layer2::setfilter("icmp6");
+	return r;
+}
+
 
 }
 

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 
 namespace usipp {
@@ -39,9 +40,10 @@ namespace usipp {
  *  \example trace.cc
  */
 class IP : public Layer2 {
+
 protected:
+
 	usipp::iphdr iph;
-	char ipOptions[40];
 	bool calc_csum;
 
 	/*! pseudo header for derived classes like UDP or TCP.
@@ -49,6 +51,13 @@ protected:
 	 *  UDP<IP6> needs a different pseudo header
 	 */
 	struct pseudohdr d_pseudo;
+
+	// IP options
+	std::vector<std::string> e_hdrs;
+	uint16_t e_hdrs_len{0};
+
+	static const uint8_t d_ipversion;
+
 public:
 
 	/*! Construct an IP object. Requires destination address as

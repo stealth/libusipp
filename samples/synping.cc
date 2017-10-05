@@ -53,9 +53,9 @@ int main(int argc, char **argv)
 	if (tcp.sendpack("") < 0)
 		cerr<<tcp.why()<<endl;
 
-	tcp.sniffpack(buf, sizeof(buf));
+	int r = tcp.sniffpack(buf, sizeof(buf));
 
-	cout<<"TCP ack was: "<<tcp.get_ack()<<endl;
+	cout<<"TCP ack was: "<<tcp.get_ack()<<endl<<"r="<<r<<endl;
 
 	return 0;
 }
