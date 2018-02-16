@@ -69,6 +69,9 @@ public:
 
 	/*! set layer2 destination address ((may be a dummy for RAW sockets) */
 	virtual int set_l2dst(const std::string &) = 0;
+
+	/*! get underlying fd */
+	virtual int tx_fd() = 0;
 };
 
 } // namespace usipp

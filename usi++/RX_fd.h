@@ -1,8 +1,8 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2016 by Sebastian Krahmer,
- *             sebastian [dot] krahmer [at] gmail [dot] com
+ * (C) 2016-2018 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,12 +116,12 @@ public:
 	/*! See RX::tag() */
 	virtual int tag() { return RX_TAG_FD; }
 
+	/*! returns fd */
+	virtual int rx_fd() { return d_fd; }
+
 	/*! Get ethernet type if it has ethernet
 	 */
 	uint16_t get_etype();
-
-	/*! returns fd. */
-	int handle() { return d_fd; }
 
 	/*! Return the cooked header if any, e.g. tuntap header */
 	std::string &get_cooked(std::string &);

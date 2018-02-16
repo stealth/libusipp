@@ -81,6 +81,12 @@ public:
 		return 0;
 	}
 
+	/*! */
+	virtual int tx_fd()
+	{
+		return d_pcap->rx_fd();
+	}
+
 	/*! Nop, use set_frame() */
 	void set_type(uint16_t)
 	{

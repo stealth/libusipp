@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2018 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -157,6 +157,8 @@ public:
 	/*! See RX::tag() */
 	virtual int tag() { return RX_TAG_PCAP; }
 
+	/*! get the underlying fd */
+	virtual int rx_fd();
 
 	/*! Return HW-frame (ethernet header) */
 	void *get_frame(void *, size_t);

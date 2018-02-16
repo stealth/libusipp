@@ -76,6 +76,10 @@ public:
 
 	/*! dummy, raw sockets dont have layer2 address */
 	virtual int set_l2dst(const std::string &) { return 0; }
+
+	/*!*/
+	virtual int tx_fd() { return -1; }
+
 };
 #else
 

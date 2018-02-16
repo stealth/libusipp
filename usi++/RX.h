@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2015 by Sebastian Krahmer,
+ * (C) 2000-2018 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -83,6 +83,9 @@ public:
 	 *  registered.
 	 */
 	virtual int tag() = 0;
+
+	/*! Get underlying fd */
+	virtual int rx_fd() = 0;
 };
 
 } // namespace usipp

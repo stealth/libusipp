@@ -83,6 +83,9 @@ public:
 	 */
 	virtual int set_l2dst(const std::string &);
 
+	/*!*/
+	virtual int tx_fd() { return -1; }
+
 	/*! Set ethernet type (ETH_P_IP, ETH_P_ARP etc).*/
 	void set_type(uint16_t);
 

@@ -64,6 +64,9 @@ public:
 	/*! dummy, no L2 address on strings */
 	virtual int set_l2dst(const std::string &s) { return 0; }
 
+	/*! */
+	virtual int tx_fd() { return -1; }
+
 	/*! return the packet that was "sent" as string, including all payloads and hdrs */
 	std::string get_pack() { return pkt; };
 };

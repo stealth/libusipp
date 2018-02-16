@@ -1,8 +1,8 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2016 by Sebastian Krahmer,
- *             sebastian [dot] krahmer [at] gmail [dot] com
+ * (C) 2016-2018 by Sebastian Krahmer,
+ *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,9 @@ public:
 
 	/*! See RX::tag() */
 	virtual int tag() { return RX_TAG_STRING; }
+
+	/*!*/
+	virtual int rx_fd() { return -1; }
 
 }; // class RX_string {}
 
