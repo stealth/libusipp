@@ -18,6 +18,7 @@
  * along with libusi++.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
 #include "usi++/usi++.h"
 #include "usi++/ipcomp.h"
 #include "usi++/RX.h"

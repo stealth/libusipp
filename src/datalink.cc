@@ -467,7 +467,7 @@ int pcap::sniffpack(void *s, size_t len, int &off)
 	// So use pcap_dispatch() for now.
 	//while ((d_packet = (char*)pcap_next(d_pd, &d_phdr)) == nullptr);
 
-	string::size_type cooked_hdr = 0, idx = d_framelen;
+	string::size_type idx = d_framelen;
 
 	d_frame2 = "";
 	d_llc = "";
