@@ -6,20 +6,21 @@ LDFLAGS=@LDFLAGS@
 DEFS=
 CXXFLAGS=-I . -I .. @CXXFLAGS@ -Wall -c -pedantic -std=c++11 $(DEFS)
 CXX=@CXX@
-CC=@CC@
 INSTALL=@INSTALL@
 RANLIB=@RANLIB@
 
 all: usi++
 
-clear:
-	rm -f *.o
+OBJS=icmp.o datalink.o ip.o ipcomp.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
+     eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
+     TX_pcap_eth.o TX_pcap.o TX_string.o RX_fd.o RX_string.o object.o
 
-usi++: icmp.o datalink.o ip.o ipcomp.o misc.o udp.o tcp.o TX_IP.o Layer2.o arp.o\
-       eapol.o ip6.o TX_IP6.o icmp6.o TX_dnet_ip.o TX_dnet_eth.o\
-       TX_pcap_eth.o TX_pcap.o TX_string.o RX_fd.o RX_string.o object.o
-	ar cr libusi++.a $^
-	$(CC) $^ -shared $(LDFLAGS) $(LIBS) -lstdc++ -o libusi++.so
+clear:
+	rm -f $(OBJS)
+
+usi++: $(OBJS)
+	ar cr libusi++.a $(OBJS)
+	$(CXX) $(OBJS) -shared $(LDFLAGS) $(LIBS) -lstdc++ -o libusi++.so
 	$(RANLIB) libusi++.a
 
 object.o: object.cc
@@ -104,5 +105,5 @@ uninstall:
 	rm -rf @prefix@/include/usi++
 
 clean:
-	rm -f *.o *.a
+	rm -f *.o *.a *.so
 
