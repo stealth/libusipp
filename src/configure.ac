@@ -25,22 +25,27 @@ AC_CHECK_LIB(dumbnet, ip_open)
 host=`uname`;
 
 case "$host" in
-	*inux*)
+	*linux*)
 		;;
-	*Free*BSD*)
-		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+	*Linux*)
 		;;
-	*free*bsd*)
-		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+	*freebsd*11*RELEASE*)
+		CXXFLAGS+="-DIMMEDIATE $CXXFLAGS"
+		;;
+	*FreeBSD*)
+		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+		;;
+	*freebsd*)
+		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
 		;;
 	*BSD*)
-		CXXFLAGS="$CXXFLAGS -DIMMEDIATE"
+		CXXFLAGS+="$CXXFLAGS -DIMMEDIATE"
 		;;
 	*bsd*)
-		CXXFLAGS="$CXXFLAGS -DIMMEDIATE"
+		CXXFLAGS+="$CXXFLAGS -DIMMEDIATE"
 		;;
 	*Darwin*)
-		CXXFLAGS="-DBROKEN_BSD $CXXFLAGS"
+		CXXFLAGS+="-DBROKEN_BSD $CXXFLAGS"
 		;;
 	*)
 		echo "Sorry, $host not supported yet."
