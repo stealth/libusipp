@@ -30,22 +30,22 @@ case "$host" in
 	*Linux*)
 		;;
 	*freebsd*11*RELEASE*)
-		CXXFLAGS+="-DIMMEDIATE"
+		CXXFLAGS="-DIMMEDIATE $CXXFLAGS"
 		;;
 	*FreeBSD*)
-		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE"
+		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
 		;;
 	*freebsd*)
-		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE"
+		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
 		;;
 	*BSD*)
-		CXXFLAGS+="-DIMMEDIATE"
+		CXXFLAGS="-DIMMEDIATE $CXXFLAGS"
 		;;
 	*bsd*)
-		CXXFLAGS+="-DIMMEDIATE"
+		CXXFLAGS="-DIMMEDIATE $CXXFLAGS"
 		;;
 	*Darwin*)
-		CXXFLAGS+="-DBROKEN_BSD"
+		CXXFLAGS="-DBROKEN_BSD $CXXFLAGS"
 		;;
 	*)
 		echo "Sorry, $host not supported yet."
@@ -68,8 +68,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyaddr gethostbyname gethostname inet_ntoa memset select socket strerror])
 
-r=`grep DLT_IEEE802_11_RADIO /usr/include/pcap/bpf.h 2>/dev/null`
-r+=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/bpf.h 2>/dev/null`
+r=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/bpf.h /usr/include/pcap/bpf.h 2>/dev/null`
 case "$r" in
 	*DLT_IEEE802_11_RADIO*)
 		AC_DEFINE([HAVE_RADIOTAP], [1], [Define if radiotap exists.])
@@ -78,8 +77,7 @@ case "$r" in
 	*)
 esac
 
-r=`grep pcap_set_immediate_mode /usr/include/pcap/pcap.h 2>/dev/null`
-r+=`grep pcap_set_immediate_mode /usr/local/include/pcap/pcap.h 2>/dev/null`
+r=`grep pcap_set_immediate_mode /usr/local/include/pcap/pcap.h /usr/include/pcap/pcap.h 2>/dev/null`
 case "$r" in
 	*pcap_set_immediate*)
 		AC_DEFINE([HAVE_PCAP_SET_IMMEDIATE_MODE], [1], [Define if you have pcap_set_immediate_mode.])
