@@ -38,6 +38,9 @@ case "$host" in
 	*freebsd*)
 		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
 		;;
+	*netbsd*)
+		CXXFLAGS="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+		;;
 	*BSD*)
 		CXXFLAGS="-DIMMEDIATE $CXXFLAGS"
 		;;
