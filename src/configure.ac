@@ -22,7 +22,7 @@ AC_CHECK_FUNCS_ONCE(pcap_inject)
 AC_CHECK_LIB(dnet, ip_open)
 AC_CHECK_LIB(dumbnet, ip_open)
 
-host=`uname`;
+host=`uname -a`;
 
 case "$host" in
 	*linux*)
@@ -30,22 +30,22 @@ case "$host" in
 	*Linux*)
 		;;
 	*freebsd*11*RELEASE*)
-		CXXFLAGS+="-DIMMEDIATE $CXXFLAGS"
+		CXXFLAGS+="-DIMMEDIATE"
 		;;
 	*FreeBSD*)
-		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE"
 		;;
 	*freebsd*)
-		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE $CXXFLAGS"
+		CXXFLAGS+="-DBROKEN_BSD -DIMMEDIATE"
 		;;
 	*BSD*)
-		CXXFLAGS+="$CXXFLAGS -DIMMEDIATE"
+		CXXFLAGS+="-DIMMEDIATE"
 		;;
 	*bsd*)
-		CXXFLAGS+="$CXXFLAGS -DIMMEDIATE"
+		CXXFLAGS+="-DIMMEDIATE"
 		;;
 	*Darwin*)
-		CXXFLAGS+="-DBROKEN_BSD $CXXFLAGS"
+		CXXFLAGS+="-DBROKEN_BSD"
 		;;
 	*)
 		echo "Sorry, $host not supported yet."
