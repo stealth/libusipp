@@ -208,7 +208,8 @@ uint16_t IP6::get_payloadlen()
 
 uint16_t IP6::set_payloadlen(uint16_t l)
 {
-	return htons(iph.payload_len = l);
+	iph.payload_len = htons(l);
+	return l;
 }
 
 
