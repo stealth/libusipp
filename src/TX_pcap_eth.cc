@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2018 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <string>
+#include <cstdint>
 #include <cstring>
 #include <cerrno>
 
@@ -84,8 +85,7 @@ int TX_pcap_eth::sendpack(const void *buf, size_t len, struct sockaddr *s)
 	if (len > max_packet_size || len + sizeof(ehdr) > max_packet_size)
 		return die("TX_pcap_eth::sendpack: Packet payload too large.", STDERR, -1);
 
-	char tbuf[max_packet_size];
-	memset(tbuf, 0, sizeof(tbuf));
+	char tbuf[max_packet_size] = {0};
 
 	memcpy(tbuf, &ehdr, sizeof(ehdr));
 	memcpy(tbuf + sizeof(ehdr), buf, len);

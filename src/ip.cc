@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -368,15 +368,15 @@ uint32_t IP::set_src(uint32_t s)
 }
 
 
-/*! Set the sourceaddress, use hostname or IP.
+/*! Set the source address.
  */
-int IP::set_src(const string &host)
+int IP::set_src(const string &src)
 {
-	struct hostent *he;
+	in_addr in;
+	if (inet_pton(AF_INET, src.c_str(), &in) != 1)
+		return die("IP::set_src::inet_pton:", PERROR, errno);
 
-	if ((he = gethostbyname(host.c_str())) == nullptr)
-		return die("IP::set_src::gethostbyname:", RETURN, h_errno);
-	memcpy(&iph.saddr, he->h_addr, he->h_length);
+	memcpy(&iph.saddr, &in.s_addr, sizeof(iph.saddr));
 	return 0;
 }
 
@@ -391,13 +391,13 @@ uint32_t IP::set_dst(uint32_t d)
 
 /*! set destinationaddress, similar to set_src()
  */
-int IP::set_dst(const string &host)
+int IP::set_dst(const string &dst)
 {
-   	struct hostent *he;
+	in_addr in;
+	if (inet_pton(AF_INET, dst.c_str(), &in) != 1)
+		return die("IP::set_dst::inet_pton:", PERROR, errno);
 
-	if ((he = gethostbyname(host.c_str())) == nullptr)
-		return die("IP::set_dst::gethostbyname:", RETURN, h_errno);
-	memcpy(&iph.daddr, he->h_addr, he->h_length);
+	memcpy(&iph.daddr, &in.s_addr, sizeof(iph.daddr));
 	return 0;
 }
 

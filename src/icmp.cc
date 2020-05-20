@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2016 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
 #include <cstring>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 #include <errno.h>
 #include <iostream>
 #include <arpa/inet.h>
@@ -34,8 +34,8 @@ namespace usipp {
 using namespace std;
 
 
-ICMP::ICMP(const string &host, RX *rx, TX *tx)
-      : IP(host, numbers::ipproto_icmp, rx, tx)
+ICMP::ICMP(const string &dst, RX *rx, TX *tx)
+      : IP(dst, numbers::ipproto_icmp, rx, tx)
 {
 	// clear memory
 	memset(&icmphdr, 0, sizeof(icmphdr));
@@ -171,8 +171,7 @@ int ICMP::sendpack(const void *payload, size_t paylen)
 	struct icmphdr *i;
 
 	// s will be our packet
-	char s[max_packet_size];
-	memset(s, 0, sizeof(s));
+	char s[max_packet_size] = {0};
 
 	// copy ICMP header to packet
 	memcpy(s, reinterpret_cast<struct icmphdr*>(&this->icmphdr), sizeof(icmphdr));

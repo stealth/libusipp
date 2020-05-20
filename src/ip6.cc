@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ const uint8_t IP6::d_ipversion = 6;
 
 
 IP6::IP6(const in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
-	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
+	: Layer2(rx, tx ? d_tx = tx : d_tx = new (nothrow) TX_IP6)
 {
 	memset(&iph, 0, sizeof(iph));
 	memset(&d_pseudo, 0, sizeof(d_pseudo));
@@ -59,7 +59,7 @@ IP6::IP6(const in6_addr &in6, uint8_t proto, RX *rx, TX *tx)
 
 
 IP6::IP6(const string &hostname, uint8_t proto, RX *rx, TX *tx)
-	: Layer2(rx, tx ? d_tx = tx : d_tx = new TX_IP6)
+	: Layer2(rx, tx ? d_tx = tx : d_tx = new (nothrow) TX_IP6)
 {
 	memset(&iph, 0, sizeof(iph));
 	memset(&d_pseudo, 0, sizeof(d_pseudo));
@@ -117,8 +117,7 @@ string &IP6::get_src(string &s)
 {
 	s = "";
 
-	char buf[128];
-	memset(buf, 0, sizeof(buf));
+	char buf[128] = {0};
 	if (inet_ntop(AF_INET6, &iph.saddr, buf, sizeof(buf)))
 		s = buf;
 	return s;
@@ -131,49 +130,45 @@ in6_addr IP6::get_dst()
 }
 
 
+/* Get IPv6 destination address, dotted form */
 string &IP6::get_dst(string &s)
 {
 	s = "";
 
-	char buf[128];
-	memset(buf, 0, sizeof(buf));
+	char buf[128] = {0};
 	if (inet_ntop(AF_INET6, &iph.daddr, buf, sizeof(buf)))
 		s = buf;
 	return s;
 }
 
 
+/*! Set IPv6 source address */
 int IP6::set_src(const string &src)
 {
-	struct hostent *he = nullptr;
 	in6_addr in6;
 
-	if (inet_pton(AF_INET6, src.c_str(), &in6) != 1) {
-		if ((he = gethostbyname2(src.c_str(), AF_INET6)) == nullptr)
-			return die("IP6::set_src::gethostbyname2", RETURN, -h_errno);
-		memcpy(&iph.saddr, he->h_addr, 16);
-	} else
-		iph.saddr = in6;
+	if (inet_pton(AF_INET6, src.c_str(), &in6) != 1)
+		return die("IP6::set_src::inet_pton", PERROR, errno);
+
+	iph.saddr = in6;
 	return 0;
 }
 
 
+/*! Set IPv6 destination address */
 int IP6::set_dst(const string &dst)
 {
-	struct hostent *he = nullptr;
 	in6_addr in6;
 
-	if (inet_pton(AF_INET6, dst.c_str(), &in6) != 1) {
-		if ((he = gethostbyname2(dst.c_str(), AF_INET6)) == nullptr)
-			return die("IP6::set_src::gethostbyname2", RETURN, -h_errno);
-		memcpy(&iph.daddr, he->h_addr, 16);
-	} else {
-		iph.daddr = in6;
-	}
+	if (inet_pton(AF_INET6, dst.c_str(), &in6) != 1)
+		return die("IP6::set_src::inet_pton", PERROR, errno);
+
+	iph.daddr = in6;
 	return 0;
 }
 
 
+/*! Set IPv6 destination address */
 in6_addr &IP6::set_dst(const in6_addr &dst)
 {
 	iph.daddr = dst;
@@ -181,6 +176,7 @@ in6_addr &IP6::set_dst(const in6_addr &dst)
 }
 
 
+/*! Set IPv6 source address */
 in6_addr &IP6::set_src(const in6_addr &src)
 {
 	iph.saddr = src;
@@ -225,8 +221,7 @@ int IP6::sendpack(const void *payload, size_t paylen)
 	if (paylen > max_packet_size || len > max_packet_size)
 		return die("IP6::sendpack: Packet payload too large.", STDERR, -1);
 
-	char s[max_packet_size];
-	memset(s, 0, sizeof(s));
+	char s[max_packet_size] = {0};
 
 	iph.payload_len = htons(e_hdrs_len + paylen);
 

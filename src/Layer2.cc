@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #include "usi++/datalink.h"
 #include "usi++/TX_IP.h"
 #include <stdio.h>
+#include <cstdint>
 #include <string.h>
 
 namespace usipp {
@@ -38,12 +39,12 @@ using namespace std;
 Layer2::Layer2(RX *r, TX *t)
 {
 	if (!r) {
-		d_rx = ref_count<RX>(new pcap);
+		d_rx = ref_count<RX>(new (nothrow) pcap);
 	} else
 		d_rx = ref_count<RX>(r);
 
 	if (!t) {
-		d_tx = ref_count<TX>(new TX_IP);
+		d_tx = ref_count<TX>(new (nothrow) TX_IP);
 	} else
 		d_tx = ref_count<TX>(t);
 }
@@ -109,7 +110,7 @@ string &Layer2::sniffpack(string &s)
 {
 	int off = 0;
 	s = "";
-	char buf[max_packet_size];
+	char buf[max_packet_size] = {0};
 	bytes_rcvd = this->sniffpack(buf, sizeof(buf), off);
 	if (bytes_rcvd > off)
 		s = string(buf + off, bytes_rcvd - off);

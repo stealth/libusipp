@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 
 #include "config.h"
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 #include <errno.h>
 #include <new>
 #include <vector>
@@ -138,7 +138,6 @@ int ICMP6::sendpack(const void *payload, size_t paylen)
 
 		// For routing extension header, the csum is calculated with the real
 		// destination
-	
 		if (this->get_proto() == numbers::ipproto6_routing) {
 			if (e_hdrs_len >= 24 && e_hdrs.begin() != e_hdrs.end())
 				memcpy(&pseudo.daddr, e_hdrs.begin()->c_str() + e_hdrs.begin()->size() - 16, 16);

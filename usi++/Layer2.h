@@ -29,7 +29,7 @@
 #include "TX.h"
 
 #include <stdio.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46,7 +46,7 @@ private:
 	ref_count<RX> d_rx;		// for receiving
 	ref_count<TX> d_tx;		// for transmitting data
 
-	int bytes_rcvd;
+	int bytes_rcvd{0};
 
 public:
 	/*! Give us a Layer 2! Default to Raw IP sockets and
