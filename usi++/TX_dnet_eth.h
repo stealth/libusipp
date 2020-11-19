@@ -108,6 +108,8 @@ public:
 	virtual int set_l2src(const std::string &) { return -1; }
 
 	virtual int set_l2dst(const std::string &) { return -1; }
+
+	virtual int tx_fd() { return -1; }
 };
 
 #endif

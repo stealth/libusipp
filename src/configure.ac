@@ -71,7 +71,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostbyaddr gethostbyname gethostname inet_ntoa memset select socket strerror])
 
-r=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/bpf.h /usr/include/pcap/bpf.h 2>/dev/null`
+r=`grep DLT_IEEE802_11_RADIO /usr/local/include/pcap/*.h /usr/include/pcap/*.h 2>/dev/null`
 case "$r" in
 	*DLT_IEEE802_11_RADIO*)
 		AC_DEFINE([HAVE_RADIOTAP], [1], [Define if radiotap exists.])
