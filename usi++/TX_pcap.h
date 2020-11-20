@@ -23,7 +23,6 @@
 
 #include "TX.h"
 #include "datalink.h"
-#include "refcount.h"
 #include "config.h"
 #include "usi-structs.h"
 #include <sys/socket.h>

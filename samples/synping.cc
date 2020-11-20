@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <memory.h>
 #include <usi++/usi++.h>
 
 using namespace std;
@@ -28,17 +29,23 @@ int main(int argc, char **argv)
 	TCP4 tcp(argv[1]);
 
 	// Use dnet rather than raw sockets
-	TX *dnet_provider = new TX_dnet_ip;
+	TX *dnet_provider = new (nothrow) TX_dnet_ip;
 
-	ref_count<TX> tx = tcp.tx();
-	cout<<"TX use counter before register: "<<tx.use()<<endl;
+	auto rx = make_shared<usipp::pcap>();
+
+	shared_ptr<TX> tx = tcp.tx();
+	cout<<"TX use counter before register: "<<tx.use_count()<<endl;
 
 	// old TX object has one user less when registering a new one
+	// This transfers ownership of dnet_provider to the tcp object
 	tcp.register_tx(dnet_provider);
-	cout<<"TX use counter after register: "<<tx.use()<<endl;
+	cout<<"old TX use counter after register: "<<tx.use_count()<<endl;
+
+	auto &rx_ref = tcp.register_rx(rx);
+	cout<<"RX use count: "<<rx_ref.use_count()<<endl;
 
 	// We dont need to care about the old or newly registered
-	// TX objects, as they are ref-counted
+	// TX/RX objects, as they are ref-counted
 #endif
 
 	tcp.init_device(argv[4], 1, min_packet_size);
