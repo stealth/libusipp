@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 #define usipp_layer2_h
 
 #include "config.h"
-#include "refcount.h"
 #include "usi-structs.h"
 #include "object.h"
 #include "RX.h"
@@ -31,6 +30,7 @@
 #include <stdio.h>
 #include <cstdint>
 #include <string>
+#include <memory>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -43,8 +43,8 @@ namespace usipp {
  */
 class Layer2 : public Object {
 private:
-	ref_count<RX> d_rx;		// for receiving
-	ref_count<TX> d_tx;		// for transmitting data
+	std::shared_ptr<RX> d_rx;		// for receiving
+	std::shared_ptr<TX> d_tx;		// for transmitting data
 
 	int bytes_rcvd{0};
 
@@ -111,7 +111,7 @@ public:
 	 */
 	TX *register_tx(TX *);
 
-	const ref_count<TX>& register_tx(const ref_count<TX> &r);
+	const std::shared_ptr<TX>& register_tx(const std::shared_ptr<TX> &r);
 
 
 	/*! Register a new receiver and return the argument.
@@ -120,14 +120,14 @@ public:
 	 */
 	RX *register_rx(RX *);
 
-	const ref_count<RX>& register_rx(const ref_count<RX> &ref);
+	const std::shared_ptr<RX>& register_rx(const std::shared_ptr<RX> &ref);
 
 	/*! return RAW TX object for fast access. You must not delete or
 	 *   mess with it.
 	 */
 	TX *raw_tx() const
 	{
-		return d_tx.ptr();
+		return d_tx.get();
 	}
 
 	/*! return RAW RX object for fast access. You must not delete or
@@ -135,17 +135,17 @@ public:
 	 */
 	RX *raw_rx() const
 	{
-		return d_rx.ptr();
+		return d_rx.get();
 	}
 
 	/*! return current TX object, ref counted */
-	ref_count<TX> tx() const
+	std::shared_ptr<TX> tx() const
 	{
 		return d_tx;
 	}
 
 	/*! return current RX object, ref counted */
-	ref_count<RX> rx() const
+	std::shared_ptr<RX> rx() const
 	{
 		return d_rx;
 	}

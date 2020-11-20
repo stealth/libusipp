@@ -48,7 +48,8 @@ int main(int argc, char **argv)
 	// test assignment operators
 	req2 = *req;
 	delete req;
-	req2.sendpack(&blob, sizeof(blob));
+	if (req2.sendpack(&blob, sizeof(blob)) < 0)
+		cerr<<"Error:"<<req2.why()<<endl;
 
 	rep->set_l2src("77:88:99:aa:bb:cc");
 

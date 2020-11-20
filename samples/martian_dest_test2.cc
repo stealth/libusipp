@@ -13,21 +13,21 @@ int main(int argc, char **argv)
 {
 	string ping = "Hello";
 
-	if (argc != 4) {
-		cerr<<"Usage: "<<argv[0]<<" <hw-dst> <hw-src> <ip-src>\n";
+	if (argc != 5) {
+		cerr<<"Usage: "<<argv[0]<<" <hw-dst> <hw-src> <ip-src> <nic>\n";
 		return 1;
 	}
 
 	ICMP icmp("127.0.0.1");
-	icmp.init_device("eth0", 1, 1500);
+	icmp.init_device(argv[4], 1, 1500);
 
 	// must be a pcap RX, init_device() already called
-	ref_count<RX> rx = icmp.rx();
+	auto rx = icmp.rx();
 
-	cout<<"refcount of RX: "<<rx.use()<<endl;
+	cout<<"refcount of RX: "<<rx.use_count()<<endl;
 
 	// does not take ownership of pcap *
-	TX_pcap_eth *eth = new TX_pcap_eth(static_cast<usipp::pcap *>(rx.ptr()));
+	TX_pcap_eth *eth = new TX_pcap_eth(static_cast<usipp::pcap *>(rx.get()));
 
 	eth->set_l2dst(argv[1]);
 	eth->set_l2src(argv[2]);

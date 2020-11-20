@@ -19,7 +19,6 @@
  */
 
 #include "config.h"
-#include "usi++/refcount.h"
 #include "usi++/usi++.h"
 #include "usi++/object.h"
 #include "usi++/RX.h"
@@ -28,6 +27,7 @@
 #include "usi++/datalink.h"
 #include "usi++/TX_IP.h"
 #include <stdio.h>
+#include <memory.h>
 #include <cstdint>
 #include <string.h>
 
@@ -39,14 +39,14 @@ using namespace std;
 Layer2::Layer2(RX *r, TX *t)
 {
 	if (!r) {
-		d_rx = ref_count<RX>(new (nothrow) pcap);
+		d_rx = shared_ptr<pcap>(new (nothrow) pcap);
 	} else
-		d_rx = ref_count<RX>(r);
+		d_rx = shared_ptr<RX>(r);
 
 	if (!t) {
-		d_tx = ref_count<TX>(new (nothrow) TX_IP);
+		d_tx = shared_ptr<TX_IP>(new (nothrow) TX_IP);
 	} else
-		d_tx = ref_count<TX>(t);
+		d_tx = shared_ptr<TX>(t);
 }
 
 
@@ -153,7 +153,7 @@ int Layer2::setfilter(const string &fstring)
 	return r;
 }
 
-const ref_count<TX> &Layer2::register_tx(const ref_count<TX> &ref)
+const shared_ptr<TX> &Layer2::register_tx(const shared_ptr<TX> &ref)
 {
 	d_tx = ref;
 	return d_tx;
@@ -162,12 +162,12 @@ const ref_count<TX> &Layer2::register_tx(const ref_count<TX> &ref)
 
 TX *Layer2::register_tx(TX *t)
 {
-	d_tx = ref_count<TX>(t);
+	d_tx = shared_ptr<TX>(t);
 	return t;
 }
 
 
-const ref_count<RX> &Layer2::register_rx(const ref_count<RX> &ref)
+const shared_ptr<RX> &Layer2::register_rx(const shared_ptr<RX> &ref)
 {
 	d_rx = ref;
 	return d_rx;
@@ -176,7 +176,7 @@ const ref_count<RX> &Layer2::register_rx(const ref_count<RX> &ref)
 
 RX *Layer2::register_rx(RX *r)
 {
-	d_rx = ref_count<RX>(r);
+	d_rx = shared_ptr<RX>(r);
 	return r;
 }
 

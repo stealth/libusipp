@@ -1,7 +1,7 @@
 /*
  * This file is part of the libusi++ packet capturing/sending framework.
  *
- * (C) 2000-2017 by Sebastian Krahmer,
+ * (C) 2000-2020 by Sebastian Krahmer,
  *                  sebastian [dot] krahmer [at] gmail [dot] com
  *
  * libusi++ is free software: you can redistribute it and/or modify
@@ -51,7 +51,10 @@ ARP::ARP()
 
 	// substitute dummy TX_string
 	// by a TX_pcap_eth, constructed from the default created RX
-	// register_tx() will also delete old d_tx
+	// register_tx() will also delete old d_tx TX_string object.
+	// Its OK to use Layer2::raw_rx(), as TX_pcap_eth() constructed object will not take
+	// ownership of the pcap pointer, so a destruction of this->d_rx, which is a TX_pcap_eth
+	// object, will not call delete on the Layer2::raw_rx().
 	register_tx(pcap_eth_tx = new (nothrow) TX_pcap_eth(reinterpret_cast<pcap *>(Layer2::raw_rx())));
 }
 
