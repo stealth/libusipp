@@ -27,9 +27,9 @@
 #include <string>
 #include <sys/socket.h>
 
-#ifdef HAVE_LIBDNET
+#if defined(HAVE_LIBDNET)
 #include <dnet.h>
-#elif HAVE_LIBDUMBNET
+#elif defined(HAVE_LIBDUMBNET)
 #include <dumbnet.h>
 #endif
 
